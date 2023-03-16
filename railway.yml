@@ -1,0 +1,4 @@
+services:
+  postgres:
+    extensions:
+      - "uuid-ossp"
