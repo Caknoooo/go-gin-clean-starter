@@ -34,10 +34,10 @@ func NewUserService(ur repository.UserRepository) UserService {
 
 func (us *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDTO) (entities.User, error) {
 	user := entities.User{}
-	user.Role = "user"
 	err := smapping.FillStruct(&user, smapping.MapFields(userDTO))
+	user.Role = "user"
 	if err != nil {
-		return user, err
+		return entities.User{}, err
 	}
 	return us.userRepository.RegisterUser(ctx, user)
 }

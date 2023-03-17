@@ -13,19 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
-func main() {
+func main() {	
 	var (
-		db         *gorm.DB            = config.SetUpDatabaseConnection()
-		jwtService services.JWTService = services.NewJWTService()
+		db             *gorm.DB                  = config.SetUpDatabaseConnection()
+		jwtService     services.JWTService       = services.NewJWTService()
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
-		userService services.UserService = services.NewUserService(userRepository)
+		userService    services.UserService      = services.NewUserService(userRepository)
 		userController controller.UserController = controller.NewUserController(userService, jwtService)
 	)
 
 	server := gin.Default()
 	routes.Router(server, userController, jwtService)
-	
-	port :=	os.Getenv("PORT")
+
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
 	}
