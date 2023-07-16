@@ -7,7 +7,7 @@ import (
 	"github.com/Caknoooo/golang-clean_template/config"
 	"github.com/Caknoooo/golang-clean_template/controller"
 	"github.com/Caknoooo/golang-clean_template/middleware"
-	"github.com/Caknoooo/golang-clean_template/migration"
+	"github.com/Caknoooo/golang-clean_template/migrations"
 	"github.com/Caknoooo/golang-clean_template/repository"
 	"github.com/Caknoooo/golang-clean_template/routes"
 	"github.com/Caknoooo/golang-clean_template/services"
@@ -29,7 +29,7 @@ func main() {
 	server.Use(middleware.CORSMiddleware())
 	routes.Router(server, userController, jwtService)
 
-	if err := migration.Seeder(db); err != nil {
+	if err := migrations.Seeder(db); err != nil {
 		log.Fatalf("error migration seeder: %v", err)	
 	}
 
