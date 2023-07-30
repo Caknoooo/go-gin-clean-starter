@@ -1,6 +1,5 @@
 # Golang Clean Architecture
 
-
 ## Introduction 👋
 > Clean Architecture is an approach to organizing code in an application that focuses on separating responsibilities and dependencies between components. In the context of Golang, Clean Architecture refers to the application of Clean Architecture principles in developing applications using the Go programming language.
 
@@ -14,4 +13,23 @@ Clean Architecture proposes a structured application design with several layers 
 - **Infrastructure Layer:** This layer contains the technical details and implementation of the technologies used in the application, such as databases, networking, data storage, and external APIs. This layer depends on other layers and is used to implement the technical components required by the application.
 
 ## How To Use?
-
+```
+1. git clone https://github.com/Caknoooo/golang-clean-template.git
+2. cd golang-clean-template
+3. cp .env.example .env
+4. configure .env with your postgres
+DB_HOST = localhost
+DB_USER = postgres
+DB_PASS = 
+DB_NAME = 
+DB_PORT = 5432
+5. Open terminal, follow the steps below:
+- if you haven't downloaded postgres, you can download it first
+- Run -> psql -U postgres
+- Run -> Create database according to what you put in .env
+- \c (your database)
+- Run -> CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
+- Quit from postgres
+6. go run main.go
+```
+![image](https://github.com/Caknoooo/golang-clean-template/assets/92671053/ceaf74a2-4015-42c4-a94a-9ddd6480b73b)
