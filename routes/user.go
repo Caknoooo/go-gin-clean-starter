@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Router(route *gin.Engine, UserController controller.UserController, jwtService services.JWTService) {
+func User(route *gin.Engine, UserController controller.UserController, jwtService services.JWTService) {
 	routes := route.Group("/api/user")
 	{
 		routes.POST("", UserController.RegisterUser)
