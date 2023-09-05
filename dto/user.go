@@ -1,26 +1,43 @@
 package dto
 
-import (
-	"github.com/google/uuid"
+import "errors"
+
+var (
+	ErrCreateUser     = errors.New("Failed to create user")
+	ErrGetAllUser     = errors.New("Failed to get all user")
+	ErrGetUserById    = errors.New("Failed to get user by id")
+	ErrGetUserByEmail = errors.New("Failed to get user by email")
+	ErrUpdateUser     = errors.New("Failed to update user")
+	ErrUserNotFound   = errors.New("User not found")
+	ErrDeleteUser     = errors.New("Failed to delete user")
 )
 
-type UserCreateDTO struct {
-	ID       uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"id"`
-	Nama     string    `gorm:"type:varchar(100)" form:"nama" json:"nama" binding:"required"`
-	NoTelp   string    `gorm:"type:varchar(20)" form:"no_telp" json:"no_telp" binding:"required"`
-	Email    string    `gorm:"type:varchar(100)" form:"email" json:"email" binding:"required"`
-	Password string    `gorm:"type:varchar(100)" form:"password" json:"password" binding:"required"`
-}
+type (
+	UserCreateRequest struct {
+		Nama     string `json:"nama" form:"nama"`
+		NoTelp   string `json:"no_telp" form:"no_telp"`
+		Email    string `json:"email" form:"email"`
+		Password string `json:"password" form:"password"`
+	}
 
-type UserUpdateDTO struct {
-	ID       uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"id"`
-	Nama     string    `gorm:"type:varchar(100)" form:"nama" json:"nama" binding:"required"`
-	NoTelp   string    `gorm:"type:varchar(20)" form:"no_telp" json:"no_telp" binding:"required"`
-	Email    string    `gorm:"type:varchar(100)" form:"email" json:"email" binding:"required"`
-	Password string    `gorm:"type:varchar(100)" form:"password" json:"password" binding:"required"`
-}
+	UserResponse struct {
+		ID       string `json:"id"`
+		Nama     string `json:"nama"`
+		NoTelp   string `json:"no_telp"`
+		Role     string `json:"role"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
-type UserLoginDTO struct {
-	Email    string `json:"email" binding:"email" form:"email"`
-	Password string `json:"password" binding:"required" form:"password"`
-}
+	UserUpdateRequest struct {
+		Nama     string `json:"nama" form:"nama"`
+		NoTelp   string `json:"no_telp" form:"no_telp"`
+		Email    string `json:"email" form:"email"`
+		Password string `json:"password" form:"password"`
+	}
+
+	UserLoginRequest struct {
+		Email    string `json:"email" form:"email" binding:"required"`
+		Password string `json:"password" form:"password" binding:"required"`
+	}
+)
