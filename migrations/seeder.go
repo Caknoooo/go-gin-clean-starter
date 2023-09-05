@@ -3,6 +3,7 @@ package migrations
 import (
 	"errors"
 
+	"github.com/Caknoooo/golang-clean_template/constants"
 	"github.com/Caknoooo/golang-clean_template/entities"
 	"gorm.io/gorm"
 )
@@ -22,14 +23,14 @@ func ListUserSeeder(db *gorm.DB) error {
 			TelpNumber: "081234567890",
 			Email:      "admin@gmail.com",
 			Password:   "admin123",
-			Role:       "admin",
+			Role:       constants.ENUM_ROLE_ADMIN,
 		},
 		{
 			Name:       "User",
 			TelpNumber: "081234567891",
 			Email:      "user@gmail.com",
 			Password:   "user123",
-			Role:       "user",
+			Role:       constants.ENUM_ROLE_USER,
 		},
 	}
 
