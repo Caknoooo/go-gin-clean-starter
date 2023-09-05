@@ -33,6 +33,8 @@ var (
 	ErrUpdateUser         = errors.New("failed to update user")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrDeleteUser         = errors.New("failed to delete user")
+	ErrPasswordNotMatch   = errors.New("password not match")
+	ErrEmailOrPassword    = errors.New("wrong email or password")
 )
 
 type (

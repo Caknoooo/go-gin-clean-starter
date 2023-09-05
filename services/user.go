@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/Caknoooo/golang-clean_template/constants"
 	"github.com/Caknoooo/golang-clean_template/dto"
 	"github.com/Caknoooo/golang-clean_template/entities"
 	"github.com/Caknoooo/golang-clean_template/helpers"
@@ -39,7 +40,7 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 	user := entities.User{
 		Name:       req.Name,
 		TelpNumber: req.TelpNumber,
-		Role:       "user",
+		Role:       constants.ENUM_ROLE_USER,
 		Email:      req.Email,
 		Password:   req.Password,
 	}
@@ -160,16 +161,17 @@ func (us *userService) DeleteUser(ctx context.Context, userId string) error {
 func (us *userService) Verify(ctx context.Context, email string, password string) (bool, error) {
 	res, err := us.userRepository.GetUserByEmail(ctx, email)
 	if err != nil {
-		return false, err
+		return false, dto.ErrUserNotFound
 	}
 
 	checkPassword, err := helpers.CheckPassword(res.Password, []byte(password))
 	if err != nil {
-		return false, err
+		return false, dto.ErrPasswordNotMatch
 	}
 
 	if res.Email == email && checkPassword {
 		return true, nil
 	}
-	return false, nil
+
+	return false, dto.ErrEmailOrPassword
 }
