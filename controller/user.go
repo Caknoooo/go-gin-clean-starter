@@ -34,113 +34,109 @@ func NewUserController(us services.UserService, jwt services.JWTService) UserCon
 func (uc *userController) RegisterUser(ctx *gin.Context) {
 	var user dto.UserCreateRequest
 	if err := ctx.ShouldBind(&user); err != nil {
-		res := utils.BuildResponseFailed("Gagal Mendapatkan Request Dari Body", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	if checkUser, _ := uc.userService.CheckUser(ctx.Request.Context(), user.Email); checkUser {
-		res := utils.BuildResponseFailed("Email Sudah Terdaftar", "Failed", utils.EmptyObj{})
-		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 	
 	result, err := uc.userService.RegisterUser(ctx.Request.Context(), user)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Menambahkan User", "Failed", utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_REGISTER_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil Menambahkan User", result)
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_REGISTER_USER, result)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (uc *userController) GetAllUser(ctx *gin.Context) {
 	result, err := uc.userService.GetAllUser(ctx.Request.Context())
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Mendapatkan List User", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_LIST_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
-	res := utils.BuildResponseSuccess("Berhasil Mendapatkan List User", result)
+
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_LIST_USER, result)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (uc *userController) MeUser(ctx *gin.Context) {
 	token := ctx.MustGet("token").(string)
-	userID, err := uc.jwtService.GetUserIDByToken(token)
+	userId, err := uc.jwtService.GetUserIDByToken(token)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Valid", nil)
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	result, err := uc.userService.GetUserByID(ctx.Request.Context(), userID)
+	result, err := uc.userService.GetUserByID(ctx.Request.Context(), userId)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Mendapatkan User", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil Mendapatkan User", result)
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_USER, result)
 	ctx.JSON(http.StatusOK, res)
 }
 
 func (uc *userController) LoginUser(ctx *gin.Context) {
-	var userLoginDTO dto.UserLoginRequest
-	if err := ctx.ShouldBind(&userLoginDTO); err != nil {
-		response := utils.BuildResponseFailed("Gagal Login", err.Error(), utils.EmptyObj{})
+	var req dto.UserLoginRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 	
-	res, _ := uc.userService.Verify(ctx.Request.Context(), userLoginDTO.Email, userLoginDTO.Password)
+	res, _ := uc.userService.Verify(ctx.Request.Context(), req.Email, req.Password)
 	if !res {
-		response := utils.BuildResponseFailed("Gagal Login", "Email atau Password Salah", utils.EmptyObj{})
+		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, dto.MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD, utils.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	user, err := uc.userService.GetUserByEmail(ctx.Request.Context(), req.Email)
+	if err != nil {
+		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	user, err := uc.userService.GetUserByEmail(ctx.Request.Context(), userLoginDTO.Email)
-	if err != nil {
-		response := utils.BuildResponseFailed("Gagal Login", err.Error(), utils.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
 	token := uc.jwtService.GenerateToken(user.ID, user.Role)
 	userResponse := entities.Authorization{
 		Token: token,
 		Role:  user.Role,
 	}
 
-	response := utils.BuildResponseSuccess("Berhasil Login", userResponse)
+	response := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, userResponse)
 	ctx.JSON(http.StatusOK, response)
 }
 
 func (uc *userController) UpdateUser(ctx *gin.Context) {
 	var req dto.UserUpdateRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed("Gagal Mendapatkan Request Dari Body", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
 	token := ctx.MustGet("token").(string)
-	userID, err := uc.jwtService.GetUserIDByToken(token)
+	userId, err := uc.jwtService.GetUserIDByToken(token)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Valid", nil)
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if err = uc.userService.UpdateUser(ctx.Request.Context(), req, userID); err != nil {
-		res := utils.BuildResponseFailed("Gagal Update User", err.Error(), utils.EmptyObj{})
+	if err = uc.userService.UpdateUser(ctx.Request.Context(), req, userId); err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil Update User", req)
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_UPDATE_USER, nil)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -148,17 +144,17 @@ func (uc *userController) DeleteUser(ctx *gin.Context) {
 	token := ctx.MustGet("token").(string)
 	userID, err := uc.jwtService.GetUserIDByToken(token)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Valid", nil)
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
 	if err = uc.userService.DeleteUser(ctx.Request.Context(), userID); err != nil {
-		res := utils.BuildResponseFailed("Gagal Menghapus User", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_USER, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil Menghapus User", utils.EmptyObj{})
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_USER, nil)
 	ctx.JSON(http.StatusOK, res)
 }
