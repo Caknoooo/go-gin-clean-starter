@@ -31,6 +31,15 @@ func NewUserService(ur repository.UserRepository) UserService {
 }
 
 func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
+	email, err := us.userRepository.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return dto.UserResponse{}, dto.ErrGetUserByEmail
+	}
+
+	if !(email == entities.User{}) {
+		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
+	}
+
 	user := entities.User{
 		Nama:     req.Nama,
 		NoTelp:   req.NoTelp,
