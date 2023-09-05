@@ -13,7 +13,6 @@ func BuildResponseSuccess(message string, data any) Response {
 	res := Response{
 		Status:  true,
 		Message: message,
-		Error:   "Success",
 		Data:    data,
 	}
 	return res
