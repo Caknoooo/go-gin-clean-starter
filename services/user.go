@@ -16,7 +16,7 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
 	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error
-	DeleteUser(ctx context.Context, userId string) error 
+	DeleteUser(ctx context.Context, userId string) error
 	Verify(ctx context.Context, email string, password string) (bool, error)
 }
 
@@ -31,21 +31,17 @@ func NewUserService(ur repository.UserRepository) UserService {
 }
 
 func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
-	email, err := us.userRepository.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		return dto.UserResponse{}, dto.ErrGetUserByEmail
-	}
-
-	if !(email == entities.User{}) {
+	email, _ := us.userRepository.CheckEmail(ctx, req.Email)
+	if email {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
 	user := entities.User{
-		Nama:     req.Nama,
-		NoTelp:   req.NoTelp,
-		Role: 	 "user",
-		Email:    req.Email,
-		Password: req.Password,
+		Name:       req.Name,
+		TelpNumber: req.TelpNumber,
+		Role:       "user",
+		Email:      req.Email,
+		Password:   req.Password,
 	}
 
 	userResponse, err := us.userRepository.RegisterUser(ctx, user)
@@ -54,12 +50,11 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 	}
 
 	return dto.UserResponse{
-		ID:       userResponse.ID.String(),
-		Nama:     userResponse.Nama,
-		NoTelp:   userResponse.NoTelp,
-		Role: 	  userResponse.Role,
-		Email:    userResponse.Email,
-		Password: userResponse.Password,
+		ID:         userResponse.ID.String(),
+		Name:       userResponse.Name,
+		TelpNumber: userResponse.TelpNumber,
+		Role:       userResponse.Role,
+		Email:      userResponse.Email,
 	}, nil
 }
 
@@ -72,12 +67,11 @@ func (us *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, erro
 	var userResponse []dto.UserResponse
 	for _, user := range users {
 		userResponse = append(userResponse, dto.UserResponse{
-			ID:       user.ID.String(),
-			Nama:     user.Nama,
-			NoTelp:   user.NoTelp,
-			Role: 	  user.Role,
-			Email:    user.Email,
-			Password: user.Password,
+			ID:         user.ID.String(),
+			Name:       user.Name,
+			TelpNumber: user.TelpNumber,
+			Role:       user.Role,
+			Email:      user.Email,
 		})
 	}
 
@@ -91,12 +85,11 @@ func (us *userService) GetUserByID(ctx context.Context, userID string) (dto.User
 	}
 
 	return dto.UserResponse{
-		ID:       user.ID.String(),
-		Nama:     user.Nama,
-		NoTelp:   user.NoTelp,
-		Role: 	  user.Role,
-		Email:    user.Email,
-		Password: user.Password,
+		ID:         user.ID.String(),
+		Name:       user.Name,
+		TelpNumber: user.TelpNumber,
+		Role:       user.Role,
+		Email:      user.Email,
 	}, nil
 }
 
@@ -107,12 +100,11 @@ func (us *userService) GetUserByEmail(ctx context.Context, email string) (dto.Us
 	}
 
 	return dto.UserResponse{
-		ID:       emails.ID.String(),
-		Nama:     emails.Nama,
-		NoTelp:   emails.NoTelp,
-		Role: 	  emails.Role,
-		Email:    emails.Email,
-		Password: emails.Password,
+		ID:         emails.ID.String(),
+		Name:       emails.Name,
+		TelpNumber: emails.TelpNumber,
+		Role:       emails.Role,
+		Email:      emails.Email,
 	}, nil
 }
 
@@ -135,12 +127,12 @@ func (us *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest
 	}
 
 	userUpdate := entities.User{
-		ID:       user.ID,
-		Nama:     req.Nama,
-		NoTelp:   req.NoTelp,
-		Role: 	  user.Role,
-		Email:    req.Email,
-		Password: req.Password,
+		ID:         user.ID,
+		Name:       req.Name,
+		TelpNumber: req.TelpNumber,
+		Role:       user.Role,
+		Email:      req.Email,
+		Password:   req.Password,
 	}
 
 	err = us.userRepository.UpdateUser(ctx, userUpdate)
