@@ -4,24 +4,24 @@ import "errors"
 
 const (
 	// Failed
-	MESSAGE_FAILED_GET_DATA_FROM_BODY      = "gagal mendapatkan request dari body"
-	MESSAGE_FAILED_REGISTER_USER           = "gagal menambahkan user"
-	MESSAGE_FAILED_GET_LIST_USER           = "gagal mendapatkan list user"
-	MESSAGE_FAILED_GET_USER_TOKEN          = "gagal mendapatkan token user"
-	MESSAGE_FAILED_TOKEN_NOT_VALID         = "token tidak valid"
-	MESSAGE_FAILED_GET_USER                = "gagal mendapatkan user"
-	MESSAGE_FAILED_LOGIN                   = "gagal login"
-	MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD = "email atau password salah"
-	MESSAGE_FAILED_UPDATE_USER             = "gagal update user"
-	MESSAGE_FAILED_DELETE_USER             = "gagal delete user"
+	MESSAGE_FAILED_GET_DATA_FROM_BODY      = "failed get data from body"
+	MESSAGE_FAILED_REGISTER_USER           = "failed create user"
+	MESSAGE_FAILED_GET_LIST_USER           = "failed get list user"
+	MESSAGE_FAILED_GET_USER_TOKEN          = "failed get user token"
+	MESSAGE_FAILED_TOKEN_NOT_VALID         = "token not valid"
+	MESSAGE_FAILED_GET_USER                = "failed get user"
+	MESSAGE_FAILED_LOGIN                   = "failed login"
+	MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD = "wrong email or password"
+	MESSAGE_FAILED_UPDATE_USER             = "failed update user"
+	MESSAGE_FAILED_DELETE_USER             = "failed delete user"
 
 	// Success
-	MESSAGE_SUCCESS_REGISTER_USER = "berhasil menambahkan user"
-	MESSAGE_SUCCESS_GET_LIST_USER = "berhasil mendapatkan list user"
-	MESSAGE_SUCCESS_GET_USER      = "berhasil mendapatkan user"
-	MESSAGE_SUCCESS_LOGIN         = "berhasil login"
-	MESSAGE_SUCCESS_UPDATE_USER   = "berhasil update user"
-	MESSAGE_SUCCESS_DELETE_USER   = "berhasil delete user"
+	MESSAGE_SUCCESS_REGISTER_USER = "success create user"
+	MESSAGE_SUCCESS_GET_LIST_USER = "success get list user"
+	MESSAGE_SUCCESS_GET_USER      = "success get user"
+	MESSAGE_SUCCESS_LOGIN         = "success login"
+	MESSAGE_SUCCESS_UPDATE_USER   = "success update user"
+	MESSAGE_SUCCESS_DELETE_USER   = "success delete user"
 )
 
 var (
