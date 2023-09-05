@@ -12,6 +12,7 @@ type UserRepository interface {
 	GetAllUser(ctx context.Context) ([]entities.User, error)
 	GetUserByID(ctx context.Context, userID string) (entities.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entities.User, error)
+	CheckEmail(ctx context.Context, email string) (bool, error)
 	UpdateUser(ctx context.Context, user entities.User) (error)
 	DeleteUser(ctx context.Context, userID string) (error) 
 }
@@ -55,6 +56,14 @@ func (ur *userRepository) GetUserByEmail(ctx context.Context, email string) (ent
 		return entities.User{}, err
 	}
 	return user, nil
+}
+
+func (ur *userRepository) CheckEmail(ctx context.Context, email string) (bool, error) {
+	var user entities.User
+	if err := ur.connection.Where("email = ?", email).Take(&user).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (ur *userRepository) UpdateUser(ctx context.Context, user entities.User) (error) {

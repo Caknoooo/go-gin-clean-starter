@@ -37,26 +37,25 @@ var (
 
 type (
 	UserCreateRequest struct {
-		Nama     string `json:"nama" form:"nama"`
-		NoTelp   string `json:"no_telp" form:"no_telp"`
-		Email    string `json:"email" form:"email"`
-		Password string `json:"password" form:"password"`
+		Name       string `json:"name" form:"name"`
+		TelpNumber string `json:"telp_number" form:"telp_number"`
+		Email      string `json:"email" form:"email"`
+		Password   string `json:"password" form:"password"`
 	}
 
 	UserResponse struct {
-		ID       string `json:"id"`
-		Nama     string `json:"nama"`
-		NoTelp   string `json:"no_telp"`
-		Role     string `json:"role"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		TelpNumber string `json:"telp_number"`
+		Role       string `json:"role"`
+		Email      string `json:"email"`
 	}
 
 	UserUpdateRequest struct {
-		Nama     string `json:"nama" form:"nama"`
-		NoTelp   string `json:"no_telp" form:"no_telp"`
-		Email    string `json:"email" form:"email"`
-		Password string `json:"password" form:"password"`
+		Name       string `json:"name" form:"name"`
+		TelpNumber string `json:"telp_number" form:"telp_number"`
+		Email      string `json:"email" form:"email"`
+		Password   string `json:"password" form:"password"`
 	}
 
 	UserLoginRequest struct {
