@@ -32,7 +32,7 @@ func NewUserController(us services.UserService, jwt services.JWTService) UserCon
 }
 
 func (uc *userController) RegisterUser(ctx *gin.Context) {
-	var user dto.UserCreateDTO
+	var user dto.UserCreateRequest
 	if err := ctx.ShouldBind(&user); err != nil {
 		res := utils.BuildResponseFailed("Gagal Mendapatkan Request Dari Body", err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
@@ -44,6 +44,7 @@ func (uc *userController) RegisterUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
+	
 	result, err := uc.userService.RegisterUser(ctx.Request.Context(), user)
 	if err != nil {
 		res := utils.BuildResponseFailed("Gagal Menambahkan User", "Failed", utils.EmptyObj{})
@@ -87,8 +88,8 @@ func (uc *userController) MeUser(ctx *gin.Context) {
 }
 
 func (uc *userController) LoginUser(ctx *gin.Context) {
-	var userLoginDTO dto.UserLoginDTO
-	if err := ctx.ShouldBindTOML(&userLoginDTO); err != nil {
+	var userLoginDTO dto.UserLoginRequest
+	if err := ctx.ShouldBind(&userLoginDTO); err != nil {
 		response := utils.BuildResponseFailed("Gagal Login", err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
@@ -118,8 +119,8 @@ func (uc *userController) LoginUser(ctx *gin.Context) {
 }
 
 func (uc *userController) UpdateUser(ctx *gin.Context) {
-	var userDTO dto.UserUpdateDTO
-	if err := ctx.ShouldBind(&userDTO); err != nil {
+	var req dto.UserUpdateRequest
+	if err := ctx.ShouldBind(&req); err != nil {
 		res := utils.BuildResponseFailed("Gagal Mendapatkan Request Dari Body", err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
@@ -133,14 +134,13 @@ func (uc *userController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	userDTO.ID = userID
-	if err = uc.userService.UpdateUser(ctx.Request.Context(), userDTO); err != nil {
+	if err = uc.userService.UpdateUser(ctx.Request.Context(), req, userID); err != nil {
 		res := utils.BuildResponseFailed("Gagal Update User", err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil Update User", userDTO)
+	res := utils.BuildResponseSuccess("Berhasil Update User", req)
 	ctx.JSON(http.StatusOK, res)
 }
 

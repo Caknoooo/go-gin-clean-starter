@@ -7,17 +7,16 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 )
 
 type JWTService interface {
-	GenerateToken(UserID uuid.UUID, role string) string
+	GenerateToken(UserID string, role string) string
 	ValidateToken(token string) (*jwt.Token, error)
-	GetUserIDByToken(token string) (uuid.UUID, error)
+	GetUserIDByToken(token string) (string, error)
 }
 
 type jwtCustomClaim struct {
-	UserID uuid.UUID `json:"user_id"`
+	UserID string `json:"user_id"`
 	Role   string    `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -42,7 +41,7 @@ func getSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateToken(UserID uuid.UUID, role string) string {
+func (j *jwtService) GenerateToken(UserID string, role string) string {
 	claims := jwtCustomClaim{
 		UserID,
 		role,
@@ -72,13 +71,12 @@ func (j *jwtService) ValidateToken(token string)(*jwt.Token, error){
 	return jwt.Parse(token, j.parseToken);
 }
 
-func (j *jwtService) GetUserIDByToken(token string)(uuid.UUID, error){
+func (j *jwtService) GetUserIDByToken(token string)(string, error){
 	t_Token, err := j.ValidateToken(token)
 	if err != nil{
-		return uuid.Nil, err
+		return "", err
 	}
 	claims := t_Token.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["user_id"])
-	teamID, _ := uuid.Parse(id)
-	return teamID, nil
+	return id, nil
 }
