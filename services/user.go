@@ -15,6 +15,7 @@ type UserService interface {
 	GetAllUser(ctx context.Context) ([]dto.UserResponse, error)
 	GetUserByID(ctx context.Context, userID string) (dto.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
+	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
 	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error
 	DeleteUser(ctx context.Context, userId string) error
@@ -57,6 +58,7 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 		TelpNumber: userResponse.TelpNumber,
 		Role:       userResponse.Role,
 		Email:      userResponse.Email,
+		IsVerified: userResponse.IsVerified,
 	}, nil
 }
 
@@ -74,10 +76,46 @@ func (us *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, erro
 			TelpNumber: user.TelpNumber,
 			Role:       user.Role,
 			Email:      user.Email,
+			IsVerified: user.IsVerified,
 		})
 	}
 
 	return userResponse, nil
+}
+
+func (us *userService) UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error) {
+	admin, err := us.userRepository.GetUserByID(ctx, adminId)
+	if err != nil {
+		return dto.UserResponse{}, dto.ErrUserNotFound
+	}
+
+	if admin.Role != constants.ENUM_ROLE_ADMIN {
+		return dto.UserResponse{}, dto.ErrUserNotAdmin
+	}
+
+	user, err := us.userRepository.GetUserByID(ctx, req.UserId)
+	if err != nil {
+		return dto.UserResponse{}, dto.ErrUserNotFound
+	}
+
+	userUpdate := entities.User{
+		ID:         user.ID,
+		IsVerified: req.IsVerified,
+	}
+
+	err = us.userRepository.UpdateUser(ctx, userUpdate)
+	if err != nil {
+		return dto.UserResponse{}, dto.ErrUpdateUser
+	}
+
+	return dto.UserResponse{
+		ID:         user.ID.String(),
+		Name:       user.Name,
+		TelpNumber: user.TelpNumber,
+		Role:       user.Role,
+		Email:      user.Email,
+		IsVerified: userUpdate.IsVerified,
+	}, nil
 }
 
 func (us *userService) GetUserByID(ctx context.Context, userID string) (dto.UserResponse, error) {
@@ -92,6 +130,7 @@ func (us *userService) GetUserByID(ctx context.Context, userID string) (dto.User
 		TelpNumber: user.TelpNumber,
 		Role:       user.Role,
 		Email:      user.Email,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
@@ -107,6 +146,7 @@ func (us *userService) GetUserByEmail(ctx context.Context, email string) (dto.Us
 		TelpNumber: emails.TelpNumber,
 		Role:       emails.Role,
 		Email:      emails.Email,
+		IsVerified: emails.IsVerified,
 	}, nil
 }
 

@@ -34,6 +34,7 @@ var (
 	ErrGetUserByEmail     = errors.New("failed to get user by email")
 	ErrEmailAlreadyExists = errors.New("email already exist")
 	ErrUpdateUser         = errors.New("failed to update user")
+	ErrUserNotAdmin       = errors.New("user not admin")
 	ErrUserNotFound       = errors.New("user not found")
 	ErrDeleteUser         = errors.New("failed to delete user")
 	ErrPasswordNotMatch   = errors.New("password not match")
@@ -54,6 +55,7 @@ type (
 		TelpNumber string `json:"telp_number"`
 		Role       string `json:"role"`
 		Email      string `json:"email"`
+		IsVerified bool   `json:"is_verified"`
 	}
 
 	UserUpdateRequest struct {
@@ -67,5 +69,10 @@ type (
 	UserLoginRequest struct {
 		Email    string `json:"email" form:"email" binding:"required"`
 		Password string `json:"password" form:"password" binding:"required"`
+	}
+
+	UpdateStatusIsVerifiedRequest struct {
+		UserId     string `json:"user_id" form:"user_id" binding:"required"`
+		IsVerified bool   `json:"is_verified" form:"is_verified"`
 	}
 )
