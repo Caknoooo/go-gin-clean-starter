@@ -9,11 +9,14 @@ const (
 	MESSAGE_FAILED_GET_LIST_USER           = "failed get list user"
 	MESSAGE_FAILED_GET_USER_TOKEN          = "failed get user token"
 	MESSAGE_FAILED_TOKEN_NOT_VALID         = "token not valid"
+	MESSAGE_FAILED_TOKEN_NOT_FOUND		 = "token not found"
 	MESSAGE_FAILED_GET_USER                = "failed get user"
 	MESSAGE_FAILED_LOGIN                   = "failed login"
 	MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD = "wrong email or password"
 	MESSAGE_FAILED_UPDATE_USER             = "failed update user"
 	MESSAGE_FAILED_DELETE_USER             = "failed delete user"
+	MESSAGE_FAILED_PROSES_REQUEST          = "failed proses request"
+	MESSAGE_FAILED_DENIED_ACCESS           = "denied access"
 
 	// Success
 	MESSAGE_SUCCESS_REGISTER_USER = "success create user"

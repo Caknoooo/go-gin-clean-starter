@@ -6,6 +6,7 @@ import (
 
 	"github.com/Caknoooo/golang-clean_template/services"
 	"github.com/Caknoooo/golang-clean_template/utils"
+	"github.com/Caknoooo/golang-clean_template/dto"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,35 +14,35 @@ func Authenticate(jwtService services.JWTService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {
-			response := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Ditemukan", nil)
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, dto.MESSAGE_FAILED_TOKEN_NOT_FOUND, nil)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		if !strings.Contains(authHeader, "Bearer ") {
-			response := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Valid", nil)
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		authHeader = strings.Replace(authHeader, "Bearer ", "", -1)
 		token, err := jwtService.ValidateToken(authHeader)
 		if err != nil {
-			response := utils.BuildResponseFailed("Gagal Memproses Request", "Token Tidak Valid", nil)
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		if !token.Valid {
-			response := utils.BuildResponseFailed("Gagal Memproses Request", "Akses Ditolak", nil)
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, dto.MESSAGE_FAILED_DENIED_ACCESS, nil)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
-		userID, err := jwtService.GetUserIDByToken(authHeader)
+		userId, err := jwtService.GetUserIDByToken(authHeader)
 		if err != nil {
-			response := utils.BuildResponseFailed("Gagal Memproses Request", err.Error(), nil)
+			response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, err.Error(), nil)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 		ctx.Set("token", authHeader)
-		ctx.Set("userID", userID)
+		ctx.Set("user_id", userId)
 		ctx.Next()
 	}
 }
