@@ -24,6 +24,7 @@ func ListUserSeeder(db *gorm.DB) error {
 			Email:      "admin@gmail.com",
 			Password:   "admin123",
 			Role:       constants.ENUM_ROLE_ADMIN,
+			IsVerified: true,
 		},
 		{
 			Name:       "User",
@@ -31,6 +32,7 @@ func ListUserSeeder(db *gorm.DB) error {
 			Email:      "user@gmail.com",
 			Password:   "user123",
 			Role:       constants.ENUM_ROLE_USER,
+			IsVerified: true,
 		},
 	}
 

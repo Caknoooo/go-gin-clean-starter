@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Caknoooo/golang-clean_template/constants"
 	"github.com/Caknoooo/golang-clean_template/dto"
@@ -13,7 +14,7 @@ import (
 type UserService interface {
 	RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
 	GetAllUser(ctx context.Context) ([]dto.UserResponse, error)
-	GetUserByID(ctx context.Context, userID string) (dto.UserResponse, error)
+	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
@@ -23,17 +24,17 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepository repository.UserRepository
+	userRepo repository.UserRepository
 }
 
 func NewUserService(ur repository.UserRepository) UserService {
 	return &userService{
-		userRepository: ur,
+		userRepo: ur,
 	}
 }
 
-func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
-	email, _ := us.userRepository.CheckEmail(ctx, req.Email)
+func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
+	email, _ := s.userRepo.CheckEmail(ctx, req.Email)
 	if email {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
@@ -47,7 +48,7 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 		IsVerified: false,
 	}
 
-	userResponse, err := us.userRepository.RegisterUser(ctx, user)
+	userResponse, err := s.userRepo.RegisterUser(ctx, user)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrCreateUser
 	}
@@ -62,8 +63,8 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 	}, nil
 }
 
-func (us *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, error) {
-	users, err := us.userRepository.GetAllUser(ctx)
+func (s *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, error) {
+	users, err := s.userRepo.GetAllUser(ctx)
 	if err != nil {
 		return nil, dto.ErrGetAllUser
 	}
@@ -83,8 +84,8 @@ func (us *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, erro
 	return userResponse, nil
 }
 
-func (us *userService) UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error) {
-	admin, err := us.userRepository.GetUserByID(ctx, adminId)
+func (s *userService) UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error) {
+	admin, err := s.userRepo.GetUserById(ctx, adminId)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrUserNotFound
 	}
@@ -93,7 +94,7 @@ func (us *userService) UpdateStatusIsVerified(ctx context.Context, req dto.Updat
 		return dto.UserResponse{}, dto.ErrUserNotAdmin
 	}
 
-	user, err := us.userRepository.GetUserByID(ctx, req.UserId)
+	user, err := s.userRepo.GetUserById(ctx, req.UserId)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrUserNotFound
 	}
@@ -103,7 +104,7 @@ func (us *userService) UpdateStatusIsVerified(ctx context.Context, req dto.Updat
 		IsVerified: req.IsVerified,
 	}
 
-	err = us.userRepository.UpdateUser(ctx, userUpdate)
+	err = s.userRepo.UpdateUser(ctx, userUpdate)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrUpdateUser
 	}
@@ -118,8 +119,8 @@ func (us *userService) UpdateStatusIsVerified(ctx context.Context, req dto.Updat
 	}, nil
 }
 
-func (us *userService) GetUserByID(ctx context.Context, userID string) (dto.UserResponse, error) {
-	user, err := us.userRepository.GetUserByID(ctx, userID)
+func (s *userService) GetUserById(ctx context.Context, userId string) (dto.UserResponse, error) {
+	user, err := s.userRepo.GetUserById(ctx, userId)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrGetUserById
 	}
@@ -134,8 +135,8 @@ func (us *userService) GetUserByID(ctx context.Context, userID string) (dto.User
 	}, nil
 }
 
-func (us *userService) GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error) {
-	emails, err := us.userRepository.GetUserByEmail(ctx, email)
+func (s *userService) GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error) {
+	emails, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrGetUserByEmail
 	}
@@ -150,8 +151,8 @@ func (us *userService) GetUserByEmail(ctx context.Context, email string) (dto.Us
 	}, nil
 }
 
-func (us *userService) CheckUser(ctx context.Context, email string) (bool, error) {
-	res, err := us.userRepository.GetUserByEmail(ctx, email)
+func (s *userService) CheckUser(ctx context.Context, email string) (bool, error) {
+	res, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return false, err
 	}
@@ -162,8 +163,8 @@ func (us *userService) CheckUser(ctx context.Context, email string) (bool, error
 	return true, nil
 }
 
-func (us *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error {
-	user, err := us.userRepository.GetUserByID(ctx, userId)
+func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error {
+	user, err := s.userRepo.GetUserById(ctx, userId)
 	if err != nil {
 		return dto.ErrUserNotFound
 	}
@@ -178,7 +179,7 @@ func (us *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest
 		IsVerified: req.IsVerified,
 	}
 
-	err = us.userRepository.UpdateUser(ctx, userUpdate)
+	err = s.userRepo.UpdateUser(ctx, userUpdate)
 	if err != nil {
 		return dto.ErrUpdateUser
 	}
@@ -186,13 +187,13 @@ func (us *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest
 	return nil
 }
 
-func (us *userService) DeleteUser(ctx context.Context, userId string) error {
-	user, err := us.userRepository.GetUserByID(ctx, userId)
+func (s *userService) DeleteUser(ctx context.Context, userId string) error {
+	user, err := s.userRepo.GetUserById(ctx, userId)
 	if err != nil {
 		return dto.ErrUserNotFound
 	}
 
-	err = us.userRepository.DeleteUser(ctx, user.ID.String())
+	err = s.userRepo.DeleteUser(ctx, user.ID.String())
 	if err != nil {
 		return dto.ErrDeleteUser
 	}
@@ -200,10 +201,16 @@ func (us *userService) DeleteUser(ctx context.Context, userId string) error {
 	return nil
 }
 
-func (us *userService) Verify(ctx context.Context, email string, password string) (bool, error) {
-	res, err := us.userRepository.GetUserByEmail(ctx, email)
+func (s *userService) Verify(ctx context.Context, email string, password string) (bool, error) {
+	res, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return false, dto.ErrUserNotFound
+	}
+
+	fmt.Println(res)
+
+	if !res.IsVerified {
+		return false, dto.ErrAccountNotVerified
 	}
 
 	checkPassword, err := helpers.CheckPassword(res.Password, []byte(password))
