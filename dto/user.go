@@ -39,6 +39,7 @@ var (
 	ErrDeleteUser         = errors.New("failed to delete user")
 	ErrPasswordNotMatch   = errors.New("password not match")
 	ErrEmailOrPassword    = errors.New("wrong email or password")
+	ErrAccountNotVerified = errors.New("account not verified")
 )
 
 type (

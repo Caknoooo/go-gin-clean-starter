@@ -32,15 +32,15 @@ func NewUserController(us services.UserService, jwt services.JWTService) UserCon
 	}
 }
 
-func (uc *userController) RegisterUser(ctx *gin.Context) {
+func (c *userController) RegisterUser(ctx *gin.Context) {
 	var user dto.UserCreateRequest
 	if err := ctx.ShouldBind(&user); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	
-	result, err := uc.userService.RegisterUser(ctx.Request.Context(), user)
+
+	result, err := c.userService.RegisterUser(ctx.Request.Context(), user)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_REGISTER_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
@@ -51,8 +51,8 @@ func (uc *userController) RegisterUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (uc *userController) GetAllUser(ctx *gin.Context) {
-	result, err := uc.userService.GetAllUser(ctx.Request.Context())
+func (c *userController) GetAllUser(ctx *gin.Context) {
+	result, err := c.userService.GetAllUser(ctx.Request.Context())
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_LIST_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
@@ -63,9 +63,9 @@ func (uc *userController) GetAllUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (uc *userController) UpdateStatusIsVerified(ctx *gin.Context) {
+func (c *userController) UpdateStatusIsVerified(ctx *gin.Context) {
 	token := ctx.MustGet("token").(string)
-	adminId, err := uc.jwtService.GetUserIDByToken(token)
+	adminId, err := c.jwtService.GetUserIDByToken(token)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
@@ -79,7 +79,7 @@ func (uc *userController) UpdateStatusIsVerified(ctx *gin.Context) {
 		return
 	}
 
-	result, err := uc.userService.UpdateStatusIsVerified(ctx.Request.Context(), req, adminId)
+	result, err := c.userService.UpdateStatusIsVerified(ctx.Request.Context(), req, adminId)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
@@ -90,16 +90,16 @@ func (uc *userController) UpdateStatusIsVerified(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (uc *userController) MeUser(ctx *gin.Context) {
+func (c *userController) MeUser(ctx *gin.Context) {
 	token := ctx.MustGet("token").(string)
-	userId, err := uc.jwtService.GetUserIDByToken(token)
+	userId, err := c.jwtService.GetUserIDByToken(token)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
 		return
 	}
 
-	result, err := uc.userService.GetUserByID(ctx.Request.Context(), userId)
+	result, err := c.userService.GetUserById(ctx.Request.Context(), userId)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER, err.Error(), utils.EmptyObj{})
 		ctx.JSON(http.StatusBadRequest, res)
@@ -110,29 +110,29 @@ func (uc *userController) MeUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (uc *userController) LoginUser(ctx *gin.Context) {
+func (c *userController) LoginUser(ctx *gin.Context) {
 	var req dto.UserLoginRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	
-	res, _ := uc.userService.Verify(ctx.Request.Context(), req.Email, req.Password)
-	if !res {
-		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, dto.MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD, utils.EmptyObj{})
+
+	res, err := c.userService.Verify(ctx.Request.Context(), req.Email, req.Password)
+	if err != nil && !res {
+		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
 		return
 	}
 
-	user, err := uc.userService.GetUserByEmail(ctx.Request.Context(), req.Email)
+	user, err := c.userService.GetUserByEmail(ctx.Request.Context(), req.Email)
 	if err != nil {
 		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	token := uc.jwtService.GenerateToken(user.ID, user.Role)
+	token := c.jwtService.GenerateToken(user.ID, user.Role)
 	userResponse := entities.Authorization{
 		Token: token,
 		Role:  user.Role,
@@ -142,7 +142,7 @@ func (uc *userController) LoginUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
-func (uc *userController) UpdateUser(ctx *gin.Context) {
+func (c *userController) UpdateUser(ctx *gin.Context) {
 	var req dto.UserUpdateRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), utils.EmptyObj{})
@@ -151,14 +151,14 @@ func (uc *userController) UpdateUser(ctx *gin.Context) {
 	}
 
 	token := ctx.MustGet("token").(string)
-	userId, err := uc.jwtService.GetUserIDByToken(token)
+	userId, err := c.jwtService.GetUserIDByToken(token)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if err = uc.userService.UpdateUser(ctx.Request.Context(), req, userId); err != nil {
+	if err = c.userService.UpdateUser(ctx.Request.Context(), req, userId); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
@@ -168,16 +168,16 @@ func (uc *userController) UpdateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (uc *userController) DeleteUser(ctx *gin.Context) {
+func (c *userController) DeleteUser(ctx *gin.Context) {
 	token := ctx.MustGet("token").(string)
-	userID, err := uc.jwtService.GetUserIDByToken(token)
+	userID, err := c.jwtService.GetUserIDByToken(token)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if err = uc.userService.DeleteUser(ctx.Request.Context(), userID); err != nil {
+	if err = c.userService.DeleteUser(ctx.Request.Context(), userID); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_USER, err.Error(), utils.EmptyObj{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
