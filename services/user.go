@@ -43,6 +43,7 @@ func (us *userService) RegisterUser(ctx context.Context, req dto.UserCreateReque
 		Role:       constants.ENUM_ROLE_USER,
 		Email:      req.Email,
 		Password:   req.Password,
+		IsVerified: false,
 	}
 
 	userResponse, err := us.userRepository.RegisterUser(ctx, user)
@@ -134,6 +135,7 @@ func (us *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest
 		Role:       user.Role,
 		Email:      req.Email,
 		Password:   req.Password,
+		IsVerified: req.IsVerified,
 	}
 
 	err = us.userRepository.UpdateUser(ctx, userUpdate)

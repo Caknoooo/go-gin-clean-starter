@@ -9,7 +9,7 @@ const (
 	MESSAGE_FAILED_GET_LIST_USER           = "failed get list user"
 	MESSAGE_FAILED_GET_USER_TOKEN          = "failed get user token"
 	MESSAGE_FAILED_TOKEN_NOT_VALID         = "token not valid"
-	MESSAGE_FAILED_TOKEN_NOT_FOUND		 = "token not found"
+	MESSAGE_FAILED_TOKEN_NOT_FOUND         = "token not found"
 	MESSAGE_FAILED_GET_USER                = "failed get user"
 	MESSAGE_FAILED_LOGIN                   = "failed login"
 	MESSAGE_FAILED_WRONG_EMAIL_OR_PASSWORD = "wrong email or password"
@@ -61,6 +61,7 @@ type (
 		TelpNumber string `json:"telp_number" form:"telp_number"`
 		Email      string `json:"email" form:"email"`
 		Password   string `json:"password" form:"password"`
+		IsVerified bool   `json:"is_verified" form:"is_verified"`
 	}
 
 	UserLoginRequest struct {
