@@ -11,4 +11,4 @@ run-build: build
 	./main
 
 test:
-	go test -v 
+	go test -v ./tests
