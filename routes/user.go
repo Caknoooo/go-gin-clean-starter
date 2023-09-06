@@ -7,17 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func User(route *gin.Engine, UserController controller.UserController, jwtService services.JWTService) {
+func User(route *gin.Engine, userController controller.UserController, jwtService services.JWTService) {
 	routes := route.Group("/api/user")
 	{
-		routes.POST("", UserController.RegisterUser)
-		routes.GET("", UserController.GetAllUser)
-		routes.POST("/login", UserController.LoginUser)
-		routes.DELETE("/", middleware.Authenticate(jwtService), UserController.DeleteUser)
-		routes.PATCH("/", middleware.Authenticate(jwtService), UserController.UpdateUser)
-		routes.GET("/me", middleware.Authenticate(jwtService), UserController.MeUser)
+		// User
+		routes.POST("", userController.RegisterUser)
+		routes.GET("", userController.GetAllUser)
+		routes.POST("/login", userController.LoginUser)
+		routes.DELETE("/", middleware.Authenticate(jwtService), userController.DeleteUser)
+		routes.PATCH("/", middleware.Authenticate(jwtService), userController.UpdateUser)
+		routes.GET("/me", middleware.Authenticate(jwtService), userController.MeUser)
 
 		// Admin
-		routes.PATCH("/verify", middleware.Authenticate(jwtService), UserController.UpdateStatusIsVerified)
+		routes.PATCH("/verify", middleware.Authenticate(jwtService), userController.UpdateStatusIsVerified)
 	}
 }

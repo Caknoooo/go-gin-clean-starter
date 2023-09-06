@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Caknoooo/golang-clean_template/constants"
+	"github.com/Caknoooo/golang-clean_template/entities"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/Caknoooo/golang-clean_template/entities"
 )
 
 func SetUpDatabaseConnection() *gorm.DB{
-	if os.Getenv("APP_ENV") != "Production"{
+	if os.Getenv("APP_ENV") != constants.ENUM_RUN_PRODUCTION {
 		err := godotenv.Load(".env")
 		if err != nil{
 			fmt.Println(err)
@@ -33,7 +34,6 @@ func SetUpDatabaseConnection() *gorm.DB{
 		// untuk mendukung tipe data UUID secara bawaan.
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{})
-
 	if err != nil{
 		fmt.Println(err)
 		panic(err)

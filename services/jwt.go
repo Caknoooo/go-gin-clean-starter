@@ -10,7 +10,7 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(UserID string, role string) string
+	GenerateToken(userId string, role string) string
 	ValidateToken(token string) (*jwt.Token, error)
 	GetUserIDByToken(token string) (string, error)
 }
@@ -41,9 +41,9 @@ func getSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateToken(UserID string, role string) string {
+func (j *jwtService) GenerateToken(userId string, role string) string {
 	claims := jwtCustomClaim{
-		UserID,
+		userId,
 		role,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 120)),

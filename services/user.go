@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Caknoooo/golang-clean_template/constants"
 	"github.com/Caknoooo/golang-clean_template/dto"
@@ -206,8 +205,6 @@ func (s *userService) Verify(ctx context.Context, email string, password string)
 	if err != nil {
 		return false, dto.ErrUserNotFound
 	}
-
-	fmt.Println(res)
 
 	if !res.IsVerified {
 		return false, dto.ErrAccountNotVerified
