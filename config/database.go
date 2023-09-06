@@ -45,8 +45,7 @@ func SetUpDatabaseConnection() *gorm.DB{
 		fmt.Println(err)
 		panic(err)
 	}
-
-	fmt.Println("Database Connected")
+	
 	return db
 }
 
