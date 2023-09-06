@@ -43,12 +43,12 @@ func Test_GetAllUser_OK(t *testing.T) {
 
 	users := []entities.User{
 		{
-			Name:  "Cakno",
-			Email: "caknocomel@gmail.com",
+			Name:  "testing",
+			Email: "testing1@gmail.com",
 		},
 		{
-			Name:  "Cakno2",
-			Email: "testing@gmail.com",
+			Name:  "testing2",
+			Email: "testing2@gmail.com",
 		},
 	}
 
@@ -66,12 +66,12 @@ func Test_GetAllUser_OK(t *testing.T) {
 func InsertTestBook() ([]entities.User, error) {
 	user := []entities.User{
 		{
-			Name:  "Cakno",
-			Email: "caknocomel@gmail.com",
+			Name:  "testing",
+			Email: "testing1@gmail.com",
 		},
 		{
-			Name:  "Cakno2",
-			Email: "testing@gmail.com",
+			Name:  "testing2",
+			Email: "testing2@gmail.com",
 		},
 	}
 
