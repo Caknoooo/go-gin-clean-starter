@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Account</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(226, 55, 55, 0.1);
+      border-radius: 5px;
+    }
+    h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    p {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Verify Your Account</h1>
+    <p>Hello, {{ .Email }}</p>
+    <p>Thank you for using my template! To complete your registration and activate your account, please click the link below:</p>
+    <div align="center">
+      <a href="{{ .Verify }}" style="color: #333 !important; text-decoration: none; padding: 10px 20px; background-color: #007bff; border-radius: 5px; display: inline-block;">Verify My Account</a>
+    </div>
+    <p>If you are unable to click the link above, please copy and paste the following URL into your web browser:</p>
+    <p>{{ .Verify }}</p>
+  </div>
+</body>
+</html>

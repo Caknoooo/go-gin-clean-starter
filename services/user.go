@@ -1,13 +1,19 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"html/template"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/Caknoooo/golang-clean_template/constants"
 	"github.com/Caknoooo/golang-clean_template/dto"
 	"github.com/Caknoooo/golang-clean_template/entities"
 	"github.com/Caknoooo/golang-clean_template/helpers"
 	"github.com/Caknoooo/golang-clean_template/repository"
+	"github.com/Caknoooo/golang-clean_template/utils"
 )
 
 type UserService interface {
@@ -16,11 +22,18 @@ type UserService interface {
 	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
+	SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
+	VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
 	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
 	Verify(ctx context.Context, email string, password string) (bool, error)
 }
+
+const (
+	LOCAL_URL          = "http://localhost:3000"
+	VERIFY_EMAIL_ROUTE = "register/verify_email"
+)
 
 type userService struct {
 	userRepo repository.UserRepository
@@ -47,18 +60,138 @@ func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateReques
 		IsVerified: false,
 	}
 
-	userResponse, err := s.userRepo.RegisterUser(ctx, user)
+	userReg, err := s.userRepo.RegisterUser(ctx, user)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrCreateUser
 	}
 
+	draftEmail, err := makeVerificationEmail(userReg.Email)
+	if err != nil {
+		return dto.UserResponse{}, err
+	}
+
+	err = utils.SendMail(userReg.Email, draftEmail["subject"], draftEmail["body"])
+	if err != nil {
+		return dto.UserResponse{}, err
+	}
+
 	return dto.UserResponse{
-		ID:         userResponse.ID.String(),
-		Name:       userResponse.Name,
-		TelpNumber: userResponse.TelpNumber,
-		Role:       userResponse.Role,
-		Email:      userResponse.Email,
-		IsVerified: userResponse.IsVerified,
+		ID:         userReg.ID.String(),
+		Name:       userReg.Name,
+		TelpNumber: userReg.TelpNumber,
+		Role:       userReg.Role,
+		Email:      userReg.Email,
+		IsVerified: userReg.IsVerified,
+	}, nil
+}
+
+func makeVerificationEmail(receiverEmail string) (map[string]string, error) {
+	expired := time.Now().Add(time.Hour * 24).Format("2006-01-02 15:04:05")
+	plainText := receiverEmail + "_" + expired
+	token, err := utils.AESEncrypt(plainText)
+	if err != nil {
+		return nil, err
+	}
+
+	verifyLink := LOCAL_URL + "/" + VERIFY_EMAIL_ROUTE + "?token=" + token
+
+	readHtml, err := os.ReadFile("utils/email-template/base_mail.html")
+	if err != nil {
+		return nil, err
+	}
+
+	data := struct {
+		Email  string
+		Verify string
+	}{
+		Email:  receiverEmail,
+		Verify: verifyLink,
+	}
+
+	tmpl, err := template.New("custom").Parse(string(readHtml))
+	if err != nil {
+		return nil, err
+	}
+
+	var strMail bytes.Buffer
+	if err := tmpl.Execute(&strMail, data); err != nil {
+		return nil, err
+	}
+
+	draftEmail := map[string]string{
+		"subject": "Cakno - Go Gin Template",
+		"body":    strMail.String(),
+	}
+
+	return draftEmail, nil
+}
+
+func (s *userService) SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error {
+	user, err := s.userRepo.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		return dto.ErrEmailNotFound
+	}
+
+	draftEmail, err := makeVerificationEmail(user.Email)
+	if err != nil {
+		return err
+	}
+
+	err = utils.SendMail(user.Email, draftEmail["subject"], draftEmail["body"])
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error) {
+	decryptedToken, err := utils.AESDecrypt(req.Token)
+	if err != nil {
+		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
+	}
+
+	if !strings.Contains(decryptedToken, "_") {
+		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
+	}
+
+	decryptedTokenSplit := strings.Split(decryptedToken, "_")
+	email := decryptedTokenSplit[0]
+	expired := decryptedTokenSplit[1]
+
+	now := time.Now()
+	expiredTime, err := time.Parse("2006-01-02 15:04:05", expired)
+	if err != nil {
+		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
+	}
+
+	if expiredTime.Sub(now) < 0 {
+		return dto.VerifyEmailResponse{
+			Email:      email,
+			IsVerified: false,
+		}, dto.ErrTokenExpired
+	}
+
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return dto.VerifyEmailResponse{}, dto.ErrUserNotFound
+	}
+
+	if user.IsVerified {
+		return dto.VerifyEmailResponse{}, dto.ErrAccountAlreadyVerified
+	}
+
+	updatedUser, err := s.userRepo.UpdateUser(ctx, entities.User{
+		ID:         user.ID,
+		IsVerified: true,
+	})
+	if err != nil {
+		return dto.VerifyEmailResponse{}, dto.ErrUpdateUser
+	}
+
+	return dto.VerifyEmailResponse{
+		Email:      email,
+		IsVerified: updatedUser.IsVerified,
 	}, nil
 }
 
