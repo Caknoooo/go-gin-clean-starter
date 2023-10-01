@@ -32,3 +32,10 @@ DB_PORT = 5432
 - Quit from postgres
 6. go run main.go
 ```
+
+## Benefit
+If You using my Template. You get some endpoints that I have set up and an architecture that is ready to go
+
+https://documenter.getpostman.com/view/29665461/2s9YJaZQCG
+
+![image](https://github.com/Caknoooo/go-gin-clean-template/assets/92671053/5aea055b-2420-4017-9310-e1c628209d0d)
