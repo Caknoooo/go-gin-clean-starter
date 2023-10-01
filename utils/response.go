@@ -3,8 +3,8 @@ package utils
 type Response struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message"`
-	Error   any    `json:"error"`
-	Data    any    `json:"data"`
+	Error   any    `json:"error,omitempty"`
+	Data    any    `json:"data,omitempty"`
 }
 
 type EmptyObj struct{}
