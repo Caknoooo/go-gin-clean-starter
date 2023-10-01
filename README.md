@@ -32,4 +32,3 @@ DB_PORT = 5432
 - Quit from postgres
 6. go run main.go
 ```
-![image](https://github.com/Caknoooo/golang-clean-template/assets/92671053/ceaf74a2-4015-42c4-a94a-9ddd6480b73b)
