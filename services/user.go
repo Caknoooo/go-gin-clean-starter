@@ -17,7 +17,7 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
-	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error
+	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
 	Verify(ctx context.Context, email string, password string) (bool, error)
 }
@@ -98,12 +98,12 @@ func (s *userService) UpdateStatusIsVerified(ctx context.Context, req dto.Update
 		return dto.UserResponse{}, dto.ErrUserNotFound
 	}
 
-	userUpdate := entities.User{
+	data := entities.User{
 		ID:         user.ID,
 		IsVerified: req.IsVerified,
 	}
 
-	err = s.userRepo.UpdateUser(ctx, userUpdate)
+	userUpdate, err := s.userRepo.UpdateUser(ctx, data)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrUpdateUser
 	}
@@ -162,28 +162,34 @@ func (s *userService) CheckUser(ctx context.Context, email string) (bool, error)
 	return true, nil
 }
 
-func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) error {
+func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
 	user, err := s.userRepo.GetUserById(ctx, userId)
 	if err != nil {
-		return dto.ErrUserNotFound
+		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
 	}
 
-	userUpdate := entities.User{
+	data := entities.User{
 		ID:         user.ID,
 		Name:       req.Name,
 		TelpNumber: req.TelpNumber,
 		Role:       user.Role,
 		Email:      req.Email,
 		Password:   req.Password,
-		IsVerified: req.IsVerified,
 	}
 
-	err = s.userRepo.UpdateUser(ctx, userUpdate)
+	userUpdate, err := s.userRepo.UpdateUser(ctx, data)
 	if err != nil {
-		return dto.ErrUpdateUser
+		return dto.UserUpdateResponse{}, dto.ErrUpdateUser
 	}
 
-	return nil
+	return dto.UserUpdateResponse{
+		ID:         userUpdate.ID.String(),
+		Name:       userUpdate.Name,
+		TelpNumber: userUpdate.TelpNumber,
+		Role:       userUpdate.Role,
+		Email:      userUpdate.Email,
+		IsVerified: userUpdate.IsVerified,
+	}, nil
 }
 
 func (s *userService) DeleteUser(ctx context.Context, userId string) error {

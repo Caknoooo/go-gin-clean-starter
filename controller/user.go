@@ -158,13 +158,14 @@ func (c *userController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err = c.userService.UpdateUser(ctx.Request.Context(), req, userId); err != nil {
+	result, err := c.userService.UpdateUser(ctx.Request.Context(), req, userId)
+	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), utils.EmptyObj{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_UPDATE_USER, nil)
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_UPDATE_USER, result)
 	ctx.JSON(http.StatusOK, res)
 }
 

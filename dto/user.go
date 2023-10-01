@@ -64,7 +64,15 @@ type (
 		TelpNumber string `json:"telp_number" form:"telp_number"`
 		Email      string `json:"email" form:"email"`
 		Password   string `json:"password" form:"password"`
-		IsVerified bool   `json:"is_verified" form:"is_verified"`
+	}
+
+	UserUpdateResponse struct {
+		ID         string `json:"id"`
+		Name       string `json:"name,omitempty"`
+		TelpNumber string `json:"telp_number,omitempty"`
+		Role       string `json:"role,omitempty"`
+		Email      string `json:"email,omitempty"`
+		IsVerified bool   `json:"is_verified,omitempty"`
 	}
 
 	UserLoginRequest struct {
