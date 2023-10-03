@@ -1,2 +1,2 @@
-branchName: "is-${issue.number}-${issue.title | slugify}"
-commentMessage: "Branch ${branchName} created for issue: ${issue.title}"
+# branchName: "is-${issue.number}-${issue.title}"
+# commentMessage: "Branch ${branchName} created for issue: ${issue.title}"
