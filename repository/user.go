@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/Caknoooo/golang-clean_template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"gorm.io/gorm"
 )
 
@@ -14,27 +14,27 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (entities.User, error)
 	CheckEmail(ctx context.Context, email string) (bool, error)
 	UpdateUser(ctx context.Context, user entities.User) (entities.User, error)
-	DeleteUser(ctx context.Context, userId string) (error) 
+	DeleteUser(ctx context.Context, userId string) error
 }
 
 type userRepository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository{
+func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{
 		db: db,
 	}
 }
 
-func (r *userRepository) RegisterUser(ctx context.Context, user entities.User) (entities.User, error){
+func (r *userRepository) RegisterUser(ctx context.Context, user entities.User) (entities.User, error) {
 	if err := r.db.Create(&user).Error; err != nil {
 		return entities.User{}, err
 	}
 	return user, nil
 }
 
-func (r *userRepository) GetAllUser(ctx context.Context) ([]entities.User, error){
+func (r *userRepository) GetAllUser(ctx context.Context) ([]entities.User, error) {
 	var user []entities.User
 	if err := r.db.Find(&user).Error; err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (r *userRepository) GetAllUser(ctx context.Context) ([]entities.User, error
 	return user, nil
 }
 
-func (r *userRepository) GetUserById(ctx context.Context, userId string) (entities.User, error){
+func (r *userRepository) GetUserById(ctx context.Context, userId string) (entities.User, error) {
 	var user entities.User
 	if err := r.db.Where("id = ?", userId).Take(&user).Error; err != nil {
 		return entities.User{}, err
@@ -73,7 +73,7 @@ func (r *userRepository) UpdateUser(ctx context.Context, user entities.User) (en
 	return user, nil
 }
 
-func (r *userRepository) DeleteUser(ctx context.Context, userId string) (error) {
+func (r *userRepository) DeleteUser(ctx context.Context, userId string) error {
 	if err := r.db.Delete(&entities.User{}, &userId).Error; err != nil {
 		return err
 	}

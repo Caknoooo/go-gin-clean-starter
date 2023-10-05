@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Caknoooo/golang-clean_template/constants"
-	"github.com/Caknoooo/golang-clean_template/dto"
-	"github.com/Caknoooo/golang-clean_template/entities"
-	"github.com/Caknoooo/golang-clean_template/helpers"
-	"github.com/Caknoooo/golang-clean_template/repository"
-	"github.com/Caknoooo/golang-clean_template/utils"
+	"github.com/Caknoooo/go-gin-clean-template/constants"
+	"github.com/Caknoooo/go-gin-clean-template/dto"
+	"github.com/Caknoooo/go-gin-clean-template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/helpers"
+	"github.com/Caknoooo/go-gin-clean-template/repository"
+	"github.com/Caknoooo/go-gin-clean-template/utils"
 )
 
 type UserService interface {

@@ -3,8 +3,8 @@ package migrations
 import (
 	"errors"
 
-	"github.com/Caknoooo/golang-clean_template/constants"
-	"github.com/Caknoooo/golang-clean_template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/constants"
+	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"gorm.io/gorm"
 )
 

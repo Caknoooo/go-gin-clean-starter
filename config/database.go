@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Caknoooo/golang-clean_template/constants"
-	"github.com/Caknoooo/golang-clean_template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/constants"
+	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func SetUpDatabaseConnection() *gorm.DB{
+func SetUpDatabaseConnection() *gorm.DB {
 	if os.Getenv("APP_ENV") != constants.ENUM_RUN_PRODUCTION {
 		err := godotenv.Load(".env")
-		if err != nil{
+		if err != nil {
 			fmt.Println(err)
 			panic(err)
 		}
@@ -34,22 +34,22 @@ func SetUpDatabaseConnection() *gorm.DB{
 		// untuk mendukung tipe data UUID secara bawaan.
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{})
-	if err != nil{
+	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 
 	if err := db.AutoMigrate(
 		entities.User{},
-	); err != nil{
+	); err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
-	
+
 	return db
 }
 
-func ClosDatabaseConnection(db *gorm.DB){
+func ClosDatabaseConnection(db *gorm.DB) {
 	dbSQL, err := db.DB()
 	if err != nil {
 		fmt.Println(err)

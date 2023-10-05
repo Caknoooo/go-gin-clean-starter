@@ -4,19 +4,19 @@ import (
 	"log"
 	"os"
 
-	"github.com/Caknoooo/golang-clean_template/config"
-	"github.com/Caknoooo/golang-clean_template/controller"
-	"github.com/Caknoooo/golang-clean_template/middleware"
-	"github.com/Caknoooo/golang-clean_template/migrations"
-	"github.com/Caknoooo/golang-clean_template/repository"
-	"github.com/Caknoooo/golang-clean_template/routes"
-	"github.com/Caknoooo/golang-clean_template/services"
+	"github.com/Caknoooo/go-gin-clean-template/config"
+	"github.com/Caknoooo/go-gin-clean-template/controller"
+	"github.com/Caknoooo/go-gin-clean-template/middleware"
+	"github.com/Caknoooo/go-gin-clean-template/migrations"
+	"github.com/Caknoooo/go-gin-clean-template/repository"
+	"github.com/Caknoooo/go-gin-clean-template/routes"
+	"github.com/Caknoooo/go-gin-clean-template/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func main() {	
+func main() {
 	var (
 		db             *gorm.DB                  = config.SetUpDatabaseConnection()
 		jwtService     services.JWTService       = services.NewJWTService()
@@ -30,7 +30,7 @@ func main() {
 	routes.User(server, userController, jwtService)
 
 	if err := migrations.Seeder(db); err != nil {
-		log.Fatalf("error migration seeder: %v", err)	
+		log.Fatalf("error migration seeder: %v", err)
 	}
 
 	port := os.Getenv("PORT")
