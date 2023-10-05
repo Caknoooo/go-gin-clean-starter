@@ -1,18 +1,24 @@
-# Golang Clean Architecture
+# Golang Gin Gorm With Clean Architecture
 
 ## Introduction 👋
 > Clean Architecture is an approach to organizing code in an application that focuses on separating responsibilities and dependencies between components. In the context of Golang, Clean Architecture refers to the application of Clean Architecture principles in developing applications using the Go programming language.
 
 Clean Architecture proposes a structured application design with several layers that have clear and isolated responsibilities. Each layer has a specific role and boundaries. Here are some common layers in Golang Clean Architecture
 
-## Layers 🔥
-- **Domain Layer:** This layer contains the core business definitions of the application. It is the innermost layer and does not depend on any other layers. It includes entities, business rules, and repository interfaces that will be implemented in the infrastructure layer.
-- **Use Case Layer:** This layer holds the business logic specific to use cases in the application. Use cases provide operations and interactions between entities in the domain layer. Use cases do not depend on implementation details in the infrastructure layer.
-- **Delivery Layer:** This layer is responsible for receiving and delivering data to and from the application. It typically consists of APIs, controllers, and presenters. This layer acts as the interface to interact with the outside world and can take input from users or deliver output to users.
-- **Repository Layer:** This layer is responsible for implementing the repository interfaces defined in the domain layer. Repositories are used to access and store data from the storage (database, cache, APIs, etc.). This layer serves as a bridge between the domain layer and the infrastructure layer.
-- **Infrastructure Layer:** This layer contains the technical details and implementation of the technologies used in the application, such as databases, networking, data storage, and external APIs. This layer depends on other layers and is used to implement the technical components required by the application.
+## Directory / Layers🔥
+- **config** This config aims to be directly related to things outside the code. An example is a database, etc. Configuration files play a crucial role in customizing the behavior of software applications. A well-structured config file can simplify the process of fine-tuning various settings to meet specific project requirements
+- **constants** constant is a directory that deals with things that cannot be changed, in other words it is always constant and is usually called repeatedly
+- **middleware**  is an intermediary layer that serves to process and modify HTTP requests as they pass through the server before reaching the actual routes or actions. Middleware can be used to perform various tasks such as user authentication, data validation, logging, session management, response compression, and many more. It helps separate different functionalities within the API application and enables consistent processing for each incoming HTTP request.
+- **controller** is a component or part of the application responsible for managing incoming HTTP requests from clients (such as browsers or mobile applications). The controller controls the flow of data between the client and the server and determines the actions to be taken based on the received requests. In other words, a controller is a crucial part of the REST API architecture that governs the interaction between the client and the server, ensuring that client requests are processed correctly according to predefined business rules.
+- **service** refers to a component responsible for executing specific business logic or operations requested by clients through HTTP requests. The service acts as an intermediary layer between the controller and data storage, fetching data from storage or performing the relevant business operations, and then returning the results to the controller to be sent as an HTTP response to the client. The significance of services in REST API architecture is to separate the business logic from the controller, making the application more modular, testable, and adaptable. In other words, services enable the separation of responsibilities between receiving HTTP requests (by the controller) and executing the corresponding business actions. This helps maintain clean and structured code in the development of RESTful applications.
+- **repository**  is a component or layer responsible for interacting with data storage, such as a database or file storage, to retrieve, store, or manage data. The repository serves as a bridge between services and the actual data storage. The primary function of a repository is to abstract database or storage-related operations from business logic and HTTP request handling. In other words, the repository provides an interface for accessing and manipulating data, allowing services to focus on business logic without needing to know the technical details of data storage underneath. In the architecture of a REST API, the use of repositories helps maintain separation of concerns between different tasks in the application, making development, testing, and code maintenance more manageable.
+- **utils**  is short for "utility functions" or "utility tools." It refers to a collection of functions or tools used for common tasks such as data validation, string manipulation, security, error handling, database connection management, and more. Utils help avoid code duplication, improve code readability, and make application development more efficient by providing commonly used and reusable functions.
+ 
+## Prerequisite 🏆
+- Go Version ``>= go 1.20``
+- PostgreSQL Version ``>= version 15.0``
 
-## How To Use?
+## How To Use 🤔
 ```
 1. git clone https://github.com/Caknoooo/golang-clean-template.git
 2. cd golang-clean-template
@@ -29,11 +35,11 @@ DB_PORT = 5432
 - Run -> Create database according to what you put in .env
 - \c (your database)
 - Run -> CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
-- Quit from postgres
+- Run -> Exit
 6. go run main.go
 ```
 
-## Benefit
+## What did you get? 😀
 If You using my Template. You get some endpoints that I have set up and an architecture that is ready to go
 
 https://documenter.getpostman.com/view/29665461/2s9YJaZQCG
