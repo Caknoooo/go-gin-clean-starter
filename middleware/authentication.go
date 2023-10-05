@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Caknoooo/golang-clean_template/services"
-	"github.com/Caknoooo/golang-clean_template/utils"
-	"github.com/Caknoooo/golang-clean_template/dto"
+	"github.com/Caknoooo/go-gin-clean-template/dto"
+	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
 

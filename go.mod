@@ -1,4 +1,4 @@
-module github.com/Caknoooo/golang-clean_template
+module github.com/Caknoooo/go-gin-clean-template
 
 go 1.20
 

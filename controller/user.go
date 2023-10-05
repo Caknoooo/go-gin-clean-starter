@@ -3,10 +3,10 @@ package controller
 import (
 	"net/http"
 
-	"github.com/Caknoooo/golang-clean_template/dto"
-	"github.com/Caknoooo/golang-clean_template/entities"
-	"github.com/Caknoooo/golang-clean_template/services"
-	"github.com/Caknoooo/golang-clean_template/utils"
+	"github.com/Caknoooo/go-gin-clean-template/dto"
+	"github.com/Caknoooo/go-gin-clean-template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
 

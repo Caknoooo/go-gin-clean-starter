@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Caknoooo/golang-clean_template/constants"
+	"github.com/Caknoooo/go-gin-clean-template/constants"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"

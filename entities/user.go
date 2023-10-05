@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"github.com/Caknoooo/golang-clean_template/helpers"
+	"github.com/Caknoooo/go-gin-clean-template/helpers"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
