@@ -11,6 +11,6 @@ type Timestamp struct {
 }
 
 type Authorization struct {
-	Token string `gorm:"type:varchar(255)" json:"token"`
-	Role  string `gorm:"type:varchar(30)" json:"role"`
+	Token string `json:"token"`
+	Role  string `json:"role"`
 }

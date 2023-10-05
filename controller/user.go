@@ -66,13 +66,7 @@ func (c *userController) GetAllUser(ctx *gin.Context) {
 }
 
 func (c *userController) UpdateStatusIsVerified(ctx *gin.Context) {
-	token := ctx.MustGet("token").(string)
-	adminId, err := c.jwtService.GetUserIDByToken(token)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
+	adminId := ctx.MustGet("user_id").(string)
 
 	var req dto.UpdateStatusIsVerifiedRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -93,13 +87,7 @@ func (c *userController) UpdateStatusIsVerified(ctx *gin.Context) {
 }
 
 func (c *userController) Me(ctx *gin.Context) {
-	token := ctx.MustGet("token").(string)
-	userId, err := c.jwtService.GetUserIDByToken(token)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, res)
-		return
-	}
+	userId := ctx.MustGet("user_id").(string)
 
 	result, err := c.userService.GetUserById(ctx.Request.Context(), userId)
 	if err != nil {
@@ -190,14 +178,7 @@ func (c *userController) Update(ctx *gin.Context) {
 		return
 	}
 
-	token := ctx.MustGet("token").(string)
-	userId, err := c.jwtService.GetUserIDByToken(token)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
+	userId := ctx.MustGet("user_id").(string)
 	result, err := c.userService.UpdateUser(ctx.Request.Context(), req, userId)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), nil)
@@ -210,15 +191,9 @@ func (c *userController) Update(ctx *gin.Context) {
 }
 
 func (c *userController) Delete(ctx *gin.Context) {
-	token := ctx.MustGet("token").(string)
-	userID, err := c.jwtService.GetUserIDByToken(token)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER_TOKEN, dto.MESSAGE_FAILED_TOKEN_NOT_VALID, nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
+	userId := ctx.MustGet("user_id").(string)
 
-	if err = c.userService.DeleteUser(ctx.Request.Context(), userID); err != nil {
+	if err := c.userService.DeleteUser(ctx.Request.Context(), userId); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_DELETE_USER, err.Error(), nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
