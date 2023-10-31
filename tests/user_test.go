@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/Caknoooo/go-gin-clean-template/controller"
-	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
 	"github.com/Caknoooo/go-gin-clean-template/services"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 )
 
 func SetUpRoutes() *gin.Engine {
@@ -41,7 +41,7 @@ func Test_GetAllUser_OK(t *testing.T) {
 
 	r.ServeHTTP(w, req)
 
-	users := []entities.User{
+	users := []entity.User{
 		{
 			Name:  "testing",
 			Email: "testing1@gmail.com",
@@ -63,8 +63,8 @@ func Test_GetAllUser_OK(t *testing.T) {
 	assert.Equal(t, users, expectedUsers, "Success Get All User")
 }
 
-func InsertTestBook() ([]entities.User, error) {
-	user := []entities.User{
+func InsertTestBook() ([]entity.User, error) {
+	user := []entity.User{
 		{
 			Name:  "testing",
 			Email: "testing1@gmail.com",

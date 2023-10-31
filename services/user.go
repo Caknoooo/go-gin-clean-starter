@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"github.com/Caknoooo/go-gin-clean-template/helpers"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
@@ -51,7 +51,7 @@ func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateReques
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
-	user := entities.User{
+	user := entity.User{
 		Name:       req.Name,
 		TelpNumber: req.TelpNumber,
 		Role:       constants.ENUM_ROLE_USER,
@@ -181,7 +181,7 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		return dto.VerifyEmailResponse{}, dto.ErrAccountAlreadyVerified
 	}
 
-	updatedUser, err := s.userRepo.UpdateUser(ctx, entities.User{
+	updatedUser, err := s.userRepo.UpdateUser(ctx, entity.User{
 		ID:         user.ID,
 		IsVerified: true,
 	})
@@ -231,7 +231,7 @@ func (s *userService) UpdateStatusIsVerified(ctx context.Context, req dto.Update
 		return dto.UserResponse{}, dto.ErrUserNotFound
 	}
 
-	data := entities.User{
+	data := entity.User{
 		ID:         user.ID,
 		IsVerified: req.IsVerified,
 	}
@@ -301,7 +301,7 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest,
 		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
 	}
 
-	data := entities.User{
+	data := entity.User{
 		ID:         user.ID,
 		Name:       req.Name,
 		TelpNumber: req.TelpNumber,

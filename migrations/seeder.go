@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
-	"github.com/Caknoooo/go-gin-clean-template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ func Seeder(db *gorm.DB) error {
 }
 
 func ListUserSeeder(db *gorm.DB) error {
-	var listUser = []entities.User{
+	var listUser = []entity.User{
 		{
 			Name:       "Admin",
 			TelpNumber: "081234567890",
@@ -36,16 +36,16 @@ func ListUserSeeder(db *gorm.DB) error {
 		},
 	}
 
-	hasTable := db.Migrator().HasTable(&entities.User{})
+	hasTable := db.Migrator().HasTable(&entity.User{})
 	if !hasTable {
-		if err := db.Migrator().CreateTable(&entities.User{}); err != nil {
+		if err := db.Migrator().CreateTable(&entity.User{}); err != nil {
 			return err
 		}
 	}
 
 	for _, data := range listUser {
-		var user entities.User
-		err := db.Where(&entities.User{Email: data.Email}).First(&user).Error
+		var user entity.User
+		err := db.Where(&entity.User{Email: data.Email}).First(&user).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
