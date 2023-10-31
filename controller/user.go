@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/entities"
 	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -123,7 +123,7 @@ func (c *userController) Login(ctx *gin.Context) {
 	}
 
 	token := c.jwtService.GenerateToken(user.ID, user.Role)
-	userResponse := entities.Authorization{
+	userResponse := entity.Authorization{
 		Token: token,
 		Role:  user.Role,
 	}

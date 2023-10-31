@@ -1,4 +1,4 @@
-package entities
+package entity
 
 import (
 	"github.com/Caknoooo/go-gin-clean-template/helpers"

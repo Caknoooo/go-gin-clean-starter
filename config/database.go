@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
-	"github.com/Caknoooo/go-gin-clean-template/entities"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -40,7 +40,7 @@ func SetUpDatabaseConnection() *gorm.DB {
 	}
 
 	if err := db.AutoMigrate(
-		entities.User{},
+		entity.User{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)
