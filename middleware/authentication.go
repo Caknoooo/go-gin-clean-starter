@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/service"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func Authenticate(jwtService services.JWTService) gin.HandlerFunc {
+func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")
 		if authHeader == "" {

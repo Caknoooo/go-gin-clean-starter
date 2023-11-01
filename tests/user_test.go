@@ -7,11 +7,11 @@ import (
 	"testing"
 
 	"github.com/Caknoooo/go-gin-clean-template/controller"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
-	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"github.com/Caknoooo/go-gin-clean-template/entity"
 )
 
 func SetUpRoutes() *gin.Engine {
@@ -23,8 +23,8 @@ func SetupControllerUser() controller.UserController {
 	var (
 		db             = SetUpDatabaseConnection()
 		userRepo       = repository.NewUserRepository(db)
-		userService    = services.NewUserService(userRepo)
-		jwtService     = services.NewJWTService()
+		userService    = service.NewUserService(userRepo)
+		jwtService     = service.NewJWTService()
 		userController = controller.NewUserController(userService, jwtService)
 	)
 

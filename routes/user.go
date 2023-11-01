@@ -3,11 +3,11 @@ package routes
 import (
 	"github.com/Caknoooo/go-gin-clean-template/controller"
 	"github.com/Caknoooo/go-gin-clean-template/middleware"
-	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/service"
 	"github.com/gin-gonic/gin"
 )
 
-func User(route *gin.Engine, userController controller.UserController, jwtService services.JWTService) {
+func User(route *gin.Engine, userController controller.UserController, jwtService service.JWTService) {
 	routes := route.Group("/api/user")
 	{
 		// User
