@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/services"
 	"github.com/Caknoooo/go-gin-clean-template/entity"
+	"github.com/Caknoooo/go-gin-clean-template/service"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -23,11 +23,11 @@ type UserController interface {
 }
 
 type userController struct {
-	jwtService  services.JWTService
-	userService services.UserService
+	jwtService  service.JWTService
+	userService service.UserService
 }
 
-func NewUserController(us services.UserService, jwt services.JWTService) UserController {
+func NewUserController(us service.UserService, jwt service.JWTService) UserController {
 	return &userController{
 		jwtService:  jwt,
 		userService: us,

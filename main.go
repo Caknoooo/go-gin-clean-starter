@@ -10,7 +10,7 @@ import (
 	"github.com/Caknoooo/go-gin-clean-template/migrations"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
 	"github.com/Caknoooo/go-gin-clean-template/routes"
-	"github.com/Caknoooo/go-gin-clean-template/services"
+	"github.com/Caknoooo/go-gin-clean-template/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -19,9 +19,9 @@ import (
 func main() {
 	var (
 		db             *gorm.DB                  = config.SetUpDatabaseConnection()
-		jwtService     services.JWTService       = services.NewJWTService()
+		jwtService     service.JWTService        = service.NewJWTService()
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
-		userService    services.UserService      = services.NewUserService(userRepository)
+		userService    service.UserService       = service.NewUserService(userRepository)
 		userController controller.UserController = controller.NewUserController(userService, jwtService)
 	)
 
