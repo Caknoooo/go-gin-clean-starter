@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
-	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/dto"
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/helpers"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
@@ -18,7 +18,7 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
-	GetAllUser(ctx context.Context) ([]dto.UserResponse, error)
+	GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error)
 	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
@@ -195,25 +195,43 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 	}, nil
 }
 
-func (s *userService) GetAllUser(ctx context.Context) ([]dto.UserResponse, error) {
-	users, err := s.userRepo.GetAllUser(ctx)
-	if err != nil {
-		return nil, dto.ErrGetAllUser
+func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error) {
+	var perPage int
+
+	if req.PerPage == 0 {
+		perPage = constants.ENUM_PAGINATION_LIMIT
+	} else {
+		perPage = req.PerPage
 	}
 
-	var userResponse []dto.UserResponse
+	users, maxPage, count, err := s.userRepo.GetAllUserWithPagination(ctx, nil, req.Search, perPage, req.Page)
+	if err != nil {
+		return dto.UserPaginationResponse{}, nil
+	}
+
+	var datas []dto.UserResponse
 	for _, user := range users {
-		userResponse = append(userResponse, dto.UserResponse{
+		data := dto.UserResponse{
 			ID:         user.ID.String(),
 			Name:       user.Name,
-			TelpNumber: user.TelpNumber,
-			Role:       user.Role,
 			Email:      user.Email,
+			Role:       user.Role,
+			TelpNumber: user.TelpNumber,
 			IsVerified: user.IsVerified,
-		})
+		}
+		
+		datas = append(datas, data)
 	}
 
-	return userResponse, nil
+	return dto.UserPaginationResponse{
+		Data: datas,
+		PaginationResponse: dto.PaginationResponse{
+			Page: req.Page,
+			PerPage: perPage,
+			MaxPage: maxPage,
+			Count: count,
+		},
+	}, nil
 }
 
 func (s *userService) UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error) {
