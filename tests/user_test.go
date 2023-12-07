@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -56,8 +55,6 @@ func Test_GetAllUser_OK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
-	json.Unmarshal(w.Body.Bytes(), &users)
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, users, expectedUsers, "Success Get All User")

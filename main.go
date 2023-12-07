@@ -40,5 +40,7 @@ func main() {
 	if port == "" {
 		port = "8888"
 	}
-	server.Run(":" + port)
+	if err := server.Run(":" + port); err != nil {
+		log.Fatalf("error running server: %v", err)
+	}
 }
