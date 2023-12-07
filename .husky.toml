@@ -37,4 +37,4 @@ commit-msg = [
 # optional custom types check regex
 types = "^(feat|fix|build|chore|ci|docs|perf|refactor|revert|style|test)$"
 # optional header check regex
-# header = "^(?P<type>\w+)(\((?P<scope>[\w/.-]+)\))?(?P<breaking>!)?:( +)?(?P<header>.+)"
+header = "^(?P<type>\w+)(\((?P<scope>[\w/.-]+)\))?(?P<breaking>!)?:( +)?(?P<header>.+)"
