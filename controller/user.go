@@ -54,15 +54,28 @@ func (c *userController) Register(ctx *gin.Context) {
 }
 
 func (c *userController) GetAllUser(ctx *gin.Context) {
-	result, err := c.userService.GetAllUser(ctx.Request.Context())
+	var req dto.PaginationRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+
+	result, err := c.userService.GetAllUserWithPagination(ctx.Request.Context(), req)
 	if err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_LIST_USER, err.Error(), nil)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_LIST_USER, result)
-	ctx.JSON(http.StatusOK, res)
+	resp := utils.Response {
+		Status: true,
+		Message: dto.MESSAGE_SUCCESS_GET_LIST_USER,
+		Data: result.Data,
+		Meta: result.PaginationResponse,
+	}
+	
+	ctx.JSON(http.StatusOK, resp)
 }
 
 func (c *userController) UpdateStatusIsVerified(ctx *gin.Context) {

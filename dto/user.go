@@ -66,6 +66,11 @@ type (
 		IsVerified bool   `json:"is_verified"`
 	}
 
+	UserPaginationResponse struct {
+		Data []UserResponse `json:"data"`
+		PaginationResponse
+	}
+
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name"`
 		TelpNumber string `json:"telp_number" form:"telp_number"`
