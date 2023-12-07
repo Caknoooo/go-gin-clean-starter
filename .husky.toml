@@ -27,6 +27,7 @@ commit-msg = [
 "*.go" = [
     "goimports -l -w",
     "gofmt -l -w",
+    "go mod tidy",
 ]
 
 # commit msg rule default support conventional commits
@@ -34,6 +35,6 @@ commit-msg = [
 # could check if this exists
 # email = "^(.+@gmail.com|.+@qq.com)$"
 # optional custom types check regex
-# types = "^(feat|fix|build|chore|ci|docs|perf|refactor|revert|style|test)$"
+types = "^(feat|fix|build|chore|ci|docs|perf|refactor|revert|style|test)$"
 # optional header check regex
 # header = "^(?P<type>\w+)(\((?P<scope>[\w/.-]+)\))?(?P<breaking>!)?:( +)?(?P<header>.+)"
