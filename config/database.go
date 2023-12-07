@@ -35,14 +35,12 @@ func SetUpDatabaseConnection() *gorm.DB {
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{})
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 
 	if err := db.AutoMigrate(
-		entity.User{},
+		&entity.User{},
 	); err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 

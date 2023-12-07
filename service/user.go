@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"html/template"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/Caknoooo/go-gin-clean-template/helpers"
 	"github.com/Caknoooo/go-gin-clean-template/repository"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
+	"github.com/google/uuid"
 )
 
 type UserService interface {
@@ -51,9 +53,18 @@ func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateReques
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
+	imageId := uuid.New()
+	ext := utils.GetExtensions(req.Image.Filename)
+
+	filename := fmt.Sprintf("profile/%s.%s", imageId, ext)
+	if err := utils.UploadFile(req.Image, filename); err != nil {
+		return dto.UserResponse{}, err
+	}
+
 	user := entity.User{
 		Name:       req.Name,
 		TelpNumber: req.TelpNumber,
+		ImageUrl:   filename,
 		Role:       constants.ENUM_ROLE_USER,
 		Email:      req.Email,
 		Password:   req.Password,
@@ -79,6 +90,7 @@ func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateReques
 		ID:         userReg.ID.String(),
 		Name:       userReg.Name,
 		TelpNumber: userReg.TelpNumber,
+		ImageUrl:   userReg.ImageUrl,
 		Role:       userReg.Role,
 		Email:      userReg.Email,
 		IsVerified: userReg.IsVerified,
@@ -219,17 +231,17 @@ func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.Pagi
 			TelpNumber: user.TelpNumber,
 			IsVerified: user.IsVerified,
 		}
-		
+
 		datas = append(datas, data)
 	}
 
 	return dto.UserPaginationResponse{
 		Data: datas,
 		PaginationResponse: dto.PaginationResponse{
-			Page: req.Page,
+			Page:    req.Page,
 			PerPage: perPage,
 			MaxPage: maxPage,
-			Count: count,
+			Count:   count,
 		},
 	}, nil
 }
