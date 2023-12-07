@@ -1,6 +1,9 @@
 package dto
 
-import "errors"
+import (
+	"errors"
+	"mime/multipart"
+)
 
 const (
 	// Failed
@@ -51,18 +54,20 @@ var (
 
 type (
 	UserCreateRequest struct {
-		Name       string `json:"name" form:"name"`
-		TelpNumber string `json:"telp_number" form:"telp_number"`
-		Email      string `json:"email" form:"email"`
-		Password   string `json:"password" form:"password"`
+		Name       string                `json:"name" form:"name"`
+		TelpNumber string                `json:"telp_number" form:"telp_number"`
+		Email      string                `json:"email" form:"email"`
+		Image      *multipart.FileHeader `json:"image" form:"image"`
+		Password   string                `json:"password" form:"password"`
 	}
 
 	UserResponse struct {
 		ID         string `json:"id"`
 		Name       string `json:"name"`
+		Email      string `json:"email"`
 		TelpNumber string `json:"telp_number"`
 		Role       string `json:"role"`
-		Email      string `json:"email"`
+		ImageUrl   string `json:"image_url"`
 		IsVerified bool   `json:"is_verified"`
 	}
 
