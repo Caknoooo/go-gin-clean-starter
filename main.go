@@ -33,6 +33,9 @@ func main() {
 		log.Fatalf("error migration seeder: %v", err)
 	}
 
+	server.RedirectTrailingSlash = false
+	server.Static("/assets", "./assets")
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
