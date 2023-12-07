@@ -2,18 +2,17 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"os"
 	"strings"
 )
 
-const PATH = "storage"
+const PATH = "assets"
 
 func UploadFile(file *multipart.FileHeader, path string) error {
 	parts := strings.Split(path, "/")
-
-	fileId := parts[1]
+	fileID := parts[1]
 	dirPath := fmt.Sprintf("%s/%s", PATH, parts[0])
 
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
@@ -22,7 +21,7 @@ func UploadFile(file *multipart.FileHeader, path string) error {
 		}
 	}
 
-	filePath := fmt.Sprintf("%s/%s", dirPath, fileId)
+	filePath := fmt.Sprintf("%s/%s", dirPath, fileID)
 
 	uploadedFile, err := file.Open()
 	if err != nil {
@@ -30,12 +29,15 @@ func UploadFile(file *multipart.FileHeader, path string) error {
 	}
 	defer uploadedFile.Close()
 
-	fileData, err := ioutil.ReadAll(uploadedFile)
+	// Using os.Create to open the file with appropriate permissions
+	targetFile, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
+	defer targetFile.Close()
 
-	err = os.WriteFile(filePath, fileData, 0666)
+	// Copy file contents from uploadedFile to targetFile
+	_, err = io.Copy(targetFile, uploadedFile)
 	if err != nil {
 		return err
 	}
