@@ -3,6 +3,8 @@ package dto
 import (
 	"errors"
 	"mime/multipart"
+
+	"github.com/Caknoooo/go-gin-clean-template/entity"
 )
 
 const (
@@ -75,6 +77,11 @@ type (
 		Data []UserResponse `json:"data"`
 		PaginationResponse
 	}
+
+	GetAllUserRepositoryResponse struct {
+		Users []entity.User
+		PaginationResponse
+	} 
 
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name"`

@@ -4,13 +4,14 @@ import (
 	"context"
 	"math"
 
+	"github.com/Caknoooo/go-gin-clean-template/dto"
 	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
 	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
-	GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, search string, perPage int, page int) ([]entity.User, int64, int64, error)
+	GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, req dto.PaginationRequest) (dto.GetAllUserRepositoryResponse, error)
 	GetUserById(ctx context.Context, userId string) (entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (entity.User, error)
 	CheckEmail(ctx context.Context, email string) (bool, error)
@@ -35,7 +36,7 @@ func (r *userRepository) RegisterUser(ctx context.Context, user entity.User) (en
 	return user, nil
 }
 
-func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, search string, perPage int, page int) ([]entity.User, int64, int64, error) {
+func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, req dto.PaginationRequest) (dto.GetAllUserRepositoryResponse, error) {
 	if tx == nil {
 		tx = r.db
 	}
@@ -44,30 +45,41 @@ func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.
 	var err error
 	var count int64
 
-	if search != "" {
-		err = tx.WithContext(ctx).Model(&entity.User{}).Where("name ILIKE ?", "%"+search+"%").Count(&count).Error
+	if req.PerPage == 0 {
+		req.PerPage = 10
+	}
+
+	if req.Page == 0 {
+		req.Page = 1
+	}
+
+	if req.Search != "" {
+		err = tx.WithContext(ctx).Model(&entity.User{}).Where("name ILIKE ?", "%"+req.Search+"%").Count(&count).Error
 		if err != nil {
-			return nil, 0, 0, err
+			return dto.GetAllUserRepositoryResponse{}, err
 		}
 	} else {
 		err = tx.WithContext(ctx).Model(&entity.User{}).Count(&count).Error
 		if err != nil {
-			return nil, 0, 0, err
+			return dto.GetAllUserRepositoryResponse{}, err
 		}
 	}
 
-	stmt := tx.WithContext(ctx).Where("name ILIKE ?", "%"+search+"%")
-	maxPage := int64(math.Ceil(float64(count) / float64(perPage)))
+	stmt := tx.WithContext(ctx).Where("name ILIKE ?", "%"+req.Search+"%")
+	maxPage := int64(math.Ceil(float64(count) / float64(req.PerPage)))
 
-	if perPage <= 0 {
-		stmt.Find(&users)
-		return users, maxPage, count, nil
-	}
+	offset := (req.Page - 1) * req.PerPage
+	_ = stmt.Offset(offset).Limit(req.PerPage).Find(&users).Error
 
-	offset := (page - 1) * perPage
-	_ = stmt.Offset(offset).Limit(perPage).Find(&users).Error
-
-	return users, maxPage, count, nil
+	return dto.GetAllUserRepositoryResponse{
+		Users: users,
+		PaginationResponse: dto.PaginationResponse{
+			Page:    req.Page,
+			PerPage: req.PerPage,
+			MaxPage: maxPage,
+			Count:   count,
+		},
+	}, nil
 }
 
 func (r *userRepository) GetUserById(ctx context.Context, userId string) (entity.User, error) {

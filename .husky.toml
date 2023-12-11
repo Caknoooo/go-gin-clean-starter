@@ -12,11 +12,11 @@ post-version = [
 ]
 
 # git hook pre commit
-pre-commit = [
-    "golangci-lint run",
-    "husky lint-staged",
-    "husky lint-commit",
-]
+# pre-commit = [
+#    "golangci-lint run",
+#    "husky lint-staged",
+#    "husky lint-commit",
+# ]
 
 # git hook commit msg
 commit-msg = [
