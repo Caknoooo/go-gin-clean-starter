@@ -208,21 +208,13 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 }
 
 func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error) {
-	var perPage int
-
-	if req.PerPage == 0 {
-		perPage = constants.ENUM_PAGINATION_LIMIT
-	} else {
-		perPage = req.PerPage
-	}
-
-	users, maxPage, count, err := s.userRepo.GetAllUserWithPagination(ctx, nil, req.Search, perPage, req.Page)
+	dataWithPaginate, err := s.userRepo.GetAllUserWithPagination(ctx, nil, req)
 	if err != nil {
-		return dto.UserPaginationResponse{}, nil
+		return dto.UserPaginationResponse{}, err
 	}
 
 	var datas []dto.UserResponse
-	for _, user := range users {
+	for _, user := range dataWithPaginate.Users {
 		data := dto.UserResponse{
 			ID:         user.ID.String(),
 			Name:       user.Name,
@@ -238,10 +230,10 @@ func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.Pagi
 	return dto.UserPaginationResponse{
 		Data: datas,
 		PaginationResponse: dto.PaginationResponse{
-			Page:    req.Page,
-			PerPage: perPage,
-			MaxPage: maxPage,
-			Count:   count,
+			Page:    dataWithPaginate.Page,
+			PerPage: dataWithPaginate.PerPage,
+			MaxPage: dataWithPaginate.MaxPage,
+			Count:   dataWithPaginate.Count,
 		},
 	}, nil
 }
