@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+  postgres:
+    hostname: postgres
+    image: postgres:latest
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - app-network
+        
+  app:
+    hostname: app
+    container_name: golang-clean-template
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    ports:
+      - ${GOLANG_PORT}:${GOLANG_PORT} 
+    restart: always
+    volumes:
+      -  ./:/app
+    depends_on: 
+      - postgres
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+volumes:
+  app_vol:
+
+networks:
+  app-network:
+    driver: bridge
