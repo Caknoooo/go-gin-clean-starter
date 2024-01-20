@@ -33,7 +33,10 @@ func main() {
 		log.Fatalf("error migration seeder: %v", err)
 	}
 
-	server.RedirectTrailingSlash = false
+	if err := migrations.Migrate(db); err != nil {
+		log.Fatalf("error migration: %v", err)
+	}
+
 	server.Static("/assets", "./assets")
 
 	port := os.Getenv("PORT")
