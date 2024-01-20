@@ -23,7 +23,6 @@ type UserService interface {
 	GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error)
 	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
-	UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error)
 	SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
 	VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
 	CheckUser(ctx context.Context, email string) (bool, error)
@@ -235,41 +234,6 @@ func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.Pagi
 			MaxPage: dataWithPaginate.MaxPage,
 			Count:   dataWithPaginate.Count,
 		},
-	}, nil
-}
-
-func (s *userService) UpdateStatusIsVerified(ctx context.Context, req dto.UpdateStatusIsVerifiedRequest, adminId string) (dto.UserResponse, error) {
-	admin, err := s.userRepo.GetUserById(ctx, adminId)
-	if err != nil {
-		return dto.UserResponse{}, dto.ErrUserNotFound
-	}
-
-	if admin.Role != constants.ENUM_ROLE_ADMIN {
-		return dto.UserResponse{}, dto.ErrUserNotAdmin
-	}
-
-	user, err := s.userRepo.GetUserById(ctx, req.UserId)
-	if err != nil {
-		return dto.UserResponse{}, dto.ErrUserNotFound
-	}
-
-	data := entity.User{
-		ID:         user.ID,
-		IsVerified: req.IsVerified,
-	}
-
-	userUpdate, err := s.userRepo.UpdateUser(ctx, data)
-	if err != nil {
-		return dto.UserResponse{}, dto.ErrUpdateUser
-	}
-
-	return dto.UserResponse{
-		ID:         user.ID.String(),
-		Name:       user.Name,
-		TelpNumber: user.TelpNumber,
-		Role:       user.Role,
-		Email:      user.Email,
-		IsVerified: userUpdate.IsVerified,
 	}, nil
 }
 
