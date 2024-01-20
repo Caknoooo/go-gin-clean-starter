@@ -45,3 +45,11 @@ If You using my Template. You get some endpoints that I have set up and an archi
 https://documenter.getpostman.com/view/29665461/2s9YJaZQCG
 
 ![image](https://github.com/Caknoooo/go-gin-clean-template/assets/92671053/5aea055b-2420-4017-9310-e1c628209d0d)
+
+You will get an issue template as below
+
+![image](https://github.com/Caknoooo/go-gin-clean-architecture/assets/92671053/00eb0d92-8ea3-4e37-85d8-d48437453ea0)
+
+You will also get a template when you make a pull request as follows 
+
+![image](https://github.com/Caknoooo/go-gin-clean-architecture/assets/92671053/7c4fa478-ac86-42d4-8967-24d5774ff98c)
