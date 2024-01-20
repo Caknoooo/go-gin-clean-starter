@@ -21,8 +21,8 @@ func main() {
 		db             *gorm.DB                  = config.SetUpDatabaseConnection()
 		jwtService     service.JWTService        = service.NewJWTService()
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
-		userService    service.UserService       = service.NewUserService(userRepository)
-		userController controller.UserController = controller.NewUserController(userService, jwtService)
+		userService    service.UserService       = service.NewUserService(userRepository, jwtService)
+		userController controller.UserController = controller.NewUserController(userService)
 	)
 
 	server := gin.Default()

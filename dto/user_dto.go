@@ -81,22 +81,21 @@ type (
 	GetAllUserRepositoryResponse struct {
 		Users []entity.User
 		PaginationResponse
-	} 
+	}
 
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name"`
 		TelpNumber string `json:"telp_number" form:"telp_number"`
 		Email      string `json:"email" form:"email"`
-		Password   string `json:"password" form:"password"`
 	}
 
 	UserUpdateResponse struct {
 		ID         string `json:"id"`
-		Name       string `json:"name,omitempty"`
-		TelpNumber string `json:"telp_number,omitempty"`
-		Role       string `json:"role,omitempty"`
-		Email      string `json:"email,omitempty"`
-		IsVerified bool   `json:"is_verified,omitempty"`
+		Name       string `json:"name"`
+		TelpNumber string `json:"telp_number"`
+		Role       string `json:"role"`
+		Email      string `json:"email"`
+		IsVerified bool   `json:"is_verified"`
 	}
 
 	SendVerificationEmailRequest struct {
@@ -115,6 +114,11 @@ type (
 	UserLoginRequest struct {
 		Email    string `json:"email" form:"email" binding:"required"`
 		Password string `json:"password" form:"password" binding:"required"`
+	}
+
+	UserLoginResponse struct {
+		Token string `json:"token"`
+		Role  string `json:"role"`
 	}
 
 	UpdateStatusIsVerifiedRequest struct {

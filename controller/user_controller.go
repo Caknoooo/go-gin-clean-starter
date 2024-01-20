@@ -4,31 +4,30 @@ import (
 	"net/http"
 
 	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/entity"
 	"github.com/Caknoooo/go-gin-clean-template/service"
 	"github.com/Caknoooo/go-gin-clean-template/utils"
 	"github.com/gin-gonic/gin"
 )
 
-type UserController interface {
-	Register(ctx *gin.Context)
-	GetAllUser(ctx *gin.Context)
-	Me(ctx *gin.Context)
-	SendVerificationEmail(ctx *gin.Context)
-	VerifyEmail(ctx *gin.Context)
-	Login(ctx *gin.Context)
-	Update(ctx *gin.Context)
-	Delete(ctx *gin.Context)
-}
+type (
+	UserController interface {
+		Register(ctx *gin.Context)
+		Login(ctx *gin.Context)
+		Me(ctx *gin.Context)
+		GetAllUser(ctx *gin.Context)
+		SendVerificationEmail(ctx *gin.Context)
+		VerifyEmail(ctx *gin.Context)
+		Update(ctx *gin.Context)
+		Delete(ctx *gin.Context)
+	}
 
-type userController struct {
-	jwtService  service.JWTService
-	userService service.UserService
-}
+	userController struct {
+		userService service.UserService
+	}
+)
 
-func NewUserController(us service.UserService, jwt service.JWTService) UserController {
+func NewUserController(us service.UserService) UserController {
 	return &userController{
-		jwtService:  jwt,
 		userService: us,
 	}
 }
@@ -67,13 +66,13 @@ func (c *userController) GetAllUser(ctx *gin.Context) {
 		return
 	}
 
-	resp := utils.Response {
-		Status: true,
+	resp := utils.Response{
+		Status:  true,
 		Message: dto.MESSAGE_SUCCESS_GET_LIST_USER,
-		Data: result.Data,
-		Meta: result.PaginationResponse,
+		Data:    result.Data,
+		Meta:    result.PaginationResponse,
 	}
-	
+
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -99,28 +98,15 @@ func (c *userController) Login(ctx *gin.Context) {
 		return
 	}
 
-	res, err := c.userService.Verify(ctx.Request.Context(), req.Email, req.Password)
-	if err != nil && !res {
-		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
-		return
-	}
-
-	user, err := c.userService.GetUserByEmail(ctx.Request.Context(), req.Email)
+	result, err := c.userService.Verify(ctx.Request.Context(), req)
 	if err != nil {
-		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), nil)
+		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	token := c.jwtService.GenerateToken(user.ID, user.Role)
-	userResponse := entity.Authorization{
-		Token: token,
-		Role:  user.Role,
-	}
-
-	response := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, userResponse)
-	ctx.JSON(http.StatusOK, response)
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, result)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (c *userController) SendVerificationEmail(ctx *gin.Context) {

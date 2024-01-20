@@ -18,17 +18,30 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserService interface {
-	RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
-	GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error)
-	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
-	GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
-	SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
-	VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
-	CheckUser(ctx context.Context, email string) (bool, error)
-	UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
-	DeleteUser(ctx context.Context, userId string) error
-	Verify(ctx context.Context, email string, password string) (bool, error)
+type (
+	UserService interface {
+		RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
+		GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error)
+		GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
+		GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
+		SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
+		VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
+		UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
+		DeleteUser(ctx context.Context, userId string) error
+		Verify(ctx context.Context, req dto.UserLoginRequest) (dto.UserLoginResponse, error)
+	}
+
+	userService struct {
+		userRepo   repository.UserRepository
+		jwtService JWTService
+	}
+)
+
+func NewUserService(userRepo repository.UserRepository, jwtService JWTService) UserService {
+	return &userService{
+		userRepo:   userRepo,
+		jwtService: jwtService,
+	}
 }
 
 const (
@@ -36,19 +49,9 @@ const (
 	VERIFY_EMAIL_ROUTE = "register/verify_email"
 )
 
-type userService struct {
-	userRepo repository.UserRepository
-}
-
-func NewUserService(ur repository.UserRepository) UserService {
-	return &userService{
-		userRepo: ur,
-	}
-}
-
 func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
-	email, _ := s.userRepo.CheckEmail(ctx, req.Email)
-	if email {
+	_, flag, _ := s.userRepo.CheckEmail(ctx, nil, req.Email)
+	if flag {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
@@ -70,7 +73,7 @@ func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateReques
 		IsVerified: false,
 	}
 
-	userReg, err := s.userRepo.RegisterUser(ctx, user)
+	userReg, err := s.userRepo.RegisterUser(ctx, nil, user)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrCreateUser
 	}
@@ -138,7 +141,7 @@ func makeVerificationEmail(receiverEmail string) (map[string]string, error) {
 }
 
 func (s *userService) SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error {
-	user, err := s.userRepo.GetUserByEmail(ctx, req.Email)
+	user, err := s.userRepo.GetUserByEmail(ctx, nil, req.Email)
 	if err != nil {
 		return dto.ErrEmailNotFound
 	}
@@ -183,7 +186,7 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		}, dto.ErrTokenExpired
 	}
 
-	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	user, err := s.userRepo.GetUserByEmail(ctx, nil, email)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrUserNotFound
 	}
@@ -192,7 +195,7 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		return dto.VerifyEmailResponse{}, dto.ErrAccountAlreadyVerified
 	}
 
-	updatedUser, err := s.userRepo.UpdateUser(ctx, entity.User{
+	updatedUser, err := s.userRepo.UpdateUser(ctx, nil, entity.User{
 		ID:         user.ID,
 		IsVerified: true,
 	})
@@ -220,6 +223,7 @@ func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.Pagi
 			Email:      user.Email,
 			Role:       user.Role,
 			TelpNumber: user.TelpNumber,
+			ImageUrl:   user.ImageUrl,
 			IsVerified: user.IsVerified,
 		}
 
@@ -238,7 +242,7 @@ func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.Pagi
 }
 
 func (s *userService) GetUserById(ctx context.Context, userId string) (dto.UserResponse, error) {
-	user, err := s.userRepo.GetUserById(ctx, userId)
+	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrGetUserById
 	}
@@ -249,12 +253,13 @@ func (s *userService) GetUserById(ctx context.Context, userId string) (dto.UserR
 		TelpNumber: user.TelpNumber,
 		Role:       user.Role,
 		Email:      user.Email,
+		ImageUrl:   user.ImageUrl,
 		IsVerified: user.IsVerified,
 	}, nil
 }
 
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error) {
-	emails, err := s.userRepo.GetUserByEmail(ctx, email)
+	emails, err := s.userRepo.GetUserByEmail(ctx, nil, email)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrGetUserByEmail
 	}
@@ -265,24 +270,13 @@ func (s *userService) GetUserByEmail(ctx context.Context, email string) (dto.Use
 		TelpNumber: emails.TelpNumber,
 		Role:       emails.Role,
 		Email:      emails.Email,
+		ImageUrl:   emails.ImageUrl,
 		IsVerified: emails.IsVerified,
 	}, nil
 }
 
-func (s *userService) CheckUser(ctx context.Context, email string) (bool, error) {
-	res, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil {
-		return false, err
-	}
-
-	if res.Email == "" {
-		return false, err
-	}
-	return true, nil
-}
-
 func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
-	user, err := s.userRepo.GetUserById(ctx, userId)
+	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
 	}
@@ -293,10 +287,9 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest,
 		TelpNumber: req.TelpNumber,
 		Role:       user.Role,
 		Email:      req.Email,
-		Password:   req.Password,
 	}
 
-	userUpdate, err := s.userRepo.UpdateUser(ctx, data)
+	userUpdate, err := s.userRepo.UpdateUser(ctx, nil, data)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUpdateUser
 	}
@@ -307,17 +300,17 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest,
 		TelpNumber: userUpdate.TelpNumber,
 		Role:       userUpdate.Role,
 		Email:      userUpdate.Email,
-		IsVerified: userUpdate.IsVerified,
+		IsVerified: user.IsVerified,
 	}, nil
 }
 
 func (s *userService) DeleteUser(ctx context.Context, userId string) error {
-	user, err := s.userRepo.GetUserById(ctx, userId)
+	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.ErrUserNotFound
 	}
 
-	err = s.userRepo.DeleteUser(ctx, user.ID.String())
+	err = s.userRepo.DeleteUser(ctx, nil, user.ID.String())
 	if err != nil {
 		return dto.ErrDeleteUser
 	}
@@ -325,24 +318,25 @@ func (s *userService) DeleteUser(ctx context.Context, userId string) error {
 	return nil
 }
 
-func (s *userService) Verify(ctx context.Context, email string, password string) (bool, error) {
-	res, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil {
-		return false, dto.ErrUserNotFound
+func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto.UserLoginResponse, error) {
+	check, flag, err := s.userRepo.CheckEmail(ctx, nil, req.Email)
+	if err != nil || !flag {
+		return dto.UserLoginResponse{}, dto.ErrEmailNotFound
 	}
 
-	if !res.IsVerified {
-		return false, dto.ErrAccountNotVerified
+	if !check.IsVerified {
+		return dto.UserLoginResponse{}, dto.ErrAccountNotVerified
 	}
 
-	checkPassword, err := helpers.CheckPassword(res.Password, []byte(password))
-	if err != nil {
-		return false, dto.ErrPasswordNotMatch
+	checkPassword, err := helpers.CheckPassword(check.Password, []byte(req.Password))
+	if err != nil || !checkPassword {
+		return dto.UserLoginResponse{}, dto.ErrPasswordNotMatch
 	}
 
-	if res.Email == email && checkPassword {
-		return true, nil
-	}
+	token := s.jwtService.GenerateToken(check.ID.String(), check.Role)
 
-	return false, dto.ErrEmailOrPassword
+	return dto.UserLoginResponse{
+		Token: token,
+		Role:  check.Role,
+	}, nil
 }

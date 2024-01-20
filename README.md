@@ -44,7 +44,7 @@ If You using my Template. You get some endpoints that I have set up and an archi
 
 https://documenter.getpostman.com/view/29665461/2s9YJaZQCG
 
-![image](https://github.com/Caknoooo/go-gin-clean-template/assets/92671053/5aea055b-2420-4017-9310-e1c628209d0d)
+![image](https://github.com/Caknoooo/go-gin-clean-architecture/assets/92671053/ad3e680c-4b4f-4c31-a70c-497e0a586812)
 
 You will get an issue template as below
 
