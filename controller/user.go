@@ -16,7 +16,6 @@ type UserController interface {
 	Me(ctx *gin.Context)
 	SendVerificationEmail(ctx *gin.Context)
 	VerifyEmail(ctx *gin.Context)
-	UpdateStatusIsVerified(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
@@ -76,27 +75,6 @@ func (c *userController) GetAllUser(ctx *gin.Context) {
 	}
 	
 	ctx.JSON(http.StatusOK, resp)
-}
-
-func (c *userController) UpdateStatusIsVerified(ctx *gin.Context) {
-	adminId := ctx.MustGet("user_id").(string)
-
-	var req dto.UpdateStatusIsVerifiedRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	result, err := c.userService.UpdateStatusIsVerified(ctx.Request.Context(), req, adminId)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_UPDATE_USER, err.Error(), nil)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_UPDATE_USER, result)
-	ctx.JSON(http.StatusOK, res)
 }
 
 func (c *userController) Me(ctx *gin.Context) {
