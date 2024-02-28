@@ -29,12 +29,12 @@ func main() {
 	server.Use(middleware.CORSMiddleware())
 	routes.User(server, userController, jwtService)
 
-	if err := migrations.Seeder(db); err != nil {
-		log.Fatalf("error migration seeder: %v", err)
-	}
-
 	if err := migrations.Migrate(db); err != nil {
 		log.Fatalf("error migration: %v", err)
+	}
+
+	if err := migrations.Seeder(db); err != nil {
+		log.Fatalf("error migration seeder: %v", err)
 	}
 
 	server.Static("/assets", "./assets")
