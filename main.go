@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"sync"
 
 	"github.com/Caknoooo/go-gin-clean-template/config"
 	"github.com/Caknoooo/go-gin-clean-template/controller"
@@ -27,15 +28,28 @@ func main() {
 
 	server := gin.Default()
 	server.Use(middleware.CORSMiddleware())
+
+	// routes
 	routes.User(server, userController, jwtService)
 
-	if err := migrations.Migrate(db); err != nil {
-		log.Fatalf("error migration: %v", err)
-	}
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-	if err := migrations.Seeder(db); err != nil {
-		log.Fatalf("error migration seeder: %v", err)
-	}
+	go func() {
+		defer wg.Done()
+		if err := migrations.Migrate(db); err != nil {
+			log.Fatalf("error migration: %v", err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err := migrations.Seeder(db); err != nil {
+			log.Fatalf("error migration seeder: %v", err)
+		}
+	}()
+
+	wg.Wait()
 
 	server.Static("/assets", "./assets")
 
@@ -44,7 +58,7 @@ func main() {
 		port = "8888"
 	}
 
-	if err := server.Run(":" + port); err != nil {
+	if err := server.Run("localhost:" + port); err != nil {
 		log.Fatalf("error running server: %v", err)
 	}
 }
