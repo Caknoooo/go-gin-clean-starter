@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"os"
 	"strings"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
 	"github.com/Caknoooo/go-gin-clean-template/dto"
@@ -57,18 +57,22 @@ const (
 func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
 	mu.Lock()
 	defer mu.Unlock()
-	
+
+	var filename string
+
 	_, flag, _ := s.userRepo.CheckEmail(ctx, nil, req.Email)
 	if flag {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
-	imageId := uuid.New()
-	ext := utils.GetExtensions(req.Image.Filename)
+	if req.Image != nil {
+		imageId := uuid.New()
+		ext := utils.GetExtensions(req.Image.Filename)
 
-	filename := fmt.Sprintf("profile/%s.%s", imageId, ext)
-	if err := utils.UploadFile(req.Image, filename); err != nil {
-		return dto.UserResponse{}, err
+		filename = fmt.Sprintf("profile/%s.%s", imageId, ext)
+		if err := utils.UploadFile(req.Image, filename); err != nil {
+			return dto.UserResponse{}, err
+		}
 	}
 
 	user := entity.User{
