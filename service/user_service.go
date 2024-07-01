@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"sync"
 
 	"github.com/Caknoooo/go-gin-clean-template/constants"
 	"github.com/Caknoooo/go-gin-clean-template/dto"
@@ -44,12 +45,19 @@ func NewUserService(userRepo repository.UserRepository, jwtService JWTService) U
 	}
 }
 
+var (
+	mu sync.Mutex
+)
+
 const (
 	LOCAL_URL          = "http://localhost:3000"
 	VERIFY_EMAIL_ROUTE = "register/verify_email"
 )
 
 func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	
 	_, flag, _ := s.userRepo.CheckEmail(ctx, nil, req.Email)
 	if flag {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
