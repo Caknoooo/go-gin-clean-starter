@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -30,47 +31,65 @@ func SetupControllerUser() controller.UserController {
 	return userController
 }
 
+func InsertTestUser() ([]entity.User, error) {
+	db := SetUpDatabaseConnection()
+	users := []entity.User{
+		{
+			Name:  "admin",
+			Email: "admin1234@gmail.com",
+		},
+		{
+			Name:  "user",
+			Email: "user1234@gmail.com",
+		},
+	}
+
+	for _, user := range users {
+		if err := db.Create(&user).Error; err != nil {
+			return nil, err
+		}
+	}
+
+	return users, nil
+}
+
 func Test_GetAllUser_OK(t *testing.T) {
 	r := SetUpRoutes()
 	userController := SetupControllerUser()
 	r.GET("/api/user", userController.GetAllUser)
+
+	expectedUsers, err := InsertTestUser()
+	if err != nil {
+		t.Fatalf("Failed to insert test users: %v", err)
+	}
 
 	req, _ := http.NewRequest(http.MethodGet, "/api/user", nil)
 	w := httptest.NewRecorder()
 
 	r.ServeHTTP(w, req)
 
-	users := []entity.User{
-		{
-			Name:  "testing",
-			Email: "testing1@gmail.com",
-		},
-		{
-			Name:  "testing2",
-			Email: "testing2@gmail.com",
-		},
-	}
-
-	expectedUsers, err := InsertTestBook()
-	if err != nil {
-		t.Error(err)
-	}
-
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, users, expectedUsers, "Success Get All User")
-}
 
-func InsertTestBook() ([]entity.User, error) {
-	user := []entity.User{
-		{
-			Name:  "testing",
-			Email: "testing1@gmail.com",
-		},
-		{
-			Name:  "testing2",
-			Email: "testing2@gmail.com",
-		},
+	type Response struct {
+		Data []entity.User `json:"data"`
 	}
 
-	return user, nil
+	var response Response
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response body: %v", err)
+	}
+
+	actualUsers := response.Data
+
+	for _, expectedUser := range expectedUsers {
+		found := false
+		for _, actualUser := range actualUsers {
+			if expectedUser.Name == actualUser.Name && expectedUser.Email == actualUser.Email {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected user not found in actual users: %v", expectedUser)
+	}
 }
