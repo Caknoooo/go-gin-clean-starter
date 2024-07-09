@@ -4,7 +4,7 @@ import (
 	"errors"
 	"mime/multipart"
 
-	"github.com/Caknoooo/go-gin-clean-template/entity"
+	"github.com/Caknoooo/go-gin-clean-starter/entity"
 )
 
 const (

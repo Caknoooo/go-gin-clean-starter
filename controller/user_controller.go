@@ -3,9 +3,9 @@ package controller
 import (
 	"net/http"
 
-	"github.com/Caknoooo/go-gin-clean-template/dto"
-	"github.com/Caknoooo/go-gin-clean-template/service"
-	"github.com/Caknoooo/go-gin-clean-template/utils"
+	"github.com/Caknoooo/go-gin-clean-starter/dto"
+	"github.com/Caknoooo/go-gin-clean-starter/service"
+	"github.com/Caknoooo/go-gin-clean-starter/utils"
 	"github.com/gin-gonic/gin"
 )
 

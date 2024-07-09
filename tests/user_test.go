@@ -6,10 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Caknoooo/go-gin-clean-template/controller"
-	"github.com/Caknoooo/go-gin-clean-template/entity"
-	"github.com/Caknoooo/go-gin-clean-template/repository"
-	"github.com/Caknoooo/go-gin-clean-template/service"
+	"github.com/Caknoooo/go-gin-clean-starter/controller"
+	"github.com/Caknoooo/go-gin-clean-starter/entity"
+	"github.com/Caknoooo/go-gin-clean-starter/repository"
+	"github.com/Caknoooo/go-gin-clean-starter/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

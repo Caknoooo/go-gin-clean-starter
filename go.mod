@@ -1,4 +1,4 @@
-module github.com/Caknoooo/go-gin-clean-template
+module github.com/Caknoooo/go-gin-clean-starter
 
 go 1.21
 

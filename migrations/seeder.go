@@ -1,7 +1,7 @@
 package migrations
 
 import (
-	"github.com/Caknoooo/go-gin-clean-template/migrations/seeds"
+	"github.com/Caknoooo/go-gin-clean-starter/migrations/seeds"
 	"gorm.io/gorm"
 )
 
