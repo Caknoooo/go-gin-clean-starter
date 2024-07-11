@@ -21,8 +21,15 @@ func main() {
 	var (
 		db             *gorm.DB                  = config.SetUpDatabaseConnection()
 		jwtService     service.JWTService        = service.NewJWTService()
+
+		// Implementation Dependency Injection
+		// Repository
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
+
+		// Service
 		userService    service.UserService       = service.NewUserService(userRepository, jwtService)
+
+		// Controller
 		userController controller.UserController = controller.NewUserController(userService)
 	)
 
@@ -33,6 +40,7 @@ func main() {
 	routes.User(server, userController, jwtService)
 
 	var wg sync.WaitGroup
+	var serve string
 	wg.Add(2)
 
 	go func() {
@@ -58,7 +66,13 @@ func main() {
 		port = "8888"
 	}
 
-	if err := server.Run("localhost:" + port); err != nil {
+	if os.Getenv("APP_ENV") == "localhost" {
+		serve = "127.0.0.1:" + port
+	} else {
+		serve = ":" + port
+	}
+
+	if err := server.Run(serve); err != nil {
 		log.Fatalf("error running server: %v", err)
 	}
 }
