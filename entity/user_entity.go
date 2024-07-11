@@ -20,7 +20,14 @@ type User struct {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	var err error
+	// u.ID = uuid.New()
 	u.Password, err = helpers.HashPassword(u.Password)
 	if err != nil {
 		return err

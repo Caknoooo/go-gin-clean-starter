@@ -56,7 +56,7 @@ Clean Architecture proposes a structured application design with several layers 
     ```bash
     CREATE DATABASE your_database;
     \c your_database
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; // remove default:uuid_generate_v4() if you not run 
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; // remove default:uuid_generate_v4() if you not use you can uncomment code in user_entity.go
     \q
     ``` 
 6. Run the application:
