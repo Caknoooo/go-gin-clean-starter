@@ -19,15 +19,15 @@ import (
 
 func main() {
 	var (
-		db             *gorm.DB                  = config.SetUpDatabaseConnection()
-		jwtService     service.JWTService        = service.NewJWTService()
+		db         *gorm.DB           = config.SetUpDatabaseConnection()
+		jwtService service.JWTService = service.NewJWTService()
 
 		// Implementation Dependency Injection
 		// Repository
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
 
 		// Service
-		userService    service.UserService       = service.NewUserService(userRepository, jwtService)
+		userService service.UserService = service.NewUserService(userRepository, jwtService)
 
 		// Controller
 		userController controller.UserController = controller.NewUserController(userService)
