@@ -28,11 +28,11 @@ Clean Architecture proposes a structured application design with several layers 
 ## How To Use
 1. Clone the repository or **Use This Template**
   ```bash
-   git clone https://github.com/Caknoooo/golang-clean-template.git
+   git clone https://github.com/Caknoooo/go-gin-clean-starter.git
   ```
 2. Navigate to the project directory:
   ```bash
-  cd golang-clean-template
+  cd go-gin-clean-starter
   ```
 3. Copy the example environment file and configure it:
   ```bash
