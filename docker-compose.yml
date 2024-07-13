@@ -22,7 +22,7 @@ services:
       context: . 
       dockerfile: Dockerfile
     ports:
-      - ${GOLANG_PORT}:${GOLANG_PORT} 
+      - ${GOLANG_PORT}:8888
     restart: always
     volumes:
       -  ./:/app

@@ -1,3 +1,4 @@
 *.env
 storage/
 assets/
+volumes/

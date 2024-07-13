@@ -13,6 +13,9 @@ run-build: build
 test:
 	go test -v ./tests
 
+init-docker:
+	docker compose up -d --build
+
 up: 
 	docker-compose up -d
 
