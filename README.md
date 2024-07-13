@@ -64,6 +64,27 @@ Clean Architecture proposes a structured application design with several layers 
   go run main.go
   ```
 
+## Run Migrations and Seeder
+To run migrations and seed the database, use the following commands:
+
+```bash
+go run main.go --migrate --seed
+```
+
+### Migrate Database 
+To migrate the database schema 
+```bash
+go run main.go --migrate
+```
+This command will apply all pending migrations to your PostgreSQL database specified in `.env`
+
+### Seeder Database 
+To seed the database with initial data:
+```bash
+go run main.go --seed
+```
+This command will populate the database with initial data using the seeders defined in your application.
+
 ## What did you get?
 By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.
 
