@@ -37,7 +37,7 @@ func SetUpDatabaseConnection() *gorm.DB {
 	return db
 }
 
-func ClosDatabaseConnection(db *gorm.DB) {
+func CloseDatabaseConnection(db *gorm.DB) {
 	dbSQL, err := db.DB()
 	if err != nil {
 		panic(err)
