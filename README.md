@@ -26,6 +26,22 @@ Clean Architecture proposes a structured application design with several layers 
 - PostgreSQL Version `>= version 15.0`
 
 ## How To Use
+There are 2 ways to do running
+### With Docker
+1. Copy the example environment file and configure it:
+  ```bash 
+  cp.env.example .env
+  ```
+2. Build Docker 
+  ```bash
+  docker-compose build --no-cache
+  ```
+3. Run Docker Compose
+  ```bash
+  docker compose up -d
+  ```
+
+### Without Docker
 1. Clone the repository or **Use This Template**
   ```bash
   git clone https://github.com/Caknoooo/go-gin-clean-starter.git
