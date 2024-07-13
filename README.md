@@ -71,14 +71,14 @@ To run migrations and seed the database, use the following commands:
 go run main.go --migrate --seed
 ```
 
-### Migrate Database 
+#### Migrate Database 
 To migrate the database schema 
 ```bash
 go run main.go --migrate
 ```
 This command will apply all pending migrations to your PostgreSQL database specified in `.env`
 
-### Seeder Database 
+#### Seeder Database 
 To seed the database with initial data:
 ```bash
 go run main.go --seed
