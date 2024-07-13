@@ -17,7 +17,7 @@ services:
         
   app:
     hostname: app
-    container_name: golang-clean-template
+    container_name: go-gin-clean-starter
     build:
       context: . 
       dockerfile: Dockerfile
