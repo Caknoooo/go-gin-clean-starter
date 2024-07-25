@@ -60,33 +60,25 @@ func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.
 		req.Page = 1
 	}
 
-	query := tx.WithContext(ctx).Model(&entity.User{})
-	if req.Search != "" {
-		query = query.Where("name LIKE ?", "%"+req.Search+"%")
-	}
-
-	err = query.Count(&count).Error
-	if err != nil {
+	if err := tx.WithContext(ctx).Model(&entity.User{}).Count(&count).Error; err != nil {
 		return dto.GetAllUserRepositoryResponse{}, err
 	}
 
-	offset := (req.Page - 1) * req.PerPage
-	maxPage := int64(math.Ceil(float64(count) / float64(req.PerPage)))
-
-	err = query.Offset(offset).Limit(req.PerPage).Find(&users).Error
-	if err != nil {
+	if err := tx.WithContext(ctx).Scopes(Paginate(req.Page, req.PerPage)).Find(&users).Error; err != nil {
 		return dto.GetAllUserRepositoryResponse{}, err
 	}
+
+	totalPage := int64(math.Ceil(float64(count) / float64(req.PerPage)))
 
 	return dto.GetAllUserRepositoryResponse{
-		Users: users,
+		Users:     users,
 		PaginationResponse: dto.PaginationResponse{
-			Page:    req.Page,
-			PerPage: req.PerPage,
-			MaxPage: maxPage,
-			Count:   count,
+			Page: 		 req.Page,
+			PerPage: 	 req.PerPage,
+			Count: 		 count,
+			MaxPage: 	 totalPage,
 		},
-	}, nil
+	}, err
 }
 
 func (r *userRepository) GetUserById(ctx context.Context, tx *gorm.DB, userId string) (entity.User, error) {
