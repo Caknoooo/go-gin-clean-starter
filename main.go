@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Caknoooo/go-gin-clean-starter/cmd"
+	"github.com/Caknoooo/go-gin-clean-starter/command"
 	"github.com/Caknoooo/go-gin-clean-starter/config"
 	"github.com/Caknoooo/go-gin-clean-starter/controller"
 	"github.com/Caknoooo/go-gin-clean-starter/middleware"
@@ -20,8 +20,10 @@ func main() {
 	defer config.CloseDatabaseConnection(db)
 
 	if len(os.Args) > 1 {
-		cmd.Commands(db)
-		return
+		flag := command.Commands(db)
+		if !flag {
+			return
+		}
 	}
 
 	var (

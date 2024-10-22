@@ -80,12 +80,17 @@ There are 2 ways to do running
   go run main.go
   ```
 
-## Run Migrations and Seeder
-To run migrations and seed the database, use the following commands:
+## Run Migrations, Seeder, and Script
+To run migrations, seed the database, and execute a script while keeping the application running, use the following command:
 
 ```bash
-go run main.go --migrate --seed
+go run main.go --migrate --seed --run --script:example_script
 ```
+
+- ``--migrate`` will apply all pending migrations.
+- ``--seed`` will seed the database with initial data.
+- ``--script:example_script`` will run the specified script (replace ``example_script`` with your script name).
+- ``--run`` will ensure the application continues running after executing the commands above.
 
 #### Migrate Database 
 To migrate the database schema 
@@ -100,6 +105,15 @@ To seed the database with initial data:
 go run main.go --seed
 ```
 This command will populate the database with initial data using the seeders defined in your application.
+
+#### Script Run
+To run a specific script:
+```bash
+go run main.go --script:example_script
+```
+Replace ``example_script`` with the actual script name in **script.go** at script folder
+
+If you need the application to continue running after performing migrations, seeding, or executing a script, always append the ``--run`` option.
 
 ## What did you get?
 By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.
