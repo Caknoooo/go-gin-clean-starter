@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Caknoooo/go-gin-clean-starter/constants"
@@ -21,14 +20,14 @@ import (
 
 type (
 	UserService interface {
-		RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
+		Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
 		GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error)
 		GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 		GetUserByEmail(ctx context.Context, email string) (dto.UserResponse, error)
 		SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
 		VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
-		UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
-		DeleteUser(ctx context.Context, userId string) error
+		Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
+		Delete(ctx context.Context, userId string) error
 		Verify(ctx context.Context, req dto.UserLoginRequest) (dto.UserLoginResponse, error)
 	}
 
@@ -45,19 +44,12 @@ func NewUserService(userRepo repository.UserRepository, jwtService JWTService) U
 	}
 }
 
-var (
-	mu sync.Mutex
-)
-
 const (
 	LOCAL_URL          = "http://localhost:3000"
 	VERIFY_EMAIL_ROUTE = "register/verify_email"
 )
 
-func (s *userService) RegisterUser(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
-	mu.Lock()
-	defer mu.Unlock()
-
+func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
 	var filename string
 
 	_, flag, _ := s.userRepo.CheckEmail(ctx, nil, req.Email)
@@ -287,7 +279,7 @@ func (s *userService) GetUserByEmail(ctx context.Context, email string) (dto.Use
 	}, nil
 }
 
-func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
+func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
@@ -316,7 +308,7 @@ func (s *userService) UpdateUser(ctx context.Context, req dto.UserUpdateRequest,
 	}, nil
 }
 
-func (s *userService) DeleteUser(ctx context.Context, userId string) error {
+func (s *userService) Delete(ctx context.Context, userId string) error {
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.ErrUserNotFound
