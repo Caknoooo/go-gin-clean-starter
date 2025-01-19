@@ -79,7 +79,7 @@ type (
 	}
 
 	GetAllUserRepositoryResponse struct {
-		Users []entity.User
+		Users []entity.User `json:"users"`
 		PaginationResponse
 	}
 
