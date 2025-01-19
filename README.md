@@ -15,13 +15,17 @@ There are 2 ways to do running
   ```bash 
   cp.env.example .env
   ```
-2. Build Docker 
+2. Build Docker
   ```bash
-  docker-compose build --no-cache
+  make up
   ```
-3. Run Docker Compose
+3. Run Initial UUID V4 Auto Generate
   ```bash
-  docker compose up -d
+  make init-uuid
+  ```
+4. Run Migration and Seeder
+  ```bash
+  make migrate-seed
   ```
 
 ### Without Docker
