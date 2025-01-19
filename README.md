@@ -9,26 +9,6 @@ You can join in the development (Open Source). **Let's Go!!!**
 - PostgreSQL Version `>= version 15.0`
 
 ## How To Use
-There are 2 ways to do running
-### With Docker
-1. Copy the example environment file and configure it:
-  ```bash 
-  cp .env.example .env
-  ```
-2. Build Docker
-  ```bash
-  make up
-  ```
-3. Run Initial UUID V4 Auto Generate
-  ```bash
-  make init-uuid
-  ```
-4. Run Migration and Seeder
-  ```bash
-  make migrate-seed
-  ```
-
-### Without Docker
 1. Clone the repository or **Use This Template**
   ```bash
   git clone https://github.com/Caknoooo/go-gin-clean-starter.git
@@ -38,10 +18,26 @@ There are 2 ways to do running
   cd go-gin-clean-starter
   ```
 3. Copy the example environment file and configure it:
-  ```bash
+  ```bash 
   cp .env.example .env
   ```
-4. Configure `.env` with your PostgreSQL credentials:
+There are 2 ways to do running
+### With Docker
+1. Build Docker
+  ```bash
+  make up
+  ```
+2. Run Initial UUID V4 for Auto Generate UUID
+  ```bash
+  make init-uuid
+  ```
+3. Run Migration and Seeder
+  ```bash
+  make migrate-seed
+  ```
+
+### Without Docker
+1. Configure `.env` with your PostgreSQL credentials:
   ```bash
   DB_HOST=localhost
   DB_USER=postgres
@@ -49,7 +45,7 @@ There are 2 ways to do running
   DB_NAME=
   DB_PORT=5432
   ```
-5. Open the terminal and follow these steps:
+2. Open the terminal and follow these steps:
   - If you haven't downloaded PostgreSQL, download it first.
   - Run:
     ```bash
@@ -62,7 +58,7 @@ There are 2 ways to do running
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; // remove default:uuid_generate_v4() if you not use you can uncomment code in user_entity.go
     \q
     ``` 
-6. Run the application:
+3. Run the application:
   ```bash
   go run main.go
   ```
