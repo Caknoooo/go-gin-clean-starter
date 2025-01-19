@@ -11,19 +11,28 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/repository"
 	"github.com/Caknoooo/go-gin-clean-starter/routes"
 	"github.com/Caknoooo/go-gin-clean-starter/service"
+	"gorm.io/gorm"
 
 	"github.com/gin-gonic/gin"
 )
+
+func args(db *gorm.DB) bool {
+	if len(os.Args) > 1 {
+		flag := command.Commands(db)
+		if !flag {
+			return false
+		}
+	}
+
+	return true
+}
 
 func main() {
 	db := config.SetUpDatabaseConnection()
 	defer config.CloseDatabaseConnection(db)
 
-	if len(os.Args) > 1 {
-		flag := command.Commands(db)
-		if !flag {
-			return
-		}
+	if !args(db) {
+		return
 	}
 
 	var (
