@@ -13,7 +13,7 @@ services:
 
   nginx:
     image: nginx:latest
-    container_name: nginx
+    container_name: ${APP_NAME:-go-gin-clean-starter}-nginx
     ports:
       - ${NGINX_PORT:-81}:80
     volumes:
