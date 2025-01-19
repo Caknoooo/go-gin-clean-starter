@@ -13,7 +13,7 @@ There are 2 ways to do running
 ### With Docker
 1. Copy the example environment file and configure it:
   ```bash 
-  cp.env.example .env
+  cp .env.example .env
   ```
 2. Build Docker
   ```bash
