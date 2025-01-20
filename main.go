@@ -13,6 +13,7 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/service"
 	"gorm.io/gorm"
 
+	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 )
 
@@ -67,6 +68,9 @@ func main() {
 	} else {
 		serve = ":" + port
 	}
+
+	myFigure := figure.NewColorFigure("Caknoo", "", "green", true)
+	myFigure.Print()
 
 	if err := server.Run(serve); err != nil {
 		log.Fatalf("error running server: %v", err)

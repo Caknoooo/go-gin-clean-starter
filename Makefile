@@ -58,3 +58,6 @@ seed:
 
 migrate-seed: 
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run main.go --migrate --seed"
+
+go-tidy:
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
