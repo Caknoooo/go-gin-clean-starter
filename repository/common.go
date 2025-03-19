@@ -1,10 +1,21 @@
 package repository
 
-import "gorm.io/gorm"
+import (
+	"math"
 
-func Paginate(page, perPage int) func(db *gorm.DB) *gorm.DB {
+	"github.com/Caknoooo/go-gin-clean-starter/dto"
+	"gorm.io/gorm"
+)
+
+func Paginate(req dto.PaginationRequest) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
-		offset := (page - 1) * perPage
-		return db.Offset(offset).Limit(perPage)
+		offset := (req.Page - 1) * req.PerPage
+		return db.Offset(offset).Limit(req.PerPage)
 	}
+}
+
+func TotalPage(count, perPage int64) int64 {
+	totalPage := int64(math.Ceil(float64(count) / float64(perPage)))
+	
+	return totalPage
 }

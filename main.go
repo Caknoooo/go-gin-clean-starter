@@ -5,57 +5,25 @@ import (
 	"os"
 
 	"github.com/Caknoooo/go-gin-clean-starter/command"
-	"github.com/Caknoooo/go-gin-clean-starter/config"
-	"github.com/Caknoooo/go-gin-clean-starter/controller"
 	"github.com/Caknoooo/go-gin-clean-starter/middleware"
-	"github.com/Caknoooo/go-gin-clean-starter/repository"
+	"github.com/Caknoooo/go-gin-clean-starter/provider"
 	"github.com/Caknoooo/go-gin-clean-starter/routes"
-	"github.com/Caknoooo/go-gin-clean-starter/service"
-	"gorm.io/gorm"
+	"github.com/samber/do"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 )
 
-func args(db *gorm.DB) bool {
+func args(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
-		flag := command.Commands(db)
-		if !flag {
-			return false
-		}
+		flag := command.Commands(injector)
+		return flag
 	}
 
 	return true
 }
 
-func main() {
-	db := config.SetUpDatabaseConnection()
-	defer config.CloseDatabaseConnection(db)
-
-	if !args(db) {
-		return
-	}
-
-	var (
-		jwtService service.JWTService = service.NewJWTService()
-
-		// Implementation Dependency Injection
-		// Repository
-		userRepository repository.UserRepository = repository.NewUserRepository(db)
-
-		// Service
-		userService service.UserService = service.NewUserService(userRepository, jwtService)
-
-		// Controller
-		userController controller.UserController = controller.NewUserController(userService)
-	)
-
-	server := gin.Default()
-	server.Use(middleware.CORSMiddleware())
-
-	// routes
-	routes.User(server, userController, jwtService)
-
+func run(server *gin.Engine) {
 	server.Static("/assets", "./assets")
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -75,4 +43,24 @@ func main() {
 	if err := server.Run(serve); err != nil {
 		log.Fatalf("error running server: %v", err)
 	}
+}
+
+func main() {
+	var (
+		injector = do.New()
+	)
+
+	if !args(injector) {
+		return
+	}
+
+	provider.RegisterDependencies(injector)
+
+	server := gin.Default()
+	server.Use(middleware.CORSMiddleware())
+
+	// routes
+	routes.RegisterRoutes(server, injector)
+
+	run(server)
 }
