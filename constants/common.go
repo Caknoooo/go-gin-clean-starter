@@ -9,4 +9,7 @@ const (
 
 	ENUM_PAGINATION_PER_PAGE = 10
 	ENUM_PAGINATION_PAGE = 1
+
+	DB = "db"
+	JWTService = "JWTService"
 )

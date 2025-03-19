@@ -5,21 +5,18 @@ import (
 	"os"
 
 	"github.com/Caknoooo/go-gin-clean-starter/command"
-	"github.com/Caknoooo/go-gin-clean-starter/config"
-	"github.com/Caknoooo/go-gin-clean-starter/controller"
 	"github.com/Caknoooo/go-gin-clean-starter/middleware"
-	"github.com/Caknoooo/go-gin-clean-starter/repository"
+	"github.com/Caknoooo/go-gin-clean-starter/provider"
 	"github.com/Caknoooo/go-gin-clean-starter/routes"
-	"github.com/Caknoooo/go-gin-clean-starter/service"
-	"gorm.io/gorm"
+	"github.com/samber/do"
 
 	"github.com/common-nighthawk/go-figure"
 	"github.com/gin-gonic/gin"
 )
 
-func args(db *gorm.DB) bool {
+func args(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
-		flag := command.Commands(db)
+		flag := command.Commands(injector)
 		if !flag {
 			return false
 		}
@@ -29,32 +26,21 @@ func args(db *gorm.DB) bool {
 }
 
 func main() {
-	db := config.SetUpDatabaseConnection()
-	defer config.CloseDatabaseConnection(db)
+	var (
+		injector = do.New()
+	)
 
-	if !args(db) {
+	if !args(injector) {
 		return
 	}
 
-	var (
-		jwtService service.JWTService = service.NewJWTService()
-
-		// Implementation Dependency Injection
-		// Repository
-		userRepository repository.UserRepository = repository.NewUserRepository(db)
-
-		// Service
-		userService service.UserService = service.NewUserService(userRepository, jwtService)
-
-		// Controller
-		userController controller.UserController = controller.NewUserController(userService)
-	)
+	provider.RegisterDependencies(injector)
 
 	server := gin.Default()
 	server.Use(middleware.CORSMiddleware())
 
 	// routes
-	routes.User(server, userController, jwtService)
+	routes.User(server, injector)
 
 	server.Static("/assets", "./assets")
 	port := os.Getenv("PORT")
