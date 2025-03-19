@@ -17,31 +17,13 @@ import (
 func args(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
 		flag := command.Commands(injector)
-		if !flag {
-			return false
-		}
+		return flag
 	}
 
 	return true
 }
 
-func main() {
-	var (
-		injector = do.New()
-	)
-
-	if !args(injector) {
-		return
-	}
-
-	provider.RegisterDependencies(injector)
-
-	server := gin.Default()
-	server.Use(middleware.CORSMiddleware())
-
-	// routes
-	routes.User(server, injector)
-
+func run(server *gin.Engine) {
 	server.Static("/assets", "./assets")
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -61,4 +43,24 @@ func main() {
 	if err := server.Run(serve); err != nil {
 		log.Fatalf("error running server: %v", err)
 	}
+}
+
+func main() {
+	var (
+		injector = do.New()
+	)
+
+	if !args(injector) {
+		return
+	}
+
+	provider.RegisterDependencies(injector)
+
+	server := gin.Default()
+	server.Use(middleware.CORSMiddleware())
+
+	// routes
+	routes.RegisterRoutes(server, injector)
+
+	run(server)
 }
