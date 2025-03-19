@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"math"
 
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
@@ -52,31 +51,29 @@ func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.
 	var err error
 	var count int64
 
-	if req.PerPage == 0 {
-		req.PerPage = 10
+	req.Default()
+
+	query := tx.WithContext(ctx).Model(&entity.User{})
+	if req.Search != "" {
+		query = query.Where("name LIKE ?", "%"+req.Search+"%")
 	}
 
-	if req.Page == 0 {
-		req.Page = 1
-	}
-
-	if err := tx.WithContext(ctx).Model(&entity.User{}).Count(&count).Error; err != nil {
+	if err := query.Count(&count).Error; err != nil {
 		return dto.GetAllUserRepositoryResponse{}, err
 	}
 
-	if err := tx.WithContext(ctx).Scopes(Paginate(req.Page, req.PerPage)).Find(&users).Error; err != nil {
+	if err := query.Scopes(Paginate(req)).Find(&users).Error; err != nil {
 		return dto.GetAllUserRepositoryResponse{}, err
 	}
 
-	totalPage := int64(math.Ceil(float64(count) / float64(req.PerPage)))
-
+	totalPage := TotalPage(count, int64(req.PerPage))
 	return dto.GetAllUserRepositoryResponse{
-		Users:     users,
+		Users: users,
 		PaginationResponse: dto.PaginationResponse{
-			Page: 		 req.Page,
-			PerPage: 	 req.PerPage,
-			Count: 		 count,
-			MaxPage: 	 totalPage,
+			Page:    req.Page,
+			PerPage: req.PerPage,
+			Count:   count,
+			MaxPage: totalPage,
 		},
 	}, err
 }

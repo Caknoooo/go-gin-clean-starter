@@ -19,10 +19,20 @@ func (p *PaginationRequest) GetOffset() int {
 	return (p.Page - 1) * p.PerPage
 }
 
-func (p *PaginationResponse) GetLimit() int {
+func (p *PaginationRequest) GetLimit() int {
 	return p.PerPage
 }
 
-func (p *PaginationResponse) GetPage() int {
+func (p *PaginationRequest) GetPage() int {
 	return p.Page
+}
+
+func (p *PaginationRequest) Default() {
+	if p.Page == 0 {
+		p.Page = 1
+	}
+
+	if p.PerPage == 0 {
+		p.PerPage = 10
+	}
 }
