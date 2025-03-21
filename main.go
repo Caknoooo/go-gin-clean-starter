@@ -25,6 +25,11 @@ func args(injector *do.Injector) bool {
 
 func run(server *gin.Engine) {
 	server.Static("/assets", "./assets")
+
+	if os.Getenv("IS_LOGGER") == "true" {
+		routes.LoggerRoute(server)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
@@ -50,11 +55,11 @@ func main() {
 		injector = do.New()
 	)
 
+	provider.RegisterDependencies(injector)
+
 	if !args(injector) {
 		return
 	}
-
-	provider.RegisterDependencies(injector)
 
 	server := gin.Default()
 	server.Use(middleware.CORSMiddleware())

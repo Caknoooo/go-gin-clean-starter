@@ -10,6 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func RunExtension(db *gorm.DB) {
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+}
+
 func SetUpDatabaseConnection() *gorm.DB {
 	if os.Getenv("APP_ENV") != constants.ENUM_RUN_PRODUCTION {
 		err := godotenv.Load(".env")
@@ -29,10 +33,14 @@ func SetUpDatabaseConnection() *gorm.DB {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: SetupLogger(),
+	})
 	if err != nil {
 		panic(err)
 	}
+
+	RunExtension(db)
 
 	return db
 }
