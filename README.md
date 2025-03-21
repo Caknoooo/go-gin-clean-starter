@@ -7,6 +7,27 @@ You can join in the development (Open Source). **Let's Go!!!**
 
 ![image](https://github.com/user-attachments/assets/0b011bcc-f9c6-466e-a9da-964cce47a8bc)
 
+## Logs Feature 📋
+
+The application includes a built-in logging system that allows you to monitor and track system queries. You can access the logs through a modern, user-friendly interface.
+
+### Accessing Logs
+To view the logs:
+1. Make sure the application is running
+2. Open your browser and navigate to:
+```bash
+http://your-domain/logs
+```
+
+### Features
+- **Monthly Filtering**: Filter logs by selecting different months
+- **Real-time Refresh**: Instantly refresh logs with the refresh button
+- **Expandable Entries**: Click on any log entry to view its full content
+- **Modern UI**: Clean and responsive interface with glass-morphism design
+
+![Logs Interface](https://github.com/user-attachments/assets/adda0afb-a1e4-4e05-b44e-87225fe63309)
+
+
 ## Prerequisite 🏆
 - Go Version `>= go 1.20`
 - PostgreSQL Version `>= version 15.0`
