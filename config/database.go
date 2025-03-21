@@ -29,7 +29,9 @@ func SetUpDatabaseConnection() *gorm.DB {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		Logger: SetupLogger(),
+	})
 	if err != nil {
 		panic(err)
 	}
