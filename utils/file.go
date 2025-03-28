@@ -46,5 +46,5 @@ func UploadFile(file *multipart.FileHeader, path string) error {
 }
 
 func GetExtensions(filename string) string {
-	return strings.Split(filename, ".")[1]
+	return strings.Split(filename, ".")[len(strings.Split(filename, "."))-1]
 }
