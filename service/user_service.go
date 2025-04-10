@@ -77,7 +77,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (
 		IsVerified: false,
 	}
 
-	userReg, err := s.userRepo.RegisterUser(ctx, nil, user)
+	userReg, err := s.userRepo.Register(ctx, nil, user)
 	if err != nil {
 		return dto.UserResponse{}, dto.ErrCreateUser
 	}
@@ -199,7 +199,7 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		return dto.VerifyEmailResponse{}, dto.ErrAccountAlreadyVerified
 	}
 
-	updatedUser, err := s.userRepo.UpdateUser(ctx, nil, entity.User{
+	updatedUser, err := s.userRepo.Update(ctx, nil, entity.User{
 		ID:         user.ID,
 		IsVerified: true,
 	})
@@ -293,7 +293,7 @@ func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, use
 		Email:      req.Email,
 	}
 
-	userUpdate, err := s.userRepo.UpdateUser(ctx, nil, data)
+	userUpdate, err := s.userRepo.Update(ctx, nil, data)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUpdateUser
 	}
@@ -314,7 +314,7 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 		return dto.ErrUserNotFound
 	}
 
-	err = s.userRepo.DeleteUser(ctx, nil, user.ID.String())
+	err = s.userRepo.Delete(ctx, nil, user.ID.String())
 	if err != nil {
 		return dto.ErrDeleteUser
 	}
