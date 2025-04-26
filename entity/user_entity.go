@@ -1,6 +1,9 @@
 package entity
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -19,18 +22,24 @@ type User struct {
 	Timestamp
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			tx.Rollback()
+			log.Printf("panic recovered in BeforeCreate: %v", r)
+			err = fmt.Errorf("internal server error")
 		}
 	}()
 
-	var err error
-	// u.ID = uuid.New()
-	u.Password, err = helpers.HashPassword(u.Password)
-	if err != nil {
-		return err
+	if u.Password == "" {
+		return fmt.Errorf("password cannot be empty")
 	}
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+	hashedPassword, hashErr := helpers.HashPassword(u.Password)
+	if hashErr != nil {
+		return fmt.Errorf("failed to hash password: %w", hashErr)
+	}
+	u.Password = hashedPassword
 	return nil
 }
