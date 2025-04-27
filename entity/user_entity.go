@@ -40,3 +40,15 @@ func (u *User) BeforeCreate() (err error) {
 
 	return nil
 }
+
+// BeforeUpdate hook to handle password updates
+func (u *User) BeforeUpdate() (err error) {
+	// Only hash password if it has been changed
+	if u.Password != "" {
+		u.Password, err = helpers.HashPassword(u.Password)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
