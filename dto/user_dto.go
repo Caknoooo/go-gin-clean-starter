@@ -61,7 +61,6 @@ type (
 		Email      string                `json:"email" form:"email" binding:"required,email"`
 		Password   string                `json:"password" form:"password" binding:"required,min=8"`
 		Image      *multipart.FileHeader `json:"image" form:"image"`
-		Password   string                `json:"password" form:"password"`
 	}
 
 	UserResponse struct {
