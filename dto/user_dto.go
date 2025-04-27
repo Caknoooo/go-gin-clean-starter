@@ -85,9 +85,9 @@ type (
 	}
 
 	UserUpdateRequest struct {
-		Name       string `json:"name" form:"name"`
-		TelpNumber string `json:"telp_number" form:"telp_number"`
-		Email      string `json:"email" form:"email"`
+		Name       string `json:"name" form:"name" binding:"omitempty,min=2,max=100"`
+		TelpNumber string `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
+		Email      string `json:"email" form:"email" binding:"omitempty,email"`
 	}
 
 	UserUpdateResponse struct {
