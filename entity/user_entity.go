@@ -3,7 +3,6 @@ package entity
 import (
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type User struct {
@@ -19,7 +18,7 @@ type User struct {
 	Timestamp
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
+func (u *User) BeforeCreate() error {
 	var err error
 	u.Password, err = helpers.HashPassword(u.Password)
 	if err != nil {
