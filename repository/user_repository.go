@@ -46,7 +46,11 @@ func (r *userRepository) Register(ctx context.Context, tx *gorm.DB, user entity.
 	return user, nil
 }
 
-func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, req dto.PaginationRequest) (dto.GetAllUserRepositoryResponse, error) {
+func (r *userRepository) GetAllUserWithPagination(
+	ctx context.Context,
+	tx *gorm.DB,
+	req dto.PaginationRequest,
+) (dto.GetAllUserRepositoryResponse, error) {
 	if tx == nil {
 		tx = r.db
 	}
