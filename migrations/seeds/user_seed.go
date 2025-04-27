@@ -16,7 +16,10 @@ func ListUserSeeder(db *gorm.DB) error {
 		return err
 	}
 
-	jsonData, _ := io.ReadAll(jsonFile)
+	jsonData, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
 
 	var listUser []entity.User
 	if err := json.Unmarshal(jsonData, &listUser); err != nil {

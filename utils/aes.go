@@ -19,7 +19,10 @@ const (
 
 func AESEncrypt(stringToEncrypt string) (encryptedString string, err error) {
 	//Since the key is in string, we need to convert decode it to bytes
-	key, _ := hex.DecodeString(KEY)
+	key, err := hex.DecodeString(KEY)
+	if err != nil {
+		return "", err
+	}
 	plaintext := []byte(stringToEncrypt)
 
 	//Create a new Cipher Block from the key
@@ -55,8 +58,15 @@ func AESDecrypt(encryptedString string) (decryptedString string, err error) {
 		}
 	}()
 
-	key, _ := hex.DecodeString(KEY)
-	enc, _ := hex.DecodeString(encryptedString)
+	key, err := hex.DecodeString(KEY)
+	if err != nil {
+		return "", errors.New("error in decoding key")
+	}
+
+	enc, err := hex.DecodeString(encryptedString)
+	if err != nil {
+		return "", errors.New("error in decoding encrypted string")
+	}
 
 	//Create a new Cipher Block from the key
 	block, err := aes.NewCipher(key)
