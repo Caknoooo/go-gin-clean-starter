@@ -18,11 +18,25 @@ type User struct {
 	Timestamp
 }
 
-func (u *User) BeforeCreate() error {
-	var err error
-	u.Password, err = helpers.HashPassword(u.Password)
-	if err != nil {
-		return err
+// BeforeCreate hook to hash password and set defaults
+func (u *User) BeforeCreate() (err error) {
+	// Hash password
+	if u.Password != "" {
+		u.Password, err = helpers.HashPassword(u.Password)
+		if err != nil {
+			return err
+		}
 	}
+
+	// Ensure UUID is set
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+
+	// Set default role if not specified
+	if u.Role == "" {
+		u.Role = "user"
+	}
+
 	return nil
 }
