@@ -12,7 +12,7 @@ type User struct {
 	TelpNumber string    `gorm:"type:varchar(20);index" json:"telp_number" validate:"omitempty,required,min=8,max=20"`
 	Password   string    `gorm:"type:varchar(255);not null" json:"-" validate:"required,min=8"`
 	Role       string    `gorm:"type:varchar(50);not null;default:'user'" json:"role" validate:"required,oneof=user admin"`
-	ImageURL   string    `gorm:"type:varchar(255)" json:"image_url" validate:"omitempty,url"`
+	ImageUrl   string    `gorm:"type:varchar(255)" json:"image_url" validate:"omitempty,url"`
 	IsVerified bool      `gorm:"default:false" json:"is_verified"`
 
 	Timestamp
