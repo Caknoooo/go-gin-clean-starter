@@ -56,9 +56,10 @@ var (
 
 type (
 	UserCreateRequest struct {
-		Name       string                `json:"name" form:"name"`
-		TelpNumber string                `json:"telp_number" form:"telp_number"`
-		Email      string                `json:"email" form:"email"`
+		Name       string                `json:"name" form:"name" binding:"required,min=2,max=100"`
+		TelpNumber string                `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
+		Email      string                `json:"email" form:"email" binding:"required,email"`
+		Password   string                `json:"password" form:"password" binding:"required,min=8"`
 		Image      *multipart.FileHeader `json:"image" form:"image"`
 		Password   string                `json:"password" form:"password"`
 	}
