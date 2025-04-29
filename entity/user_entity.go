@@ -1,45 +1,54 @@
 package entity
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type User struct {
 	ID         uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"id"`
-	Name       string    `json:"name"`
-	TelpNumber string    `json:"telp_number"`
-	Email      string    `json:"email"`
-	Password   string    `json:"password"`
-	Role       string    `json:"role"`
-	ImageUrl   string    `json:"image_url"`
-	IsVerified bool      `json:"is_verified"`
+	Name       string    `gorm:"type:varchar(100);not null" json:"name" validate:"required,min=2,max=100"`
+	Email      string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"email" validate:"required,email"`
+	TelpNumber string    `gorm:"type:varchar(20);index" json:"telp_number" validate:"omitempty,required,min=8,max=20"`
+	Password   string    `gorm:"type:varchar(255);not null" json:"-" validate:"required,min=8"`
+	Role       string    `gorm:"type:varchar(50);not null;default:'user'" json:"role" validate:"required,oneof=user admin"`
+	ImageUrl   string    `gorm:"type:varchar(255)" json:"image_url" validate:"omitempty,url"`
+	IsVerified bool      `gorm:"default:false" json:"is_verified"`
 
 	Timestamp
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("panic recovered in BeforeCreate: %v", r)
-			err = fmt.Errorf("internal server error")
+// BeforeCreate hook to hash password and set defaults
+func (u *User) BeforeCreate() (err error) {
+	// Hash password
+	if u.Password != "" {
+		u.Password, err = helpers.HashPassword(u.Password)
+		if err != nil {
+			return err
 		}
-	}()
-
-	if u.Password == "" {
-		return fmt.Errorf("password cannot be empty")
 	}
+
+	// Ensure UUID is set
 	if u.ID == uuid.Nil {
 		u.ID = uuid.New()
 	}
-	hashedPassword, hashErr := helpers.HashPassword(u.Password)
-	if hashErr != nil {
-		return fmt.Errorf("failed to hash password: %w", hashErr)
+
+	// Set default role if not specified
+	if u.Role == "" {
+		u.Role = "user"
 	}
-	u.Password = hashedPassword
+
+	return nil
+}
+
+// BeforeUpdate hook to handle password updates
+func (u *User) BeforeUpdate() (err error) {
+	// Only hash password if it has been changed
+	if u.Password != "" {
+		u.Password, err = helpers.HashPassword(u.Password)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

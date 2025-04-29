@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"gorm.io/gorm"
@@ -11,7 +10,11 @@ import (
 type (
 	UserRepository interface {
 		Register(ctx context.Context, tx *gorm.DB, user entity.User) (entity.User, error)
-		GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, req dto.PaginationRequest) (dto.GetAllUserRepositoryResponse, error)
+		GetAllUserWithPagination(
+			ctx context.Context,
+			tx *gorm.DB,
+			req dto.PaginationRequest,
+		) (dto.GetAllUserRepositoryResponse, error)
 		GetUserById(ctx context.Context, tx *gorm.DB, userId string) (entity.User, error)
 		GetUserByEmail(ctx context.Context, tx *gorm.DB, email string) (entity.User, error)
 		CheckEmail(ctx context.Context, tx *gorm.DB, email string) (entity.User, bool, error)
@@ -42,7 +45,11 @@ func (r *userRepository) Register(ctx context.Context, tx *gorm.DB, user entity.
 	return user, nil
 }
 
-func (r *userRepository) GetAllUserWithPagination(ctx context.Context, tx *gorm.DB, req dto.PaginationRequest) (dto.GetAllUserRepositoryResponse, error) {
+func (r *userRepository) GetAllUserWithPagination(
+	ctx context.Context,
+	tx *gorm.DB,
+	req dto.PaginationRequest,
+) (dto.GetAllUserRepositoryResponse, error) {
 	if tx == nil {
 		tx = r.db
 	}

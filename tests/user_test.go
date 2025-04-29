@@ -63,7 +63,11 @@ func Test_GetAllUser_OK(t *testing.T) {
 		t.Fatalf("Failed to insert test users: %v", err)
 	}
 
-	req, _ := http.NewRequest(http.MethodGet, "/api/user", nil)
+	req, err := http.NewRequest(http.MethodGet, "/api/user", nil)
+	if err != nil {
+		t.Fatalf("Failed to create request: %v", err)
+	}
+
 	w := httptest.NewRecorder()
 
 	r.ServeHTTP(w, req)

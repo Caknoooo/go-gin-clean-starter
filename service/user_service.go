@@ -52,7 +52,11 @@ const (
 func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
 	var filename string
 
-	_, flag, _ := s.userRepo.CheckEmail(ctx, nil, req.Email)
+	_, flag, err := s.userRepo.CheckEmail(ctx, nil, req.Email)
+	if err != nil {
+		return dto.UserResponse{}, err
+	}
+
 	if flag {
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
@@ -199,10 +203,12 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 		return dto.VerifyEmailResponse{}, dto.ErrAccountAlreadyVerified
 	}
 
-	updatedUser, err := s.userRepo.Update(ctx, nil, entity.User{
-		ID:         user.ID,
-		IsVerified: true,
-	})
+	updatedUser, err := s.userRepo.Update(
+		ctx, nil, entity.User{
+			ID:         user.ID,
+			IsVerified: true,
+		},
+	)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrUpdateUser
 	}
@@ -213,7 +219,10 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 	}, nil
 }
 
-func (s *userService) GetAllUserWithPagination(ctx context.Context, req dto.PaginationRequest) (dto.UserPaginationResponse, error) {
+func (s *userService) GetAllUserWithPagination(
+	ctx context.Context,
+	req dto.PaginationRequest,
+) (dto.UserPaginationResponse, error) {
 	dataWithPaginate, err := s.userRepo.GetAllUserWithPagination(ctx, nil, req)
 	if err != nil {
 		return dto.UserPaginationResponse{}, err
@@ -279,7 +288,10 @@ func (s *userService) GetUserByEmail(ctx context.Context, email string) (dto.Use
 	}, nil
 }
 
-func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
+func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (
+	dto.UserUpdateResponse,
+	error,
+) {
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
