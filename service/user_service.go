@@ -66,7 +66,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (
 	var filename string
 
 	_, flag, err := s.userRepo.CheckEmail(ctx, nil, req.Email)
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return dto.UserResponse{}, err
 	}
 
