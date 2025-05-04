@@ -3,7 +3,9 @@ package service
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"html/template"
 	"os"
 	"strings"
@@ -28,19 +30,30 @@ type (
 		VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error)
 		Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error)
 		Delete(ctx context.Context, userId string) error
-		Verify(ctx context.Context, req dto.UserLoginRequest) (dto.UserLoginResponse, error)
+		Verify(ctx context.Context, req dto.UserLoginRequest) (dto.TokenResponse, error)
+		RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (dto.TokenResponse, error)
+		RevokeRefreshToken(ctx context.Context, userID string) error
 	}
 
 	userService struct {
-		userRepo   repository.UserRepository
-		jwtService JWTService
+		userRepo         repository.UserRepository
+		refreshTokenRepo repository.RefreshTokenRepository
+		jwtService       JWTService
+		db               *gorm.DB
 	}
 )
 
-func NewUserService(userRepo repository.UserRepository, jwtService JWTService) UserService {
+func NewUserService(
+	userRepo repository.UserRepository,
+	refreshTokenRepo repository.RefreshTokenRepository,
+	jwtService JWTService,
+	db *gorm.DB,
+) UserService {
 	return &userService{
-		userRepo:   userRepo,
-		jwtService: jwtService,
+		userRepo:         userRepo,
+		refreshTokenRepo: refreshTokenRepo,
+		jwtService:       jwtService,
+		db:               db,
 	}
 }
 
@@ -321,6 +334,13 @@ func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, use
 }
 
 func (s *userService) Delete(ctx context.Context, userId string) error {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
 		return dto.ErrUserNotFound
@@ -334,25 +354,151 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 	return nil
 }
 
-func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto.UserLoginResponse, error) {
-	check, flag, err := s.userRepo.CheckEmail(ctx, nil, req.Email)
-	if err != nil || !flag {
-		return dto.UserLoginResponse{}, dto.ErrEmailNotFound
+func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto.TokenResponse, error) {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	user, err := s.userRepo.GetUserByEmail(ctx, tx, req.Email)
+	if err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, errors.New("invalid email or password")
 	}
 
-	if !check.IsVerified {
-		return dto.UserLoginResponse{}, dto.ErrAccountNotVerified
-	}
-
-	checkPassword, err := helpers.CheckPassword(check.Password, []byte(req.Password))
+	checkPassword, err := helpers.CheckPassword(user.Password, []byte(req.Password))
 	if err != nil || !checkPassword {
-		return dto.UserLoginResponse{}, dto.ErrPasswordNotMatch
+		tx.Rollback()
+		return dto.TokenResponse{}, errors.New("invalid email or password")
 	}
 
-	token := s.jwtService.GenerateToken(check.ID.String(), check.Role)
+	accessToken := s.jwtService.GenerateAccessToken(user.ID.String(), user.Role)
 
-	return dto.UserLoginResponse{
-		Token: token,
-		Role:  check.Role,
+	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
+
+	hashedToken, err := helpers.HashPassword(refreshTokenString)
+	if err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	if err := s.refreshTokenRepo.DeleteByUserID(ctx, tx, user.ID.String()); err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	refreshToken := entity.RefreshToken{
+		UserID:    user.ID,
+		Token:     hashedToken,
+		ExpiresAt: expiresAt,
+	}
+
+	if _, err := s.refreshTokenRepo.Create(ctx, tx, refreshToken); err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return dto.TokenResponse{}, err
+	}
+
+	return dto.TokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshTokenString,
+		Role:         user.Role,
 	}, nil
+}
+
+func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (dto.TokenResponse, error) {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Find the refresh token in the database
+	dbToken, err := s.refreshTokenRepo.FindByToken(ctx, tx, req.RefreshToken)
+	if err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, errors.New(dto.MESSAGE_FAILED_INVALID_REFRESH_TOKEN)
+	}
+
+	if time.Now().After(dbToken.ExpiresAt) {
+		tx.Rollback()
+		return dto.TokenResponse{}, errors.New(dto.MESSAGE_FAILED_EXPIRED_REFRESH_TOKEN)
+	}
+
+	user, err := s.userRepo.GetUserById(ctx, tx, dbToken.UserID.String())
+	if err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, dto.ErrUserNotFound
+	}
+
+	accessToken := s.jwtService.GenerateAccessToken(user.ID.String(), user.Role)
+
+	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
+
+	hashedToken, err := helpers.HashPassword(refreshTokenString)
+	if err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	if err := s.refreshTokenRepo.DeleteByUserID(ctx, tx, user.ID.String()); err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	refreshToken := entity.RefreshToken{
+		UserID:    user.ID,
+		Token:     hashedToken,
+		ExpiresAt: expiresAt,
+	}
+
+	if _, err := s.refreshTokenRepo.Create(ctx, tx, refreshToken); err != nil {
+		tx.Rollback()
+		return dto.TokenResponse{}, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return dto.TokenResponse{}, err
+	}
+
+	return dto.TokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshTokenString,
+		Role:         user.Role,
+	}, nil
+}
+
+func (s *userService) RevokeRefreshToken(ctx context.Context, userID string) error {
+	tx := s.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Check if user exists
+	_, err := s.userRepo.GetUserById(ctx, tx, userID)
+	if err != nil {
+		tx.Rollback()
+		return dto.ErrUserNotFound
+	}
+
+	// Delete all refresh tokens for the user
+	if err := s.refreshTokenRepo.DeleteByUserID(ctx, tx, userID); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }
