@@ -3,6 +3,7 @@ package entity
 import (
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -19,7 +20,7 @@ type User struct {
 }
 
 // BeforeCreate hook to hash password and set defaults
-func (u *User) BeforeCreate() (err error) {
+func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 	// Hash password
 	if u.Password != "" {
 		u.Password, err = helpers.HashPassword(u.Password)
@@ -42,7 +43,7 @@ func (u *User) BeforeCreate() (err error) {
 }
 
 // BeforeUpdate hook to handle password updates
-func (u *User) BeforeUpdate() (err error) {
+func (u *User) BeforeUpdate(_ *gorm.DB) (err error) {
 	// Only hash password if it has been changed
 	if u.Password != "" {
 		u.Password, err = helpers.HashPassword(u.Password)
