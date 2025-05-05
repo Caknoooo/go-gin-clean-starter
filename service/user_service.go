@@ -62,6 +62,14 @@ const (
 	VERIFY_EMAIL_ROUTE = "register/verify_email"
 )
 
+func SafeRollback(tx *gorm.DB) {
+	if r := recover(); r != nil {
+		tx.Rollback()
+		// TODO: Do you think that we should panic here?
+		// panic(r)
+	}
+}
+
 func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
 	var filename string
 
@@ -335,11 +343,7 @@ func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, use
 
 func (s *userService) Delete(ctx context.Context, userId string) error {
 	tx := s.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	defer SafeRollback(tx)
 
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
@@ -356,11 +360,7 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 
 func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto.TokenResponse, error) {
 	tx := s.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	defer SafeRollback(tx)
 
 	user, err := s.userRepo.GetUserByEmail(ctx, tx, req.Email)
 	if err != nil {
@@ -413,11 +413,7 @@ func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto
 
 func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequest) (dto.TokenResponse, error) {
 	tx := s.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	defer SafeRollback(tx)
 
 	// Find the refresh token in the database
 	dbToken, err := s.refreshTokenRepo.FindByToken(ctx, tx, req.RefreshToken)
@@ -476,11 +472,7 @@ func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 
 func (s *userService) RevokeRefreshToken(ctx context.Context, userID string) error {
 	tx := s.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	defer SafeRollback(tx)
 
 	// Check if user exists
 	_, err := s.userRepo.GetUserById(ctx, tx, userID)
