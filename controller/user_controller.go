@@ -14,6 +14,7 @@ type (
 		Register(ctx *gin.Context)
 		Login(ctx *gin.Context)
 		Me(ctx *gin.Context)
+		Refresh(ctx *gin.Context)
 		GetAllUser(ctx *gin.Context)
 		SendVerificationEmail(ctx *gin.Context)
 		VerifyEmail(ctx *gin.Context)
@@ -177,5 +178,24 @@ func (c *userController) Delete(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_USER, nil)
+	ctx.JSON(http.StatusOK, res)
+}
+
+func (c *userController) Refresh(ctx *gin.Context) {
+	var req dto.RefreshTokenRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+
+	result, err := c.userService.RefreshToken(ctx.Request.Context(), req)
+	if err != nil {
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_REFRESH_TOKEN, err.Error(), nil)
+		ctx.JSON(http.StatusUnauthorized, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_REFRESH_TOKEN, result)
 	ctx.JSON(http.StatusOK, res)
 }
