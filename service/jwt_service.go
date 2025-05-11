@@ -1,6 +1,8 @@
 package service
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
@@ -10,7 +12,8 @@ import (
 )
 
 type JWTService interface {
-	GenerateToken(userId string, role string) string
+	GenerateAccessToken(userId string, role string) string
+	GenerateRefreshToken() (string, time.Time)
 	ValidateToken(token string) (*jwt.Token, error)
 	GetUserIDByToken(token string) (string, error)
 }
@@ -22,14 +25,18 @@ type jwtCustomClaim struct {
 }
 
 type jwtService struct {
-	secretKey string
-	issuer    string
+	secretKey     string
+	issuer        string
+	accessExpiry  time.Duration
+	refreshExpiry time.Duration
 }
 
 func NewJWTService() JWTService {
 	return &jwtService{
-		secretKey: getSecretKey(),
-		issuer:    "Template",
+		secretKey:     getSecretKey(),
+		issuer:        "Template",
+		accessExpiry:  time.Minute * 15,
+		refreshExpiry: time.Hour * 24 * 7,
 	}
 }
 
@@ -41,12 +48,12 @@ func getSecretKey() string {
 	return secretKey
 }
 
-func (j *jwtService) GenerateToken(userId string, role string) string {
+func (j *jwtService) GenerateAccessToken(userId string, role string) string {
 	claims := jwtCustomClaim{
 		userId,
 		role,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 120)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.accessExpiry)),
 			Issuer:    j.issuer,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
@@ -58,6 +65,20 @@ func (j *jwtService) GenerateToken(userId string, role string) string {
 		log.Println(err)
 	}
 	return tx
+}
+
+func (j *jwtService) GenerateRefreshToken() (string, time.Time) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		log.Println(err)
+		return "", time.Time{}
+	}
+
+	refreshToken := base64.StdEncoding.EncodeToString(b)
+	expiresAt := time.Now().Add(j.refreshExpiry)
+
+	return refreshToken, expiresAt
 }
 
 func (j *jwtService) parseToken(t_ *jwt.Token) (any, error) {
@@ -72,12 +93,12 @@ func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
 }
 
 func (j *jwtService) GetUserIDByToken(token string) (string, error) {
-	t_Token, err := j.ValidateToken(token)
+	tToken, err := j.ValidateToken(token)
 	if err != nil {
 		return "", err
 	}
-	
-	claims := t_Token.Claims.(jwt.MapClaims)
+
+	claims := tToken.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["user_id"])
 	return id, nil
 }
