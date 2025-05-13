@@ -40,6 +40,26 @@ services:
     networks:
       - app-network
 
+  test:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: ${APP_NAME:-go-gin-clean-starter}-test
+    volumes:
+      - .:/app
+    command: go test -v ./tests
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - TEST_DB_NAME=${DB_NAME}
+      - DB_PORT=5432
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
 volumes:
   app-data:
 
