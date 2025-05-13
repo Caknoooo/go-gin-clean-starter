@@ -21,6 +21,8 @@ help:
 	@echo "  seed          Run database seeds"
 	@echo "  migrate-seed  Run both migrations and seeds"
 	@echo "  go-tidy       Run go mod tidy in container"
+	@echo "  swagger       Generate Swagger documentation"
+	@echo "  clean-swagger Clean generated Swagger documentation"
 
 # Import .env file
 ifneq (,$(wildcard ./.env))
@@ -85,3 +87,9 @@ migrate-seed:
 
 go-tidy:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
+
+swagger:
+	swag init
+
+clean-swagger:
+	rm -rf docs/
