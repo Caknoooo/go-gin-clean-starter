@@ -1,0 +1,434 @@
+basePath: /api
+definitions:
+  dto.PaginationResponse:
+    description: Response metadata for paginated responses
+    properties:
+      count:
+        type: integer
+      max_page:
+        type: integer
+      page:
+        type: integer
+      per_page:
+        type: integer
+    type: object
+  dto.RefreshTokenRequest:
+    description: Request body for refreshing a token
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dto.SendVerificationEmailRequest:
+    description: Request body for sending a verification email
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  dto.TokenResponse:
+    description: Response body for access and refresh tokens
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      role:
+        type: string
+    type: object
+  dto.UserCreateRequest:
+    type: object
+  dto.UserLoginRequest:
+    description: Request body for user login
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.UserResponse:
+    description: Response body for user data
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      role:
+        type: string
+      telp_number:
+        type: string
+    type: object
+  dto.UserUpdateRequest:
+    description: Request body for updating a user
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      telp_number:
+        maxLength: 20
+        minLength: 8
+        type: string
+    type: object
+  dto.UserUpdateResponse:
+    description: Response body for updated user data
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      is_verified:
+        type: boolean
+      name:
+        type: string
+      role:
+        type: string
+      telp_number:
+        type: string
+    type: object
+  dto.VerifyEmailRequest:
+    description: Request body for verifying an email
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  dto.VerifyEmailResponse:
+    description: Response body for email verification
+    properties:
+      email:
+        type: string
+      is_verified:
+        type: boolean
+    type: object
+  utils.Response:
+    description: Standard response structure for all API endpoints
+    properties:
+      data: {}
+      error: {}
+      message:
+        type: string
+      meta: {}
+      status:
+        type: boolean
+    type: object
+host: localhost:8888
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: This is a user management API built with Go, Gin, GORM, and PostgreSQL.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: User Management API
+  version: "1.0"
+paths:
+  /user:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the authenticated user's account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of users
+      parameters:
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.UserResponse'
+                  type: array
+                meta:
+                  $ref: '#/definitions/dto.PaginationResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get all users with pagination
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's details
+      parameters:
+      - description: Update request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserUpdateResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - users
+    post:
+      consumes:
+      - multipart/form-data
+      description: Creates a new user account
+      parameters:
+      - description: User creation request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Register a new user
+      tags:
+      - users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns access and refresh tokens
+      parameters:
+      - description: Login request
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Login
+      tags:
+      - users
+  /user/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's details
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - users
+  /user/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes an access token using a refresh token
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: refresh
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokenResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Refresh token
+      tags:
+      - users
+  /user/send_verification_email:
+    post:
+      consumes:
+      - application/json
+      description: Sends a verification email to the specified email address
+      parameters:
+      - description: Email request
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendVerificationEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Send verification email
+      tags:
+      - users
+  /user/verify_email:
+    post:
+      consumes:
+      - application/json
+      description: Verifies a user's email using a token
+      parameters:
+      - description: Verification request
+        in: body
+        name: verify
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VerifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.VerifyEmailResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Verify email
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: Bearer token for authentication
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
