@@ -1,10 +1,27 @@
+// @title User Management API
+// @version 1.0
+// @description This is a user management API built with Go, Gin, GORM, and PostgreSQL.
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.email support@example.com
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+// @host localhost:8888
+// @BasePath /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Bearer token for authentication
 package main
 
 import (
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"os"
 
 	"github.com/Caknoooo/go-gin-clean-starter/command"
+	_ "github.com/Caknoooo/go-gin-clean-starter/docs"
 	"github.com/Caknoooo/go-gin-clean-starter/middleware"
 	"github.com/Caknoooo/go-gin-clean-starter/provider"
 	"github.com/Caknoooo/go-gin-clean-starter/routes"
@@ -29,6 +46,8 @@ func run(server *gin.Engine) {
 	if os.Getenv("IS_LOGGER") == "true" {
 		routes.LoggerRoute(server)
 	}
+
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := os.Getenv("PORT")
 	if port == "" {
