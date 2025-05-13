@@ -22,7 +22,7 @@ run-build: build
 	./main
 
 test:
-	go test -v ./tests
+	docker exec --env-file .env.test -it ${CONTAINER_NAME} go test -v ./tests
 
 init-docker:
 	docker compose up -d --build
