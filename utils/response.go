@@ -1,5 +1,7 @@
 package utils
 
+// Response represents the standard API response
+// @Description Standard response structure for all API endpoints
 type Response struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message"`
@@ -8,6 +10,8 @@ type Response struct {
 	Meta    any    `json:"meta,omitempty"`
 }
 
+// EmptyObj represents an empty object
+// @Description Used when no data is returned
 type EmptyObj struct{}
 
 func BuildResponseSuccess(message string, data any) Response {

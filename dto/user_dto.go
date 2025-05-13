@@ -48,6 +48,8 @@ var (
 )
 
 type (
+	// UserCreateRequest represents a request to create a new user
+	// @Description Request body for creating a user
 	UserCreateRequest struct {
 		Name       string                `json:"name" form:"name" binding:"required,min=2,max=100"`
 		TelpNumber string                `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
@@ -56,6 +58,8 @@ type (
 		Image      *multipart.FileHeader `json:"image" form:"image"`
 	}
 
+	// UserResponse represents a user response
+	// @Description Response body for user data
 	UserResponse struct {
 		ID         string `json:"id"`
 		Name       string `json:"name"`
@@ -66,22 +70,30 @@ type (
 		IsVerified bool   `json:"is_verified"`
 	}
 
+	// UserPaginationResponse represents a paginated list of users
+	// @Description Response body for a paginated list of users
 	UserPaginationResponse struct {
 		Data []UserResponse `json:"data"`
 		PaginationResponse
 	}
 
+	// GetAllUserRepositoryResponse represents a repository response for users
+	// @Description Internal response structure for user repository (not exposed in API)
 	GetAllUserRepositoryResponse struct {
 		Users []entity.User `json:"users"`
 		PaginationResponse
 	}
 
+	// UserUpdateRequest represents a request to update a user
+	// @Description Request body for updating a user
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name" binding:"omitempty,min=2,max=100"`
 		TelpNumber string `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
 		Email      string `json:"email" form:"email" binding:"omitempty,email"`
 	}
 
+	// UserUpdateResponse represents a response after updating a user
+	// @Description Response body for updated user data
 	UserUpdateResponse struct {
 		ID         string `json:"id"`
 		Name       string `json:"name"`
@@ -91,19 +103,27 @@ type (
 		IsVerified bool   `json:"is_verified"`
 	}
 
+	// SendVerificationEmailRequest represents a request to send a verification email
+	// @Description Request body for sending a verification email
 	SendVerificationEmailRequest struct {
 		Email string `json:"email" form:"email" binding:"required"`
 	}
 
+	// VerifyEmailRequest represents a request to verify an email
+	// @Description Request body for verifying an email
 	VerifyEmailRequest struct {
 		Token string `json:"token" form:"token" binding:"required"`
 	}
 
+	// VerifyEmailResponse represents a response after verifying an email
+	// @Description Response body for email verification
 	VerifyEmailResponse struct {
 		Email      string `json:"email"`
 		IsVerified bool   `json:"is_verified"`
 	}
 
+	// UserLoginRequest represents a login request
+	// @Description Request body for user login
 	UserLoginRequest struct {
 		Email    string `json:"email" form:"email" binding:"required"`
 		Password string `json:"password" form:"password" binding:"required"`

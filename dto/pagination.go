@@ -1,12 +1,16 @@
 package dto
 
 type (
+	// PaginationRequest represents pagination query parameters
+	// @Description Query parameters for paginated requests
 	PaginationRequest struct {
 		Search  string `form:"search"`
 		Page    int    `form:"page"`
 		PerPage int    `form:"per_page"`
 	}
 
+	// PaginationResponse represents pagination metadata
+	// @Description Response metadata for paginated responses
 	PaginationResponse struct {
 		Page    int   `json:"page"`
 		PerPage int   `json:"per_page"`
