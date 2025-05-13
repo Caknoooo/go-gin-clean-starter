@@ -26,13 +26,13 @@ help:
 
 # Import .env file
 ifneq (,$(wildcard ./.env))
-		include .env
-		export $(shell sed 's/=.*//' .env)
+    include .env
+    export
 endif
 
 # Variables
-CONTAINER_NAME=${APP_NAME}-app
-POSTGRES_CONTAINER_NAME=${APP_NAME}-db
+CONTAINER_NAME=$(APP_NAME)-app
+POSTGRES_CONTAINER_NAME=$(APP_NAME)-db
 
 # Commands
 dep:
@@ -48,6 +48,7 @@ run-build: build
 	./main
 
 test:
+	echo "Container name: ${CONTAINER_NAME}"
 	docker exec --env-file .env.test -it ${CONTAINER_NAME} go test -v ./tests
 
 init-docker:
