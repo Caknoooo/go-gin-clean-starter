@@ -33,6 +33,15 @@ func NewUserController(us service.UserService) UserController {
 	}
 }
 
+// @Summary Register a new user
+// @Description Creates a new user account
+// @Tags users
+// @Accept multipart/form-data
+// @Produce json
+// @Param user body dto.UserCreateRequest true "User creation request"
+// @Success 200 {object} utils.Response{data=dto.UserResponse}
+// @Failure 400 {object} utils.Response
+// @Router /user [post]
 func (c *userController) Register(ctx *gin.Context) {
 	var user dto.UserCreateRequest
 	if err := ctx.ShouldBind(&user); err != nil {
@@ -52,6 +61,17 @@ func (c *userController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Get all users with pagination
+// @Description Retrieves a paginated list of users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param search query string false "Search term"
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page" default(10)
+// @Success 200 {object} utils.Response{data=[]dto.UserResponse,meta=dto.PaginationResponse}
+// @Failure 400 {object} utils.Response
+// @Router /user [get]
 func (c *userController) GetAllUser(ctx *gin.Context) {
 	var req dto.PaginationRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -77,6 +97,16 @@ func (c *userController) GetAllUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// @Summary Get current user
+// @Description Retrieves the authenticated user's details
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} utils.Response{data=dto.UserResponse}
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Router /user/me [get]
 func (c *userController) Me(ctx *gin.Context) {
 	userId := ctx.MustGet("user_id").(string)
 
@@ -91,6 +121,15 @@ func (c *userController) Me(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Login
+// @Description Authenticates a user and returns access and refresh tokens
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param login body dto.UserLoginRequest true "Login request"
+// @Success 200 {object} utils.Response{data=dto.TokenResponse}
+// @Failure 400 {object} utils.Response
+// @Router /user/login [post]
 func (c *userController) Login(ctx *gin.Context) {
 	var req dto.UserLoginRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -110,6 +149,15 @@ func (c *userController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Send verification email
+// @Description Sends a verification email to the specified email address
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param email body dto.SendVerificationEmailRequest true "Email request"
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Router /user/send_verification_email [post]
 func (c *userController) SendVerificationEmail(ctx *gin.Context) {
 	var req dto.SendVerificationEmailRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -129,6 +177,15 @@ func (c *userController) SendVerificationEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Verify email
+// @Description Verifies a user's email using a token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param verify body dto.VerifyEmailRequest true "Verification request"
+// @Success 200 {object} utils.Response{data=dto.VerifyEmailResponse}
+// @Failure 400 {object} utils.Response
+// @Router /user/verify_email [post]
 func (c *userController) VerifyEmail(ctx *gin.Context) {
 	var req dto.VerifyEmailRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -148,6 +205,17 @@ func (c *userController) VerifyEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Update user
+// @Description Updates the authenticated user's details
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param user body dto.UserUpdateRequest true "Update request"
+// @Success 200 {object} utils.Response{data=dto.UserUpdateResponse}
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Router /user [patch]
 func (c *userController) Update(ctx *gin.Context) {
 	var req dto.UserUpdateRequest
 	if err := ctx.ShouldBind(&req); err != nil {
@@ -168,6 +236,16 @@ func (c *userController) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Delete user
+// @Description Deletes the authenticated user's account
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Router /user [delete]
 func (c *userController) Delete(ctx *gin.Context) {
 	userId := ctx.MustGet("user_id").(string)
 
@@ -181,6 +259,16 @@ func (c *userController) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary Refresh token
+// @Description Refreshes an access token using a refresh token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param refresh body dto.RefreshTokenRequest true "Refresh token request"
+// @Success 200 {object} utils.Response{data=dto.TokenResponse}
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Router /user/refresh [post]
 func (c *userController) Refresh(ctx *gin.Context) {
 	var req dto.RefreshTokenRequest
 	if err := ctx.ShouldBind(&req); err != nil {
