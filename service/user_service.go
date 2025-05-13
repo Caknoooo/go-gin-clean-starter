@@ -5,11 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"html/template"
 	"os"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 
 	"github.com/Caknoooo/go-gin-clean-starter/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
@@ -347,15 +348,17 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 
 	user, err := s.userRepo.GetUserById(ctx, nil, userId)
 	if err != nil {
+		tx.Rollback()
 		return dto.ErrUserNotFound
 	}
 
 	err = s.userRepo.Delete(ctx, nil, user.ID.String())
 	if err != nil {
+		tx.Rollback()
 		return dto.ErrDeleteUser
 	}
 
-	return nil
+	return tx.Commit().Error
 }
 
 func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto.TokenResponse, error) {
