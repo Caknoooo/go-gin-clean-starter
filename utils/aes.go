@@ -54,7 +54,7 @@ func AESDecrypt(encryptedString string) (decryptedString string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			decryptedString = ""
-			err = errors.New("error in decrypting")
+			err = errors.New("ciphertext too short")
 		}
 	}()
 
@@ -83,13 +83,18 @@ func AESDecrypt(encryptedString string) (decryptedString string, err error) {
 	//Get the nonce size
 	nonceSize := aesGCM.NonceSize()
 
+	// Check if the ciphertext is too short before slicing
+	if len(enc) < nonceSize {
+		return "", errors.New("ciphertext too short")
+	}
+
 	//Extract the nonce from the encrypted data
 	nonce, ciphertext := enc[:nonceSize], enc[nonceSize:]
 
 	//Decrypt the data
 	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		return "", nil
+		return "", errors.New("error decrypting")
 	}
 
 	return string(plaintext), nil
