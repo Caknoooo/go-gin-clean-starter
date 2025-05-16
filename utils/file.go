@@ -5,38 +5,56 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-const PATH = "assets"
+var PATH = "assets"
 
 func UploadFile(file *multipart.FileHeader, path string) error {
+	// Split the path and get the file ID (last part)
 	parts := strings.Split(path, "/")
-	fileID := parts[1]
-	dirPath := fmt.Sprintf("%s/%s", PATH, parts[0])
+	if len(parts) < 1 {
+		return fmt.Errorf("invalid path: %s", path)
+	}
+	fileID := parts[len(parts)-1]
+	// Directory is all parts except the last one
+	dirParts := parts[:len(parts)-1]
+	dirPath := filepath.Join(PATH, filepath.Join(dirParts...))
 
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		if err := os.MkdirAll(dirPath, 0777); err != nil {
-			return err
-		}
+	// Create the directory structure if it doesn't exist
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return err
 	}
 
-	filePath := fmt.Sprintf("%s/%s", dirPath, fileID)
+	// Construct the full file path
+	filePath := filepath.Join(dirPath, fileID)
 
+	// Open the uploaded file
 	uploadedFile, err := file.Open()
 	if err != nil {
 		return err
 	}
-	defer uploadedFile.Close()
+	defer func(uploadedFile multipart.File) {
+		err := uploadedFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(uploadedFile)
 
-	// Using os.Create to open the file with appropriate permissions
+	// Create the target file
 	targetFile, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
-	defer targetFile.Close()
+	defer func(targetFile *os.File) {
+		err := targetFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(targetFile)
 
-	// Copy file contents from uploadedFile to targetFile
+	// Copy file contents
 	_, err = io.Copy(targetFile, uploadedFile)
 	if err != nil {
 		return err
