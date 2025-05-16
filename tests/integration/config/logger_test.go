@@ -1,9 +1,9 @@
-package config
+package config_test
 
 import (
 	"fmt"
 	"github.com/Caknoooo/go-gin-clean-starter/config"
-	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/utils"
+	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +19,7 @@ import (
 
 type LoggerIntegrationTestSuite struct {
 	suite.Suite
-	dbContainer *utils.TestDatabaseContainer
+	dbContainer *container.TestDatabaseContainer
 	db          *gorm.DB
 	testLogDir  string
 }
@@ -34,7 +34,7 @@ func (suite *LoggerIntegrationTestSuite) SetupSuite() {
 	}
 
 	// Start test database container
-	container, err := utils.StartTestContainer()
+	container, err := container.StartTestContainer()
 	require.NoError(suite.T(), err)
 	suite.dbContainer = container
 

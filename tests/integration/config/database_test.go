@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/utils"
+	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"os"
 	"testing"
 
@@ -14,14 +14,14 @@ import (
 
 type DatabaseConfigTestSuite struct {
 	suite.Suite
-	dbContainer *utils.TestDatabaseContainer
+	dbContainer *container.TestDatabaseContainer
 	db          *gorm.DB
 }
 
 // SetupSuite runs before the entire test suite
 func (suite *DatabaseConfigTestSuite) SetupSuite() {
 	// Start test container
-	container, err := utils.StartTestContainer()
+	container, err := container.StartTestContainer()
 	require.NoError(suite.T(), err)
 	suite.dbContainer = container
 
@@ -56,7 +56,7 @@ func (suite *DatabaseConfigTestSuite) SetupSuite() {
 func (suite *DatabaseConfigTestSuite) TearDownSuite() {
 	// Close database connection if it exists
 	if suite.db != nil {
-		err := utils.CloseDatabaseConnection(suite.db)
+		err := container.CloseDatabaseConnection(suite.db)
 		if err != nil {
 			panic(err)
 		}
@@ -96,7 +96,7 @@ func (suite *DatabaseConfigTestSuite) TearDownSuite() {
 }
 
 func (suite *DatabaseConfigTestSuite) TestSetUpDatabaseConnection() {
-	db := utils.SetUpDatabaseConnection()
+	db := container.SetUpDatabaseConnection()
 	suite.db = db // Store for cleanup
 
 	// Verify the connection works by executing a simple query
@@ -113,7 +113,7 @@ func (suite *DatabaseConfigTestSuite) TestSetUpDatabaseConnection() {
 }
 
 func (suite *DatabaseConfigTestSuite) TestCloseDatabaseConnection() {
-	db := utils.SetUpDatabaseConnection()
+	db := container.SetUpDatabaseConnection()
 	suite.db = db
 
 	// Verify connection is open
@@ -122,7 +122,7 @@ func (suite *DatabaseConfigTestSuite) TestCloseDatabaseConnection() {
 	require.NoError(suite.T(), err)
 
 	// Close connection
-	err = utils.CloseDatabaseConnection(db)
+	err = container.CloseDatabaseConnection(db)
 	if err != nil {
 		panic(err)
 	}
