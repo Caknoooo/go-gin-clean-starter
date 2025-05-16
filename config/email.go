@@ -1,30 +1,36 @@
 package config
 
 import (
-	"github.com/spf13/viper"
+	"fmt"
+	"strconv"
 )
 
 type EmailConfig struct {
-	Host         string `mapstructure:"SMTP_HOST"`
-	Port         int    `mapstructure:"SMTP_PORT"`
-	SenderName   string `mapstructure:"SMTP_SENDER_NAME"`
-	AuthEmail    string `mapstructure:"SMTP_AUTH_EMAIL"`
-	AuthPassword string `mapstructure:"SMTP_AUTH_PASSWORD"`
+	Host         string
+	Port         int
+	SenderName   string
+	AuthEmail    string
+	AuthPassword string
 }
 
 func NewEmailConfig() (*EmailConfig, error) {
-	viper.SetConfigFile(".env")
-
-	if err := viper.ReadInConfig(); err != nil {
+	port, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
+	if err != nil {
 		return nil, err
 	}
 
-	viper.AutomaticEnv()
-
-	var config EmailConfig
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
+	config := &EmailConfig{
+		Host:         getEnv("SMTP_HOST", ""),
+		Port:         port,
+		SenderName:   getEnv("SMTP_SENDER_NAME", ""),
+		AuthEmail:    getEnv("SMTP_AUTH_EMAIL", ""),
+		AuthPassword: getEnv("SMTP_AUTH_PASSWORD", ""),
 	}
 
-	return &config, nil
+	// Validate required fields
+	if config.Host == "" || config.AuthEmail == "" || config.AuthPassword == "" {
+		return nil, fmt.Errorf("email configuration is incomplete")
+	}
+
+	return config, nil
 }
