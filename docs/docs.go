@@ -64,7 +64,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -86,7 +86,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -120,7 +120,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -136,7 +136,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -162,19 +162,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -213,7 +213,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -229,13 +229,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -271,7 +271,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -287,7 +287,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -317,7 +317,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -333,13 +333,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -375,7 +375,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -391,13 +391,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -431,13 +431,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -473,7 +473,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/utils.Response"
+                                    "$ref": "#/definitions/container.Response"
                                 },
                                 {
                                     "type": "object",
@@ -489,7 +489,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "$ref": "#/definitions/container.Response"
                         }
                     }
                 }
@@ -667,7 +667,7 @@ const docTemplate = `{
                 }
             }
         },
-        "utils.Response": {
+        "container.Response": {
             "description": "Standard response structure for all API endpoints",
             "type": "object",
             "properties": {
