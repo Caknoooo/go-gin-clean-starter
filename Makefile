@@ -48,8 +48,7 @@ run-build: build
 	./main
 
 test:
-	echo "Container name: ${CONTAINER_NAME}"
-	docker exec --env-file .env.test -it ${CONTAINER_NAME} go test -v ./tests
+	env $(cat .env.test | xargs) go test -v ./...
 
 init-docker:
 	docker compose up -d --build
