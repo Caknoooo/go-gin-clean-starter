@@ -2,7 +2,7 @@ package config_test
 
 import (
 	"github.com/Caknoooo/go-gin-clean-starter/config"
-	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/utils"
+	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"os"
 	"strconv"
 	"testing"
@@ -14,12 +14,12 @@ import (
 
 type EmailConfigTestSuite struct {
 	suite.Suite
-	emailContainer *utils.TestDatabaseContainer
+	emailContainer *container.TestDatabaseContainer
 }
 
 func (suite *EmailConfigTestSuite) SetupSuite() {
 	// Start MailHog containers
-	container, err := utils.StartTestContainer()
+	container, err := container.StartTestContainer()
 	require.NoError(suite.T(), err)
 	suite.emailContainer = container
 
