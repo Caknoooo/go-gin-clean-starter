@@ -13,7 +13,7 @@ type EmailConfig struct {
 	AuthPassword string
 }
 
-func NewEmailConfig() (*EmailConfig, error) {
+var NewEmailConfig = func() (*EmailConfig, error) {
 	port, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
 	if err != nil {
 		return nil, err
