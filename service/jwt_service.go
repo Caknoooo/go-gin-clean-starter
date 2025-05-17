@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -89,7 +90,35 @@ func (j *jwtService) parseToken(t_ *jwt.Token) (any, error) {
 }
 
 func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
-	return jwt.Parse(token, j.parseToken)
+	if token == "" {
+		return nil, fmt.Errorf("token is empty")
+	}
+
+	// First check if the token has the expected number of parts
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("token contains an invalid number of segments")
+	}
+
+	parsedToken, err := jwt.ParseWithClaims(
+		token, &jwtCustomClaim{}, func(token *jwt.Token) (interface{}, error) {
+			// Specifically check for SigningMethodHS256
+			if token.Method != jwt.SigningMethodHS256 {
+				return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+			}
+			return []byte(j.secretKey), nil
+		},
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
+	}
+
+	if !parsedToken.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	return parsedToken, nil
 }
 
 func (j *jwtService) GetUserIDByToken(token string) (string, error) {
@@ -98,7 +127,11 @@ func (j *jwtService) GetUserIDByToken(token string) (string, error) {
 		return "", err
 	}
 
-	claims := tToken.Claims.(jwt.MapClaims)
-	id := fmt.Sprintf("%v", claims["user_id"])
-	return id, nil
+	// Get the claims from the token
+	claims, ok := tToken.Claims.(*jwtCustomClaim)
+	if !ok {
+		return "", fmt.Errorf("invalid token claims")
+	}
+
+	return claims.UserID, nil
 }
