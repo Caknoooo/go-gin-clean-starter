@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -139,7 +140,13 @@ func makeVerificationEmail(receiverEmail string) (map[string]string, error) {
 
 	verifyLink := LOCAL_URL + "/" + VERIFY_EMAIL_ROUTE + "?token=" + token
 
-	readHtml, err := os.ReadFile("utils/email-template/base_mail.html")
+	templatePath := "utils/email-template/base_mail.html"
+	projectPath, err := helpers.GetProjectRoot()
+	if err != nil {
+		return nil, err
+	}
+	templatePath = path.Join(projectPath, templatePath)
+	readHtml, err := os.ReadFile(templatePath)
 	if err != nil {
 		return nil, err
 	}
