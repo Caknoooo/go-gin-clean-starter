@@ -36,7 +36,6 @@ func TestLoadEnv(t *testing.T) {
 		"Should load .env.test file in testing mode", func(t *testing.T) {
 			// Setup
 			originalEnv := os.Getenv("APP_ENV")
-			os.Setenv("APP_ENV", constants.ENUM_RUN_TESTING)
 			defer func() {
 				os.Setenv("APP_ENV", originalEnv)
 			}()

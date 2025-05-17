@@ -48,7 +48,7 @@ run-build: build
 	./main
 
 test:
-	env $(cat .env.test | xargs) go test -v ./...
+	APP_ENV=test env $(cat .env.test | xargs) go test -v ./...
 
 init-docker:
 	docker compose up -d --build

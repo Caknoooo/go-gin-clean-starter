@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/Caknoooo/go-gin-clean-starter/constants"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"os"
 )
 
 func RunExtension(db *gorm.DB) {
@@ -30,7 +29,7 @@ func loadEnv() {
 		envFile = ".env"
 	}
 
-	if err := godotenv.Load(envFile); err != nil {
+	if err := godotenv.Overload(envFile); err != nil {
 		// Don't panic if .env file is not found in production (use actual env vars)
 		if !os.IsNotExist(err) || appEnv != constants.ENUM_RUN_PRODUCTION {
 			panic(fmt.Errorf("failed to load %s file: %w", envFile, err))
