@@ -69,16 +69,16 @@ func TestSendMail(t *testing.T) {
 					return tt.emailConfig, tt.emailConfigErr
 				}
 
-				// Create mock dialer
+				// Create mock Dialer
 				mockDialer := new(MockDialer)
 				if tt.emailConfig != nil {
 					mockDialer.On("DialAndSend", mock.Anything).Return(tt.dialerErr)
 				}
 
-				// Replace the real dialer with our mock
-				originalNewDialer := newDialer
-				defer func() { newDialer = originalNewDialer }()
-				newDialer = func(host string, port int, username, password string) dialer {
+				// Replace the real Dialer with our mock
+				originalNewDialer := NewDialer
+				defer func() { NewDialer = originalNewDialer }()
+				NewDialer = func(host string, port int, username, password string) Dialer {
 					return mockDialer
 				}
 

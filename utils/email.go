@@ -5,13 +5,13 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-// dialer is an interface that matches gomail.Dialer for mocking purposes
-type dialer interface {
+// Dialer is an interface that matches gomail.Dialer for mocking purposes
+type Dialer interface {
 	DialAndSend(...*gomail.Message) error
 }
 
-// newDialer is a variable that holds the function to create a new dialer
-var newDialer = func(host string, port int, username, password string) dialer {
+// NewDialer is a variable that holds the function to create a new Dialer
+var NewDialer = func(host string, port int, username, password string) Dialer {
 	return gomail.NewDialer(host, port, username, password)
 }
 
@@ -27,8 +27,8 @@ func SendMail(toEmail string, subject string, body string) error {
 	mailer.SetHeader("Subject", subject)
 	mailer.SetBody("text/html", body)
 
-	// Use the newDialer function instead of directly calling gomail.NewDialer
-	dialer := newDialer(
+	// Use the NewDialer function instead of directly calling gomail.NewDialer
+	dialer := NewDialer(
 		emailConfig.Host,
 		emailConfig.Port,
 		emailConfig.AuthEmail,
