@@ -257,7 +257,7 @@ func (s *userService) GetAllUserWithPagination(
 		return dto.UserPaginationResponse{}, err
 	}
 
-	var datas []dto.UserResponse
+	var users []dto.UserResponse
 	for _, user := range dataWithPaginate.Users {
 		data := dto.UserResponse{
 			ID:         user.ID.String(),
@@ -269,11 +269,11 @@ func (s *userService) GetAllUserWithPagination(
 			IsVerified: user.IsVerified,
 		}
 
-		datas = append(datas, data)
+		users = append(users, data)
 	}
 
 	return dto.UserPaginationResponse{
-		Data: datas,
+		Data: users,
 		PaginationResponse: dto.PaginationResponse{
 			Page:    dataWithPaginate.Page,
 			PerPage: dataWithPaginate.PerPage,
@@ -353,13 +353,20 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 	tx := s.db.Begin()
 	defer SafeRollback(tx)
 
-	user, err := s.userRepo.GetUserById(ctx, nil, userId)
+	user, err := s.userRepo.GetUserById(ctx, tx, userId)
 	if err != nil {
 		tx.Rollback()
 		return dto.ErrUserNotFound
 	}
 
-	err = s.userRepo.Delete(ctx, nil, user.ID.String())
+	// Delete user's refresh tokens first
+	if err := s.refreshTokenRepo.DeleteByUserID(ctx, tx, user.ID.String()); err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to delete refresh tokens: %w", err)
+	}
+
+	// Then delete the user
+	err = s.userRepo.Delete(ctx, tx, user.ID.String())
 	if err != nil {
 		tx.Rollback()
 		return dto.ErrDeleteUser
@@ -388,7 +395,6 @@ func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto
 
 	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
-	hashedToken, err := helpers.HashPassword(refreshTokenString)
 	if err != nil {
 		tx.Rollback()
 		return dto.TokenResponse{}, err
@@ -401,7 +407,7 @@ func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (dto
 
 	refreshToken := entity.RefreshToken{
 		UserID:    user.ID,
-		Token:     hashedToken,
+		Token:     refreshTokenString,
 		ExpiresAt: expiresAt,
 	}
 
@@ -425,13 +431,14 @@ func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 	tx := s.db.Begin()
 	defer SafeRollback(tx)
 
-	// Find the refresh token in the database
+	// Find the refresh token in the database with the raw token
 	dbToken, err := s.refreshTokenRepo.FindByToken(ctx, tx, req.RefreshToken)
 	if err != nil {
 		tx.Rollback()
 		return dto.TokenResponse{}, errors.New(dto.MESSAGE_FAILED_INVALID_REFRESH_TOKEN)
 	}
 
+	// Check if the token is expired
 	if time.Now().After(dbToken.ExpiresAt) {
 		tx.Rollback()
 		return dto.TokenResponse{}, errors.New(dto.MESSAGE_FAILED_EXPIRED_REFRESH_TOKEN)
@@ -447,12 +454,6 @@ func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 
 	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
-	hashedToken, err := helpers.HashPassword(refreshTokenString)
-	if err != nil {
-		tx.Rollback()
-		return dto.TokenResponse{}, err
-	}
-
 	if err := s.refreshTokenRepo.DeleteByUserID(ctx, tx, user.ID.String()); err != nil {
 		tx.Rollback()
 		return dto.TokenResponse{}, err
@@ -460,7 +461,7 @@ func (s *userService) RefreshToken(ctx context.Context, req dto.RefreshTokenRequ
 
 	refreshToken := entity.RefreshToken{
 		UserID:    user.ID,
-		Token:     hashedToken,
+		Token:     refreshTokenString,
 		ExpiresAt: expiresAt,
 	}
 
