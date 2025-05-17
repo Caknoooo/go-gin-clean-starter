@@ -42,7 +42,7 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 		u.Role = "user"
 	}
 
-	// Validate the user first
+	// Validate the user
 	if err := validate.Struct(u); err != nil {
 		return err
 	}

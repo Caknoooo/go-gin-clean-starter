@@ -2,10 +2,10 @@ package seeds
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"os"
 
+	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"gorm.io/gorm"
 )
@@ -15,14 +15,27 @@ func ListUserSeeder(db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(jsonFile)
+
+	// Extend UserCreateRequest to include Role and IsVerified
+	type SeedUserRequest struct {
+		dto.UserCreateRequest
+		Role       string `json:"role" binding:"required,oneof=user admin"`
+		IsVerified bool   `json:"is_verified"`
+	}
 
 	jsonData, err := io.ReadAll(jsonFile)
 	if err != nil {
 		return err
 	}
 
-	var listUser []entity.User
-	if err := json.Unmarshal(jsonData, &listUser); err != nil {
+	var seedUsers []SeedUserRequest
+	if err := json.Unmarshal(jsonData, &seedUsers); err != nil {
 		return err
 	}
 
@@ -33,16 +46,23 @@ func ListUserSeeder(db *gorm.DB) error {
 		}
 	}
 
-	for _, data := range listUser {
-		var user entity.User
-		err := db.Where(&entity.User{Email: data.Email}).First(&user).Error
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return err
+	for _, seedUser := range seedUsers {
+		// Convert SeedUserRequest to entity.User
+		user := entity.User{
+			Name:       seedUser.Name,
+			TelpNumber: seedUser.TelpNumber,
+			Email:      seedUser.Email,
+			Password:   seedUser.Password,
+			Role:       seedUser.Role,
+			IsVerified: seedUser.IsVerified,
 		}
 
-		isData := db.Find(&user, "email = ?", data.Email).RowsAffected
+		// Check if user already exists
+		var existingUser entity.User
+		isData := db.Where("email = ?", user.Email).Find(&existingUser).RowsAffected
+
 		if isData == 0 {
-			if err := db.Create(&data).Error; err != nil {
+			if err := db.Create(&user).Error; err != nil {
 				return err
 			}
 		}
