@@ -10,7 +10,7 @@ import (
 	"io"
 )
 
-const (
+var (
 	// todo
 	KEY = "8e71bbce7451ba2835de5aea73e4f3f96821455240823d2fd8174975b8321bfc"
 )
