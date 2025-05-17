@@ -2,6 +2,7 @@ package entity
 
 import (
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,8 @@ type User struct {
 
 	Timestamp
 }
+
+var validate = validator.New()
 
 // BeforeCreate hook to hash password and set defaults
 func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
@@ -37,6 +40,11 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 	// Set default role if not specified
 	if u.Role == "" {
 		u.Role = "user"
+	}
+
+	// Validate the user first
+	if err := validate.Struct(u); err != nil {
+		return err
 	}
 
 	return nil
