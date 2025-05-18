@@ -11,14 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
+var (
 	LOG_DIR = "./config/logs/query_log"
 
 	LOG_HTML = "logs.html"
 )
 
 func LoggerRoute(router *gin.Engine) {
-	router.LoadHTMLGlob(LOG_HTML)
+	// Use LoadHTMLFiles instead of LoadHTMLGlob to load a specific file
+	router.LoadHTMLFiles(LOG_HTML)
 
 	router.GET("/logs/:month", Logger)
 	router.GET("/logs", Logger)
@@ -34,19 +35,23 @@ func Logger(c *gin.Context) {
 	logFile := filepath.Join(LOG_DIR, logFileName)
 
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		c.HTML(http.StatusOK, LOG_HTML, gin.H{
-			"Month": month,
-			"Logs":  nil,
-		})
+		c.HTML(
+			http.StatusOK, filepath.Base(LOG_HTML), gin.H{
+				"Month": month,
+				"Logs":  nil,
+			},
+		)
 		return
 	}
 
 	file, err := os.Open(logFile)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, LOG_HTML, gin.H{
-			"Month": month,
-			"Logs":  nil,
-		})
+		c.HTML(
+			http.StatusInternalServerError, filepath.Base(LOG_HTML), gin.H{
+				"Month": month,
+				"Logs":  nil,
+			},
+		)
 		return
 	}
 	defer file.Close()
@@ -72,22 +77,26 @@ func Logger(c *gin.Context) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		c.HTML(http.StatusInternalServerError, LOG_HTML, gin.H{
-			"Month": month,
-			"Logs":  nil,
-		})
+		c.HTML(
+			http.StatusInternalServerError, filepath.Base(LOG_HTML), gin.H{
+				"Month": month,
+				"Logs":  nil,
+			},
+		)
 		return
 	}
 
-	reverseLogs := reverseSlice(logs)
+	reverseLogs := ReverseSlice(logs)
 
-	c.HTML(http.StatusOK, LOG_HTML, gin.H{
-		"Month": month,
-		"Logs":  reverseLogs,
-	})
+	c.HTML(
+		http.StatusOK, filepath.Base(LOG_HTML), gin.H{
+			"Month": month,
+			"Logs":  reverseLogs,
+		},
+	)
 }
 
-func reverseSlice(input []string) []string {
+func ReverseSlice(input []string) []string {
 	length := len(input)
 	reversed := make([]string, length)
 	for i, v := range input {
