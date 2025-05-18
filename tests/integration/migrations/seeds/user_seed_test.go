@@ -2,14 +2,14 @@ package seeds
 
 import (
 	"encoding/json"
-	"github.com/Caknoooo/go-gin-clean-starter/migrations/seeds"
-	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
+	"github.com/Caknoooo/go-gin-clean-starter/migrations/seeds"
+	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
@@ -21,6 +21,7 @@ type SeedsTestSuite struct {
 	testData     []SeedUserRequest
 	tempJSONPath string
 	projectRoot  string
+	usedTestJSON bool // Tracks if users_test.json was created
 }
 
 type SeedUserRequest struct {
@@ -92,42 +93,81 @@ func (suite *SeedsTestSuite) TearDownSuite() {
 		}
 	}
 
-	// Remove test JSON file
+	// Remove temporary test JSON file
 	os.Remove(suite.tempJSONPath)
 }
 
 func (suite *SeedsTestSuite) BeforeTest(suiteName, testName string) {
 	// Ensure clean state for each test
 	suite.db.Migrator().DropTable(&entity.User{})
+	suite.usedTestJSON = false // Reset for each test
 }
 
-func (suite *SeedsTestSuite) TestListUserSeeder_Success() {
-	// Create a test migrations/json directory in project root
+func (suite *SeedsTestSuite) setupTestJSON() (string, error) {
+	// Create migrations/json directory if it doesn't exist
 	testSeedDir := filepath.Join(suite.projectRoot, "migrations", "json")
 	err := os.MkdirAll(testSeedDir, 0755)
 	if err != nil {
-		suite.T().Fatalf("Failed to create test seed directory: %v", err)
+		return "", err
 	}
-	defer os.RemoveAll(testSeedDir)
 
-	// Copy our test JSON to the expected location
-	expectedJSONPath := filepath.Join(testSeedDir, "users.json")
-	err = copyFile(suite.tempJSONPath, expectedJSONPath)
-	if err != nil {
-		suite.T().Fatalf("Failed to copy test JSON file: %v", err)
+	// Check if users.json exists
+	usersJSONPath := filepath.Join(testSeedDir, "users.json")
+	if _, err := os.Stat(usersJSONPath); err == nil {
+		// users.json exists, use it directly
+		return usersJSONPath, nil
 	}
+
+	// users.json doesn't exist, create users_test.json
+	testJSONPath := filepath.Join(testSeedDir, "users_test.json")
+	err = copyFile(suite.tempJSONPath, testJSONPath)
+	if err != nil {
+		return "", err
+	}
+	suite.usedTestJSON = true
+	return testJSONPath, nil
+}
+
+func (suite *SeedsTestSuite) cleanupTestJSON(jsonPath string) {
+	if suite.usedTestJSON {
+		os.Remove(jsonPath) // Only remove users_test.json
+	}
+	// Never remove users.json or migrations/json directory
+}
+
+func (suite *SeedsTestSuite) TestListUserSeeder_Success() {
+	// Setup JSON file (either users.json or users_test.json)
+	jsonPath, err := suite.setupTestJSON()
+	if err != nil {
+		suite.T().Fatalf("Failed to setup test JSON: %v", err)
+	}
+	defer suite.cleanupTestJSON(jsonPath)
+
+	// Temporarily override GetProjectRoot to point to the directory containing the JSON
+	oldGetProjectRoot := helpers.GetProjectRoot
+	helpers.GetProjectRoot = func() (string, error) {
+		return suite.projectRoot, nil
+	}
+	defer func() { helpers.GetProjectRoot = oldGetProjectRoot }()
 
 	// Execute the seeder
 	err = seeds.ListUserSeeder(suite.db)
 	assert.NoError(suite.T(), err, "Seeder should not return error")
 
+	// Read the JSON file to verify expected data
+	var seededData []SeedUserRequest
+	data, err := os.ReadFile(jsonPath)
+	assert.NoError(suite.T(), err, "Should read JSON file")
+	err = json.Unmarshal(data, &seededData)
+	assert.NoError(suite.T(), err, "Should parse JSON file")
+
 	// Verify data was inserted
 	var users []entity.User
 	result := suite.db.Find(&users)
 	assert.NoError(suite.T(), result.Error, "Should be able to query users")
-	assert.Equal(suite.T(), len(suite.testData), int(result.RowsAffected), "Should insert all test users")
+	assert.Equal(suite.T(), len(seededData), int(result.RowsAffected), "Should insert all test users")
 
-	for _, testUser := range suite.testData {
+	for _, testUser := range seededData {
 		var user entity.User
 		err := suite.db.Where("email = ?", testUser.Email).First(&user).Error
 		assert.NoError(suite.T(), err, "Should find seeded user")
@@ -138,20 +178,19 @@ func (suite *SeedsTestSuite) TestListUserSeeder_Success() {
 }
 
 func (suite *SeedsTestSuite) TestListUserSeeder_TableCreation() {
-	// Create test directory structure
-	testSeedDir := filepath.Join(suite.projectRoot, "migrations", "json")
-	err := os.MkdirAll(testSeedDir, 0755)
+	// Setup JSON file
+	jsonPath, err := suite.setupTestJSON()
 	if err != nil {
-		suite.T().Fatalf("Failed to create test seed directory: %v", err)
+		suite.T().Fatalf("Failed to setup test JSON: %v", err)
 	}
-	defer os.RemoveAll(testSeedDir)
+	defer suite.cleanupTestJSON(jsonPath)
 
-	// Copy test JSON file
-	expectedJSONPath := filepath.Join(testSeedDir, "users.json")
-	err = copyFile(suite.tempJSONPath, expectedJSONPath)
-	if err != nil {
-		suite.T().Fatalf("Failed to copy test JSON file: %v", err)
+	// Temporarily override GetProjectRoot
+	oldGetProjectRoot := helpers.GetProjectRoot
+	helpers.GetProjectRoot = func() (string, error) {
+		return suite.projectRoot, nil
 	}
+	defer func() { helpers.GetProjectRoot = oldGetProjectRoot }()
 
 	// Ensure table doesn't exist
 	suite.db.Migrator().DropTable(&entity.User{})
@@ -166,20 +205,19 @@ func (suite *SeedsTestSuite) TestListUserSeeder_TableCreation() {
 }
 
 func (suite *SeedsTestSuite) TestListUserSeeder_DuplicateUsers() {
-	// Create test directory structure
-	testSeedDir := filepath.Join(suite.projectRoot, "migrations", "json")
-	err := os.MkdirAll(testSeedDir, 0755)
+	// Setup JSON file
+	jsonPath, err := suite.setupTestJSON()
 	if err != nil {
-		suite.T().Fatalf("Failed to create test seed directory: %v", err)
+		suite.T().Fatalf("Failed to setup test JSON: %v", err)
 	}
-	defer os.RemoveAll(testSeedDir)
+	defer suite.cleanupTestJSON(jsonPath)
 
-	// Copy test JSON file
-	expectedJSONPath := filepath.Join(testSeedDir, "users.json")
-	err = copyFile(suite.tempJSONPath, expectedJSONPath)
-	if err != nil {
-		suite.T().Fatalf("Failed to copy test JSON file: %v", err)
+	// Temporarily override GetProjectRoot
+	oldGetProjectRoot := helpers.GetProjectRoot
+	helpers.GetProjectRoot = func() (string, error) {
+		return suite.projectRoot, nil
 	}
+	defer func() { helpers.GetProjectRoot = oldGetProjectRoot }()
 
 	// First run - should insert users
 	err = seeds.ListUserSeeder(suite.db)
@@ -214,21 +252,29 @@ func (suite *SeedsTestSuite) TestListUserSeeder_InvalidJSONPath() {
 }
 
 func (suite *SeedsTestSuite) TestListUserSeeder_InvalidJSONContent() {
-	// Create test directory structure
-	testSeedDir := filepath.Join(suite.projectRoot, "migrations", "json")
+	// Create a temporary directory to act as a fake project root
+	tempDir := suite.T().TempDir()
+	testSeedDir := filepath.Join(tempDir, "migrations", "json")
 	err := os.MkdirAll(testSeedDir, 0755)
 	if err != nil {
 		suite.T().Fatalf("Failed to create test seed directory: %v", err)
 	}
-	defer os.RemoveAll(testSeedDir)
 
-	// Create invalid JSON file
+	// Create invalid JSON file as users.json in the temporary directory
 	invalidJSONPath := filepath.Join(testSeedDir, "users.json")
 	err = os.WriteFile(invalidJSONPath, []byte("invalid json content"), 0644)
 	if err != nil {
 		suite.T().Fatalf("Failed to create invalid JSON file: %v", err)
 	}
 
+	// Temporarily override GetProjectRoot to point to tempDir
+	oldGetProjectRoot := helpers.GetProjectRoot
+	helpers.GetProjectRoot = func() (string, error) {
+		return tempDir, nil
+	}
+	defer func() { helpers.GetProjectRoot = oldGetProjectRoot }()
+
+	// Run the seeder, which should read the invalid users.json
 	err = seeds.ListUserSeeder(suite.db)
 	assert.Error(suite.T(), err, "Should return error for invalid JSON content")
 }
