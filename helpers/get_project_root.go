@@ -7,8 +7,9 @@ import (
 	"runtime"
 )
 
-func GetProjectRoot() (string, error) {
-	// Get the path of the current file (database.go)
+// GetProjectRoot is a function variable that can be reassigned
+var GetProjectRoot = func() (string, error) {
+	// Get the path of the current file
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
 		return "", fmt.Errorf("unable to get current file path")
