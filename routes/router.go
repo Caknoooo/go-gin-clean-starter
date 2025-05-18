@@ -5,6 +5,6 @@ import (
 	"github.com/samber/do"
 )
 
-func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
+var RegisterRoutes = func(server *gin.Engine, injector *do.Injector) {
 	User(server, injector)
 }

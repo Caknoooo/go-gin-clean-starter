@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Commands(injector *do.Injector) bool {
+var Commands = func(injector *do.Injector) bool {
 	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
 
 	var scriptName string

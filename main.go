@@ -31,7 +31,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func args(injector *do.Injector) bool {
+var args = func(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
 		flag := command.Commands(injector)
 		return flag
@@ -40,7 +40,7 @@ func args(injector *do.Injector) bool {
 	return true
 }
 
-func run(server *gin.Engine) {
+var run = func(server *gin.Engine) {
 	server.Static("/assets", "./assets")
 
 	if os.Getenv("IS_LOGGER") == "true" {
@@ -57,6 +57,8 @@ func run(server *gin.Engine) {
 	var serve string
 	if os.Getenv("APP_ENV") == "localhost" {
 		serve = "0.0.0.0:" + port
+	} else if os.Getenv("APP_ENV") == "prod" {
+		serve = "127.0.0.1:" + port
 	} else {
 		serve = ":" + port
 	}
