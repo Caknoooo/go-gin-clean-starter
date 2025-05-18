@@ -2,8 +2,10 @@ package seeds
 
 import (
 	"encoding/json"
+	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"io"
 	"os"
+	"path"
 
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
@@ -11,7 +13,13 @@ import (
 )
 
 func ListUserSeeder(db *gorm.DB) error {
-	jsonFile, err := os.Open("./migrations/json/users.json")
+	projectDir, err := helpers.GetProjectRoot()
+	if err != nil {
+		return err
+	}
+
+	jsonFilePath := path.Join(projectDir, "migrations/json/users.json")
+	jsonFile, err := os.Open(jsonFilePath)
 	if err != nil {
 		return err
 	}

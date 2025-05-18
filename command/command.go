@@ -14,7 +14,7 @@ import (
 
 func Commands(injector *do.Injector) bool {
 	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
-	
+
 	var scriptName string
 
 	migrate := false
