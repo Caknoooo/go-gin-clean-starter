@@ -1085,3 +1085,220 @@ func TestUpdate(t *testing.T) {
 		t.Fatalf("Failed to clean up test user: %v", err)
 	}
 }
+
+func TestDelete(t *testing.T) {
+	// First, register a test user
+	registerReq := dto.UserCreateRequest{
+		Name:     "Delete Test User",
+		Email:    "delete_test@example.com",
+		Password: "password123",
+	}
+
+	// Create the user through the service layer
+	userRepo := repository.NewUserRepository(db)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+	jwtService := service.NewJWTService()
+	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
+	registeredUser, err := userService.Register(context.Background(), registerReq)
+	assert.NoError(t, err)
+
+	// Generate a valid JWT token for the user
+	token := jwtService.GenerateAccessToken(registeredUser.ID, registeredUser.Role)
+
+	// Test cases
+	tests := []struct {
+		name         string
+		setupAuth    func(t *testing.T, request *http.Request)
+		expectedCode int
+		checkData    bool
+	}{
+		{
+			name: "Success delete user",
+			setupAuth: func(t *testing.T, request *http.Request) {
+				request.Header.Set("Authorization", "Bearer "+token)
+			},
+			expectedCode: http.StatusOK,
+			checkData:    true,
+		},
+		{
+			name: "Unauthorized - no token",
+			setupAuth: func(t *testing.T, request *http.Request) {
+				// No auth header set
+			},
+			expectedCode: http.StatusUnauthorized,
+			checkData:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			tt.name, func(t *testing.T) {
+				// Create a new Gin router
+				router := gin.Default()
+
+				// Use the actual Authenticate middleware
+				router.Use(middleware.Authenticate(jwtService))
+
+				router.DELETE("/user", userController.Delete)
+
+				// Create request
+				req, err := http.NewRequest("DELETE", "/user", nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Set up auth
+				tt.setupAuth(t, req)
+
+				// Create response recorder
+				rr := httptest.NewRecorder()
+
+				// Serve the request
+				router.ServeHTTP(rr, req)
+
+				// Check status code
+				assert.Equal(t, tt.expectedCode, rr.Code)
+
+				// If we expect success, check the response data
+				if tt.checkData {
+					var response struct {
+						Status  bool        `json:"status"`
+						Message string      `json:"message"`
+						Data    interface{} `json:"data"`
+					}
+					err = json.Unmarshal(rr.Body.Bytes(), &response)
+					assert.NoError(t, err)
+					assert.True(t, response.Status)
+					assert.Equal(t, dto.MESSAGE_SUCCESS_DELETE_USER, response.Message)
+
+					// Verify the user is actually deleted
+					_, err := userService.GetUserById(context.Background(), registeredUser.ID)
+					assert.Error(t, err) // Should return error since user is deleted
+				}
+			},
+		)
+	}
+
+	// Clean up (though user should be deleted by the test)
+	db.Exec("DELETE FROM users WHERE email = ?", registerReq.Email)
+}
+
+func TestRefreshToken(t *testing.T) {
+	// First, register a test user
+	registerReq := dto.UserCreateRequest{
+		Name:     "Refresh Test User",
+		Email:    "refresh_test@example.com",
+		Password: "password123",
+	}
+
+	// Register the user
+	userRepo := repository.NewUserRepository(db)
+	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+	jwtService := service.NewJWTService()
+	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
+
+	// Register the user first
+	_, err := userService.Register(context.Background(), registerReq)
+	assert.NoError(t, err)
+
+	// Then login to get refresh token
+	loginReq := dto.UserLoginRequest{
+		Email:    registerReq.Email,
+		Password: registerReq.Password,
+	}
+	loginRes, err := userService.Verify(context.Background(), loginReq)
+	assert.NoError(t, err)
+	refreshToken := loginRes.RefreshToken
+
+	// Test cases
+	tests := []struct {
+		name         string
+		payload      dto.RefreshTokenRequest
+		expectedCode int
+		checkData    bool
+	}{
+		{
+			name: "Success refresh token",
+			payload: dto.RefreshTokenRequest{
+				RefreshToken: refreshToken,
+			},
+			expectedCode: http.StatusOK,
+			checkData:    true,
+		},
+		{
+			name: "Invalid refresh token",
+			payload: dto.RefreshTokenRequest{
+				RefreshToken: "invalid-token",
+			},
+			expectedCode: http.StatusUnauthorized,
+			checkData:    false,
+		},
+		{
+			name:         "Empty refresh token",
+			payload:      dto.RefreshTokenRequest{},
+			expectedCode: http.StatusBadRequest,
+			checkData:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(
+			tt.name, func(t *testing.T) {
+				// Create a new Gin router
+				router := gin.Default()
+				router.POST("/user/refresh", userController.Refresh)
+
+				// Convert payload to JSON
+				payloadBytes, err := json.Marshal(tt.payload)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Create request
+				req, err := http.NewRequest("POST", "/user/refresh", bytes.NewBuffer(payloadBytes))
+				if err != nil {
+					t.Fatal(err)
+				}
+				req.Header.Set("Content-Type", "application/json")
+
+				// Create response recorder
+				rr := httptest.NewRecorder()
+
+				// Serve the request
+				router.ServeHTTP(rr, req)
+
+				// Check status code
+				assert.Equal(t, tt.expectedCode, rr.Code)
+
+				// If we expect success, check the response data
+				if tt.checkData {
+					var response struct {
+						Status  bool              `json:"status"`
+						Message string            `json:"message"`
+						Data    dto.TokenResponse `json:"data"`
+					}
+					err = json.Unmarshal(rr.Body.Bytes(), &response)
+					assert.NoError(t, err)
+					assert.True(t, response.Status)
+					assert.Equal(t, dto.MESSAGE_SUCCESS_REFRESH_TOKEN, response.Message)
+					assert.NotEmpty(t, response.Data.AccessToken)
+					assert.NotEmpty(t, response.Data.RefreshToken)
+				} else if tt.expectedCode == http.StatusBadRequest {
+					// For bad request cases, check the error message
+					var response struct {
+						Status  bool   `json:"status"`
+						Message string `json:"message"`
+					}
+					err = json.Unmarshal(rr.Body.Bytes(), &response)
+					assert.NoError(t, err)
+					assert.False(t, response.Status)
+					assert.NotEmpty(t, response.Message)
+				}
+			},
+		)
+	}
+
+	// Clean up
+	db.Exec("DELETE FROM users WHERE email = ?", registerReq.Email)
+	db.Exec("DELETE FROM refresh_tokens WHERE token = ?", refreshToken)
+}
