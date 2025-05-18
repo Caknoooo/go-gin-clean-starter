@@ -9,7 +9,7 @@ import (
 	"github.com/samber/do"
 )
 
-func User(route *gin.Engine, injector *do.Injector) {
+var User = func(route *gin.Engine, injector *do.Injector) {
 	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
 	userController := do.MustInvoke[controller.UserController](injector)
 

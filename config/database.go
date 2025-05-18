@@ -37,7 +37,7 @@ func loadEnv() {
 	}
 }
 
-func SetUpDatabaseConnection() *gorm.DB {
+var SetUpDatabaseConnection = func() *gorm.DB {
 	if os.Getenv("APP_ENV") != constants.ENUM_RUN_PRODUCTION {
 		loadEnv()
 	}

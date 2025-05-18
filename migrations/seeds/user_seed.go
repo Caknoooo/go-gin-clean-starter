@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ListUserSeeder(db *gorm.DB) error {
+var ListUserSeeder = func(db *gorm.DB) error {
 	projectDir, err := helpers.GetProjectRoot()
 	if err != nil {
 		return err

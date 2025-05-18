@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ProvideUserDependencies(injector *do.Injector) {
+var ProvideUserDependencies = func(injector *do.Injector) {
 	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
 	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
 
