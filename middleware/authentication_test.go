@@ -3,11 +3,12 @@ package middleware
 import (
 	"encoding/json"
 	"errors"
-	"github.com/golang-jwt/jwt/v4"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/utils"
@@ -125,15 +126,13 @@ func TestAuthenticateMiddleware(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Setup
+
 				gin.SetMode(gin.TestMode)
 				router := gin.New()
 
-				// Create mock JWT service
 				mockJWT := new(MockJWTService)
 				tt.mockJWTSetup(mockJWT)
 
-				// Add middleware and test route
 				router.Use(Authenticate(mockJWT))
 				router.GET(
 					"/test", func(c *gin.Context) {
@@ -144,21 +143,17 @@ func TestAuthenticateMiddleware(t *testing.T) {
 					},
 				)
 
-				// Create request
 				req, _ := http.NewRequest(http.MethodGet, "/test", nil)
 				authHeader := tt.setupAuth()
 				if authHeader != "" {
 					req.Header.Set("Authorization", authHeader)
 				}
 
-				// Record response
 				resp := httptest.NewRecorder()
 				router.ServeHTTP(resp, req)
 
-				// Verify status code
 				assert.Equal(t, tt.expectedStatus, resp.Code)
 
-				// Verify response body for error cases
 				if tt.expectedStatus != http.StatusOK {
 					var response utils.Response
 					err := json.Unmarshal(resp.Body.Bytes(), &response)
@@ -168,7 +163,6 @@ func TestAuthenticateMiddleware(t *testing.T) {
 					assert.Equal(t, tt.expectedResponse.Error, response.Error)
 				}
 
-				// Assert mock expectations
 				mockJWT.AssertExpectations(t)
 			},
 		)

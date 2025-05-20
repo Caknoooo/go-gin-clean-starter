@@ -18,24 +18,22 @@ func TestGetProjectRoot(t *testing.T) {
 
 	t.Run(
 		"successful discovery of project root", func(t *testing.T) {
-			// Create a temporary directory structure
+
 			tmpDir, err := os.MkdirTemp("", "project-root-test-*")
 			require.NoError(t, err)
 			defer os.RemoveAll(tmpDir)
 
-			// Create a go.mod file in the temporary directory
 			goModPath := filepath.Join(tmpDir, "go.mod")
 			err = os.WriteFile(goModPath, []byte("module test"), 0644)
 			require.NoError(t, err)
 
-			// Create a subdirectory structure to simulate walking up
 			subDir := filepath.Join(tmpDir, "cmd", "app")
 			err = os.MkdirAll(subDir, 0755)
 			require.NoError(t, err)
 
 			// Mock the GetProjectRoot function
 			GetProjectRoot = func() (string, error) {
-				// Simulate starting from the subDir
+
 				dir := subDir
 				for {
 					if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
@@ -50,7 +48,6 @@ func TestGetProjectRoot(t *testing.T) {
 				}
 			}
 
-			// Test the function
 			root, err := GetProjectRoot()
 			assert.NoError(t, err)
 			assert.Equal(t, tmpDir, root)
@@ -64,7 +61,6 @@ func TestGetProjectRoot(t *testing.T) {
 				return "", filepath.ErrBadPattern
 			}
 
-			// Test the function
 			root, err := GetProjectRoot()
 			assert.Error(t, err)
 			assert.Empty(t, root)

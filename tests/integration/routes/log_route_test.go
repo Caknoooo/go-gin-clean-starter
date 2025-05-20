@@ -1,7 +1,6 @@
 package routes_test
 
 import (
-	"github.com/Caknoooo/go-gin-clean-starter/routes"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,31 +9,29 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Caknoooo/go-gin-clean-starter/routes"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLoggerRoute_Integration(t *testing.T) {
-	// Setup test environment
+
 	tempDir := t.TempDir()
 	currentMonth := time.Now().Format("January")
 	testMonth := "December"
 
-	// Create test log files
 	createTestLogFile(t, tempDir, currentMonth, "current_month_log1\n\ncurrent_month_log2\n")
 	createTestLogFile(t, tempDir, testMonth, "december_log1\n\ndecember_log2\n")
 
-	// Override LOG_DIR for test
 	originalLogDir := routes.LOG_DIR
 	routes.LOG_DIR = tempDir
 	defer func() { routes.LOG_DIR = originalLogDir }()
 
-	// Initialize router in test mode
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
 
-	// Create a temporary HTML template file for testing
 	tempHTMLFile := filepath.Join(tempDir, "logs.html")
 	htmlContent := `
 	<!DOCTYPE html>
@@ -59,12 +56,10 @@ func TestLoggerRoute_Integration(t *testing.T) {
 	err := os.WriteFile(tempHTMLFile, []byte(htmlContent), 0644)
 	require.NoError(t, err, "Failed to create temporary HTML template")
 
-	// Override LOG_HTML for test
 	originalLogHTML := routes.LOG_HTML
 	routes.LOG_HTML = tempHTMLFile
 	defer func() { routes.LOG_HTML = originalLogHTML }()
 
-	// Call the route setup
 	routes.LoggerRoute(router)
 
 	t.Run(
@@ -119,7 +114,7 @@ func TestLoggerRoute_Integration(t *testing.T) {
 
 	t.Run(
 		"GET /logs - with empty log file", func(t *testing.T) {
-			// Create empty log file for January
+
 			emptyMonth := "January"
 			createTestLogFile(t, tempDir, emptyMonth, "")
 
@@ -136,7 +131,7 @@ func TestLoggerRoute_Integration(t *testing.T) {
 
 	t.Run(
 		"GET /logs - with malformed log file", func(t *testing.T) {
-			// Create malformed log file (no newlines between entries)
+
 			malformedMonth := "February"
 			createTestLogFile(t, tempDir, malformedMonth, "log1log2log3")
 
@@ -147,7 +142,7 @@ func TestLoggerRoute_Integration(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, w.Code)
 			assert.Contains(t, w.Body.String(), malformedMonth)
-			// All logs will be treated as one block
+
 			assert.Contains(t, w.Body.String(), "log1log2log3")
 		},
 	)

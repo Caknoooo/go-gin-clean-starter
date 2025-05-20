@@ -21,7 +21,6 @@ type TestDatabaseContainer struct {
 func StartTestContainer() (*TestDatabaseContainer, error) {
 	ctx := context.Background()
 
-	// Set up the container request
 	req := testcontainers.ContainerRequest{
 		Image:        "postgres:13-alpine",
 		ExposedPorts: []string{"5432/tcp"},
@@ -35,7 +34,6 @@ func StartTestContainer() (*TestDatabaseContainer, error) {
 			WithStartupTimeout(30 * time.Second),
 	}
 
-	// Start the container
 	container, err := testcontainers.GenericContainer(
 		ctx, testcontainers.GenericContainerRequest{
 			ContainerRequest: req,
@@ -46,13 +44,11 @@ func StartTestContainer() (*TestDatabaseContainer, error) {
 		return nil, fmt.Errorf("failed to start container: %w", err)
 	}
 
-	// Get the mapped port
 	mappedPort, err := container.MappedPort(ctx, "5432")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get container port: %w", err)
 	}
 
-	// Get the container host
 	host, err := container.Host(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get container host: %w", err)
@@ -82,7 +78,7 @@ func CloseDatabaseConnection(db *gorm.DB) error {
 
 // SetUpDatabaseConnection establishes a GORM database connection to the test container.
 func SetUpDatabaseConnection() *gorm.DB {
-	// Construct the DSN using environment variables set by the test suite
+
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		os.Getenv("DB_HOST"),
@@ -92,13 +88,11 @@ func SetUpDatabaseConnection() *gorm.DB {
 		os.Getenv("DB_PORT"),
 	)
 
-	// Open GORM connection
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to database: %w", err))
 	}
 
-	// Enable UUID extension
 	err = db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
 	if err != nil {
 		panic(fmt.Errorf("failed to enable uuid-ossp extension: %w", err))

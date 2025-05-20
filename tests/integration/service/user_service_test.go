@@ -3,15 +3,16 @@ package service_test
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+
 	"github.com/Caknoooo/go-gin-clean-starter/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/helpers"
 	"github.com/Caknoooo/go-gin-clean-starter/service"
 	"github.com/golang-jwt/jwt/v4"
 	"gorm.io/gorm"
-	"os"
-	"path/filepath"
-	"testing"
-	"time"
 
 	"github.com/Caknoooo/go-gin-clean-starter/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
@@ -60,7 +61,7 @@ func (m *MockDialer) DialAndSend(messages ...*gomail.Message) error {
 }
 
 func TestUserService_Register(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -70,7 +71,6 @@ func TestUserService_Register(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -105,7 +105,6 @@ func TestUserService_Register(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -114,21 +113,16 @@ func TestUserService_Register(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 
-	// Mock JWT service
 	jwtService := &MockJWTService{}
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Create temporary email template file
 	tempDir := t.TempDir()
 	emailTemplatePath := filepath.Join(tempDir, "base_mail.html")
 	err = os.WriteFile(
@@ -143,7 +137,6 @@ func TestUserService_Register(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Mock email sending by overriding newDialer
 	originalNewDialer := utils.NewDialer
 	utils.NewDialer = func(host string, port int, username, password string) utils.Dialer {
 		dialer := &MockDialer{}
@@ -152,7 +145,6 @@ func TestUserService_Register(t *testing.T) {
 	}
 	defer func() { utils.NewDialer = originalNewDialer }()
 
-	// Mock UploadFile
 	originalPath := utils.PATH
 	utils.PATH = tempDir
 	defer func() { utils.PATH = originalPath }()
@@ -221,16 +213,13 @@ func TestUserService_Register(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Run setup
 				tt.setup()
 
-				// Execute registration
 				user, err := userService.Register(context.Background(), tt.input)
 
-				// Validate results
 				if tt.expectedError != nil {
 					assert.Error(t, err)
 					assert.Equal(t, tt.expectedError, err)
@@ -238,7 +227,6 @@ func TestUserService_Register(t *testing.T) {
 					assert.NoError(t, err)
 				}
 
-				// Validate user response
 				tt.validateUser(t, user)
 			},
 		)
@@ -255,7 +243,6 @@ func TestUserService_GetAllUserWithPagination(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -290,7 +277,6 @@ func TestUserService_GetAllUserWithPagination(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -299,7 +285,6 @@ func TestUserService_GetAllUserWithPagination(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
@@ -452,7 +437,7 @@ func TestUserService_GetAllUserWithPagination(t *testing.T) {
 }
 
 func TestUserService_GetUserById(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -462,7 +447,6 @@ func TestUserService_GetUserById(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -484,7 +468,6 @@ func TestUserService_GetUserById(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -493,24 +476,19 @@ func TestUserService_GetUserById(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
 	// Test cases
@@ -571,16 +549,13 @@ func TestUserService_GetUserById(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Setup test data and get user ID
 				userId := tt.setup()
 
-				// Execute the function
 				user, err := userService.GetUserById(ctx, userId)
 
-				// Validate results
 				if tt.expectedError != nil {
 					assert.Error(t, err)
 					assert.Equal(t, tt.expectedError, err)
@@ -588,7 +563,6 @@ func TestUserService_GetUserById(t *testing.T) {
 					assert.NoError(t, err)
 				}
 
-				// Validate user response
 				tt.validate(t, user)
 			},
 		)
@@ -596,7 +570,7 @@ func TestUserService_GetUserById(t *testing.T) {
 }
 
 func TestUserService_GetUserByEmail(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -606,7 +580,6 @@ func TestUserService_GetUserByEmail(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -628,7 +601,6 @@ func TestUserService_GetUserByEmail(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -637,24 +609,19 @@ func TestUserService_GetUserByEmail(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
 	// Test cases
@@ -740,7 +707,7 @@ func TestUserService_GetUserByEmail(t *testing.T) {
 }
 
 func TestUserService_SendVerificationEmail(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -750,7 +717,6 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -772,7 +738,6 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -781,19 +746,15 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Create temporary email template file
 	tempDir := t.TempDir()
 	emailTemplatePath := filepath.Join(tempDir, "base_mail.html")
 	err = os.WriteFile(
@@ -808,7 +769,6 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Mock email sending by overriding newDialer
 	originalNewDialer := utils.NewDialer
 	mockDialer := &MockDialer{}
 	utils.NewDialer = func(host string, port int, username, password string) utils.Dialer {
@@ -816,7 +776,6 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 	}
 	defer func() { utils.NewDialer = originalNewDialer }()
 
-	// Mock template path
 	originalPath := utils.PATH
 	utils.PATH = tempDir
 	defer func() { utils.PATH = originalPath }()
@@ -883,10 +842,9 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Reset the template file to valid state before each test
 				err := os.WriteFile(
 					emailTemplatePath, []byte(`
                 <html>
@@ -899,22 +857,17 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 				)
 				assert.NoError(t, err)
 
-				// Create fresh mock for each test
 				mockDialer := &MockDialer{}
 				utils.NewDialer = func(host string, port int, username, password string) utils.Dialer {
 					return mockDialer
 				}
 
-				// Setup test data
 				req := tt.setup()
 
-				// Setup mock expectations
 				tt.mockEmail(mockDialer)
 
-				// Execute the function
 				err = userService.SendVerificationEmail(context.Background(), req)
 
-				// Validate results
 				if tt.expectedError != nil {
 					assert.Error(t, err)
 					if tt.name == "Template parsing fails" {
@@ -926,7 +879,6 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 					assert.NoError(t, err)
 				}
 
-				// Verify mock expectations
 				mockDialer.AssertExpectations(t)
 			},
 		)
@@ -934,7 +886,7 @@ func TestUserService_SendVerificationEmail(t *testing.T) {
 }
 
 func TestUserService_VerifyEmail(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -944,7 +896,6 @@ func TestUserService_VerifyEmail(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -966,12 +917,10 @@ func TestUserService_VerifyEmail(t *testing.T) {
 		panic(err)
 	}
 
-	// Set AES encryption key for testing
 	originalKey := utils.KEY
 	utils.KEY = "6368616e676520746869732070617373776f726420746f206120736563726574" // test key
 	defer func() { utils.KEY = originalKey }()
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -980,27 +929,21 @@ func TestUserService_VerifyEmail(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
-	// Helper function to create a test token
 	createTestToken := func(email string, hoursToAdd time.Duration) string {
 		expired := time.Now().Add(hoursToAdd).Format("2006-01-02 15:04:05")
 		plainText := email + "_" + expired
@@ -1145,20 +1088,17 @@ func TestUserService_VerifyEmail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Setup test data and get email and token
 				email, token := tt.setup()
 
-				// Execute the function
 				response, err := userService.VerifyEmail(
 					ctx, dto.VerifyEmailRequest{
 						Token: token,
 					},
 				)
 
-				// Validate results
 				if tt.expectedError != nil {
 					assert.Error(t, err)
 					assert.Equal(t, tt.expectedError, err)
@@ -1166,7 +1106,6 @@ func TestUserService_VerifyEmail(t *testing.T) {
 					assert.NoError(t, err)
 				}
 
-				// Validate response
 				tt.validate(t, response, email)
 			},
 		)
@@ -1174,7 +1113,7 @@ func TestUserService_VerifyEmail(t *testing.T) {
 }
 
 func TestUserService_Update(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -1184,7 +1123,6 @@ func TestUserService_Update(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -1206,7 +1144,6 @@ func TestUserService_Update(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -1215,24 +1152,19 @@ func TestUserService_Update(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
 	// Test cases
@@ -1326,7 +1258,7 @@ func TestUserService_Update(t *testing.T) {
 }
 
 func TestUserService_Delete(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -1336,7 +1268,6 @@ func TestUserService_Delete(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -1358,7 +1289,6 @@ func TestUserService_Delete(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -1367,19 +1297,15 @@ func TestUserService_Delete(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Create test context
 	ctx := context.Background()
 
 	tests := []struct {
@@ -1517,7 +1443,7 @@ func TestUserService_Delete(t *testing.T) {
 }
 
 func TestUserService_Verify(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -1527,7 +1453,6 @@ func TestUserService_Verify(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -1549,7 +1474,6 @@ func TestUserService_Verify(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -1558,29 +1482,23 @@ func TestUserService_Verify(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 
-	// Mock JWT service
 	mockJWTService := &MockJWTService{}
 	mockJWTService.On("GenerateAccessToken", mock.Anything, mock.Anything).Return("mock-access-token")
 	mockJWTService.On("GenerateRefreshToken").Return("mock-refresh-token", time.Now().Add(24*time.Hour))
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, mockJWTService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM refresh_tokens WHERE TRUE")
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
 	// Test cases
@@ -1707,17 +1625,14 @@ func TestUserService_Verify(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE refresh_tokens RESTART IDENTITY CASCADE")
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Setup test data
 				loginRequest := tt.setup()
 
-				// Execute the function
 				tokens, err := userService.Verify(ctx, loginRequest)
 
-				// Validate results
 				if tt.expectedError != "" {
 					assert.Error(t, err)
 					assert.Contains(t, err.Error(), tt.expectedError)
@@ -1725,7 +1640,6 @@ func TestUserService_Verify(t *testing.T) {
 					assert.NoError(t, err)
 				}
 
-				// Validate response
 				tt.validate(t, tokens)
 			},
 		)
@@ -1733,7 +1647,7 @@ func TestUserService_Verify(t *testing.T) {
 }
 
 func TestUserService_RefreshToken(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -1743,7 +1657,6 @@ func TestUserService_RefreshToken(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	if err != nil {
 		panic(err)
@@ -1765,7 +1678,6 @@ func TestUserService_RefreshToken(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -1774,30 +1686,24 @@ func TestUserService_RefreshToken(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Clean up database after test
 	defer func() {
 		db.Exec("DELETE FROM refresh_tokens WHERE TRUE")
 		db.Exec("DELETE FROM users WHERE TRUE")
 	}()
 
-	// Create test context
 	ctx := context.Background()
 
-	// Helper function to create test user with refresh token
 	createTestUserWithToken := func() (entity.User, string) {
-		// Create test user
+
 		user := entity.User{
 			Name:       "Test User",
 			Email:      "test@example.com",
@@ -1809,7 +1715,6 @@ func TestUserService_RefreshToken(t *testing.T) {
 		createdUser, err := userRepo.Register(ctx, nil, user)
 		assert.NoError(t, err)
 
-		// Create refresh token
 		refreshTokenString, expiresAt := jwtService.GenerateRefreshToken()
 
 		refreshToken := entity.RefreshToken{
@@ -1907,17 +1812,14 @@ func TestUserService_RefreshToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Clean database before each test
+
 				db.Exec("TRUNCATE TABLE refresh_tokens RESTART IDENTITY CASCADE")
 				db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
 
-				// Setup test data
 				req, expectedRole := tt.setup()
 
-				// Execute the function
 				response, err := userService.RefreshToken(ctx, req)
 
-				// Validate results
 				if tt.expectedError != "" {
 					assert.Error(t, err)
 					assert.Contains(t, err.Error(), tt.expectedError)
@@ -1926,7 +1828,6 @@ func TestUserService_RefreshToken(t *testing.T) {
 					assert.Equal(t, expectedRole, response.Role)
 				}
 
-				// Run additional validations
 				tt.validate(t, response, req.RefreshToken)
 			},
 		)
@@ -1934,7 +1835,7 @@ func TestUserService_RefreshToken(t *testing.T) {
 }
 
 func TestUserService_RevokeRefreshToken(t *testing.T) {
-	// Start test container
+
 	dbContainer, err := container.StartTestContainer()
 	assert.NoError(t, err)
 	defer func(dbContainer *container.TestDatabaseContainer) {
@@ -1944,7 +1845,6 @@ func TestUserService_RevokeRefreshToken(t *testing.T) {
 		}
 	}(dbContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", dbContainer.Host)
 	assert.NoError(t, err)
 	err = os.Setenv("DB_USER", "testuser")
@@ -1956,26 +1856,21 @@ func TestUserService_RevokeRefreshToken(t *testing.T) {
 	err = os.Setenv("DB_PORT", dbContainer.Port)
 	assert.NoError(t, err)
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
 		assert.NoError(t, err)
 	}(db)
 
-	// Migrate database schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	assert.NoError(t, err)
 
-	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db)
 	jwtService := service.NewJWTService()
 
-	// Create user service
 	userService := service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 
-	// Create test context
 	ctx := context.Background()
 
 	// Test cases

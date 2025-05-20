@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// MockDB is a mock implementation of gorm.DB for testing
 type MockDB struct {
 	mock.Mock
 }

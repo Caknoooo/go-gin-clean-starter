@@ -38,7 +38,7 @@ func TestAESEncryptDecrypt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				// Test encryption
+
 				encrypted, err := AESEncrypt(tt.input)
 				if tt.wantError {
 					assert.Error(t, err)
@@ -47,7 +47,6 @@ func TestAESEncryptDecrypt(t *testing.T) {
 				require.NoError(t, err)
 				assert.NotEmpty(t, encrypted)
 
-				// Test decryption
 				decrypted, err := AESDecrypt(encrypted)
 				require.NoError(t, err)
 				assert.Equal(t, tt.input, decrypted)

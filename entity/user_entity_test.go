@@ -221,11 +221,9 @@ func validateUser(user *User) error {
 
 // Mock helper functions for validation
 func isValidEmail(email string) bool {
-	// Simplified email validation
 	return email != "" && email != "invalid-email"
 }
 
 func isValidURL(url string) bool {
-	// Simplified URL validation
 	return url != "" && url != "not-a-url"
 }

@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
-	"github.com/Caknoooo/go-gin-clean-starter/dto"
-	"github.com/Caknoooo/go-gin-clean-starter/repository"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/Caknoooo/go-gin-clean-starter/dto"
+	"github.com/Caknoooo/go-gin-clean-starter/repository"
 
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
@@ -15,7 +16,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Mock DTOs and helper functions for testing
 type PaginationRequest struct {
 	Page    int
 	PerPage int
@@ -60,7 +60,7 @@ func TotalPage(count, perPage int64) int64 {
 }
 
 func TestUserRepository(t *testing.T) {
-	// Start test container
+
 	testContainer, err := container.StartTestContainer()
 	if err != nil {
 		t.Fatalf("failed to start test container: %v", err)
@@ -72,7 +72,6 @@ func TestUserRepository(t *testing.T) {
 		}
 	}(testContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", testContainer.Host)
 	if err != nil {
 		panic(err)
@@ -94,7 +93,6 @@ func TestUserRepository(t *testing.T) {
 		return
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -103,16 +101,13 @@ func TestUserRepository(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate the schema
 	err = db.AutoMigrate(&entity.User{})
 	if err != nil {
 		t.Fatalf("failed to migrate schema: %v", err)
 	}
 
-	// Initialize repository
 	repo := repository.NewUserRepository(db)
 
-	// Helper function to clean the database
 	cleanDB := func() {
 		err := db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE").Error
 		if err != nil {
@@ -149,7 +144,7 @@ func TestUserRepository(t *testing.T) {
 	t.Run(
 		"GetAllUserWithPagination", func(t *testing.T) {
 			t.Cleanup(cleanDB)
-			// Create multiple users
+
 			users := []entity.User{
 				{
 					ID:         uuid.New(),
@@ -182,7 +177,6 @@ func TestUserRepository(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			// Test pagination
 			req := dto.PaginationRequest{
 				Page:    1,
 				PerPage: 1,

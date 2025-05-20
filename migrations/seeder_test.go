@@ -23,19 +23,15 @@ func (m *MockSeeder) ListUserSeeder(db *gorm.DB) error {
 func TestSeeder(t *testing.T) {
 	t.Run(
 		"Success", func(t *testing.T) {
-			// Create mock
+
 			mockSeeder := new(MockSeeder)
 
-			// Set up expectations
 			mockSeeder.On("ListUserSeeder", mock.AnythingOfType("*gorm.DB")).Return(nil)
 
-			// Replace actual function with mock
 			seeds.ListUserSeeder = mockSeeder.ListUserSeeder
 
-			// Call the function with a nil DB (since we're mocking)
 			err := Seeder(nil)
 
-			// Assertions
 			assert.NoError(t, err)
 			mockSeeder.AssertExpectations(t)
 		},
@@ -43,20 +39,16 @@ func TestSeeder(t *testing.T) {
 
 	t.Run(
 		"Error", func(t *testing.T) {
-			// Create mock
+
 			mockSeeder := new(MockSeeder)
 
-			// Set up expectations with error
 			expectedErr := errors.New("seeder error")
 			mockSeeder.On("ListUserSeeder", mock.AnythingOfType("*gorm.DB")).Return(expectedErr)
 
-			// Replace actual function with mock
 			seeds.ListUserSeeder = mockSeeder.ListUserSeeder
 
-			// Call the function with a nil DB (since we're mocking)
 			err := Seeder(nil)
 
-			// Assertions
 			assert.Error(t, err)
 			assert.Equal(t, expectedErr, err)
 			mockSeeder.AssertExpectations(t)

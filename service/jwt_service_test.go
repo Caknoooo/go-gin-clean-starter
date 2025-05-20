@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewJWTService(t *testing.T) {
-	// Test with environment variable
+
 	os.Setenv("JWT_SECRET", "test-secret")
 	defer os.Unsetenv("JWT_SECRET")
 
@@ -24,7 +24,6 @@ func TestNewJWTService(t *testing.T) {
 	assert.Equal(t, time.Minute*15, jwtService.accessExpiry)
 	assert.Equal(t, time.Hour*24*7, jwtService.refreshExpiry)
 
-	// Test without environment variable
 	os.Unsetenv("JWT_SECRET")
 	service = NewJWTService()
 	assert.Equal(t, "test-secret", jwtService.secretKey)

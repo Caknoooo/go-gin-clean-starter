@@ -1,9 +1,10 @@
 package entity_test
 
 import (
-	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"os"
 	"testing"
+
+	"github.com/Caknoooo/go-gin-clean-starter/entity"
 
 	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"github.com/google/uuid"
@@ -12,23 +13,20 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// Start the test container
+
 	testContainer, err := container.StartTestContainer()
 	if err != nil {
 		panic(err)
 	}
 
-	// Set environment variables for database connection
 	os.Setenv("DB_HOST", testContainer.Host)
 	os.Setenv("DB_USER", "testuser")
 	os.Setenv("DB_PASS", "testpassword")
 	os.Setenv("DB_NAME", "testdb")
 	os.Setenv("DB_PORT", testContainer.Port)
 
-	// Run tests
 	code := m.Run()
 
-	// Cleanup
 	if err := testContainer.Stop(); err != nil {
 		panic(err)
 	}
@@ -39,7 +37,6 @@ func TestMain(m *testing.M) {
 func setupTestDB(t *testing.T) *gorm.DB {
 	db := container.SetUpDatabaseConnection()
 
-	// Migrate the User schema
 	err := db.AutoMigrate(&entity.User{})
 	if err != nil {
 		t.Fatalf("Failed to migrate database: %v", err)
@@ -49,13 +46,12 @@ func setupTestDB(t *testing.T) *gorm.DB {
 }
 
 func cleanupTestDB(t *testing.T, db *gorm.DB) {
-	// Drop the User table
+
 	err := db.Migrator().DropTable(&entity.User{})
 	if err != nil {
 		t.Fatalf("Failed to drop table: %v", err)
 	}
 
-	// Close the database connection
 	if err := container.CloseDatabaseConnection(db); err != nil {
 		t.Fatalf("Failed to close database connection: %v", err)
 	}
@@ -83,7 +79,7 @@ func TestUser_Integration_Create(t *testing.T) {
 			},
 			expectError: false,
 			validate: func(t *testing.T, user *entity.User, db *gorm.DB) {
-				// Verify the user was saved
+
 				var savedUser entity.User
 				err := db.Where("email = ?", user.Email).First(&savedUser).Error
 				assert.NoError(t, err, "User should exist in the database")
@@ -154,7 +150,6 @@ func TestUser_Integration_Update(t *testing.T) {
 	db := setupTestDB(t)
 	defer cleanupTestDB(t, db)
 
-	// Create a test user
 	user := &entity.User{
 		Name:       "John Doe",
 		Email:      "john@example.com",

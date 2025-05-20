@@ -24,7 +24,7 @@ var validate = validator.New()
 
 // BeforeCreate hook to hash password and set defaults
 func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
-	// Hash password
+
 	if u.Password != "" {
 		u.Password, err = helpers.HashPassword(u.Password)
 		if err != nil {
@@ -32,17 +32,14 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 		}
 	}
 
-	// Ensure UUID is set
 	if u.ID == uuid.Nil {
 		u.ID = uuid.New()
 	}
 
-	// Set default role if not specified
 	if u.Role == "" {
 		u.Role = "user"
 	}
 
-	// Validate the user
 	if err := validate.Struct(u); err != nil {
 		return err
 	}
@@ -52,7 +49,7 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 
 // BeforeUpdate hook to handle password updates
 func (u *User) BeforeUpdate(_ *gorm.DB) (err error) {
-	// Only hash password if it has been changed
+
 	if u.Password != "" {
 		u.Password, err = helpers.HashPassword(u.Password)
 		if err != nil {

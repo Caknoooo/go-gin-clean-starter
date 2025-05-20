@@ -45,7 +45,7 @@ func TestHashPassword(t *testing.T) {
 				} else {
 					assert.NoError(t, err)
 					assert.NotEmpty(t, hash)
-					// Verify the hash is in bcrypt format
+
 					assert.Greater(t, len(hash), 10) // bcrypt hashes are typically 60 chars
 				}
 			},

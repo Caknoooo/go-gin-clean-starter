@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MockUserRouteRegistrar mocks the User route registration function
 type MockUserRouteRegistrar struct {
 	mock.Mock
 }
@@ -19,7 +18,7 @@ func (m *MockUserRouteRegistrar) User(server *gin.Engine, injector *do.Injector)
 }
 
 func TestRegisterRoutes(t *testing.T) {
-	// Create mock server and injector
+
 	mockEngine := gin.Default()
 	mockInjector := do.New()
 

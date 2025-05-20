@@ -2,10 +2,11 @@ package repository_test
 
 import (
 	"context"
-	"github.com/Caknoooo/go-gin-clean-starter/repository"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/Caknoooo/go-gin-clean-starter/repository"
 
 	"github.com/Caknoooo/go-gin-clean-starter/entity"
 	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
@@ -15,7 +16,7 @@ import (
 )
 
 func TestRefreshTokenRepository(t *testing.T) {
-	// Start test container
+
 	testContainer, err := container.StartTestContainer()
 	if err != nil {
 		t.Fatalf("failed to start test container: %v", err)
@@ -27,7 +28,6 @@ func TestRefreshTokenRepository(t *testing.T) {
 		}
 	}(testContainer)
 
-	// Set environment variables for database connection
 	err = os.Setenv("DB_HOST", testContainer.Host)
 	if err != nil {
 		panic(err)
@@ -49,7 +49,6 @@ func TestRefreshTokenRepository(t *testing.T) {
 		panic(err)
 	}
 
-	// Setup database connection
 	db := container.SetUpDatabaseConnection()
 	defer func(db *gorm.DB) {
 		err := container.CloseDatabaseConnection(db)
@@ -58,16 +57,13 @@ func TestRefreshTokenRepository(t *testing.T) {
 		}
 	}(db)
 
-	// Migrate the schema
 	err = db.AutoMigrate(&entity.User{}, &entity.RefreshToken{})
 	if err != nil {
 		t.Fatalf("failed to migrate schema: %v", err)
 	}
 
-	// Initialize repository
 	repo := repository.NewRefreshTokenRepository(db)
 
-	// Create a test user
 	user := entity.User{
 		ID:         uuid.New(),
 		Name:       "Test User",

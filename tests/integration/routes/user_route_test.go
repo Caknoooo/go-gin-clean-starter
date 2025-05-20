@@ -31,38 +31,32 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// Setup test container
+
 	testContainer, err := container.StartTestContainer()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start test container: %v", err))
 	}
 
-	// Set environment variables for database connection
 	os.Setenv("DB_HOST", testContainer.Host)
 	os.Setenv("DB_PORT", testContainer.Port)
 	os.Setenv("DB_USER", "testuser")
 	os.Setenv("DB_PASS", "testpassword")
 	os.Setenv("DB_NAME", "testdb")
 
-	// Setup database connection
 	db = container.SetUpDatabaseConnection()
 
-	// Auto migrate required tables
 	if err := db.AutoMigrate(&entity.User{}, &entity.RefreshToken{}); err != nil {
 		panic(fmt.Sprintf("Failed to migrate tables: %v", err))
 	}
 
-	// Setup dependency injection
 	injector = do.New()
 
-	// Provide database dependency
 	do.ProvideNamed(
 		injector, constants.DB, func(i *do.Injector) (*gorm.DB, error) {
 			return db, nil
 		},
 	)
 
-	// Provide JWTService dependency
 	jwtService := service.NewJWTService()
 	do.ProvideNamed(
 		injector, constants.JWTService, func(i *do.Injector) (service.JWTService, error) {
@@ -70,13 +64,10 @@ func TestMain(m *testing.M) {
 		},
 	)
 
-	// Provide user dependencies
 	provider.ProvideUserDependencies(injector)
 
-	// Run tests
 	code := m.Run()
 
-	// Cleanup
 	if err := container.CloseDatabaseConnection(db); err != nil {
 		fmt.Printf("Failed to close database connection: %v\n", err)
 	}
@@ -84,7 +75,6 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Failed to stop test container: %v\n", err)
 	}
 
-	// Final database cleanup
 	db.Exec("DELETE FROM users")
 	db.Exec("DELETE FROM refresh_tokens")
 
@@ -92,22 +82,19 @@ func TestMain(m *testing.M) {
 }
 
 func TestUserRoutes(t *testing.T) {
-	// Create a new Gin router
+
 	router := gin.Default()
 
-	// Register user routes
 	routes.User(router, injector)
 
-	// Helper function to create a test user and get access token
 	createTestUserAndGetToken := func(t *testing.T) (string, string) {
 		registerReq := dto.UserCreateRequest{
 			Name:       fmt.Sprintf("Test User %d", time.Now().UnixNano()),
-			TelpNumber: "08123456789", // Add telp_number
+			TelpNumber: "08123456789",
 			Email:      fmt.Sprintf("test_%d@example.com", time.Now().UnixNano()),
 			Password:   "password123",
 		}
 
-		// Create multipart form request for registration
 		body := new(bytes.Buffer)
 		writer := multipart.NewWriter(body)
 		writer.WriteField("name", registerReq.Name)
@@ -128,7 +115,6 @@ func TestUserRoutes(t *testing.T) {
 			t.Fatalf("Failed to register test user: status %d, body: %s", regRec.Code, regRec.Body.String())
 		}
 
-		// Login to get token
 		loginReq := dto.UserLoginRequest{
 			Email:    registerReq.Email,
 			Password: registerReq.Password,

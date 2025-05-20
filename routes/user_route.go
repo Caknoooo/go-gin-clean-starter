@@ -15,7 +15,7 @@ var User = func(route *gin.Engine, injector *do.Injector) {
 
 	routes := route.Group("/api/user")
 	{
-		// User
+
 		routes.POST("", userController.Register)
 		routes.GET("", userController.GetAllUser)
 		routes.POST("/login", userController.Login)

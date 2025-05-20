@@ -1,11 +1,12 @@
 package config_test
 
 import (
-	"github.com/Caknoooo/go-gin-clean-starter/config"
-	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/Caknoooo/go-gin-clean-starter/config"
+	"github.com/Caknoooo/go-gin-clean-starter/tests/integration/container"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,12 +19,11 @@ type EmailConfigTestSuite struct {
 }
 
 func (suite *EmailConfigTestSuite) SetupSuite() {
-	// Start MailHog containers
+
 	container, err := container.StartTestContainer()
 	require.NoError(suite.T(), err)
 	suite.emailContainer = container
 
-	// Set environment variables for tests
 	err = os.Setenv("SMTP_HOST", container.Host)
 	if err != nil {
 		panic(err)
@@ -47,7 +47,7 @@ func (suite *EmailConfigTestSuite) SetupSuite() {
 }
 
 func (suite *EmailConfigTestSuite) TearDownSuite() {
-	// Clean up environment
+
 	err := os.Unsetenv("SMTP_HOST")
 	if err != nil {
 		panic(err)
@@ -69,7 +69,6 @@ func (suite *EmailConfigTestSuite) TearDownSuite() {
 		panic(err)
 	}
 
-	// Stop containers
 	if suite.emailContainer != nil {
 		err := suite.emailContainer.Stop()
 		require.NoError(suite.T(), err)
@@ -77,12 +76,11 @@ func (suite *EmailConfigTestSuite) TearDownSuite() {
 }
 
 func (suite *EmailConfigTestSuite) TestNewEmailConfig_Integration() {
-	// Test that we can create a valid emailConfig with the test container
+
 	emailConfig, err := config.NewEmailConfig()
 	require.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), emailConfig)
 
-	// Verify the emailConfig values
 	assert.Equal(suite.T(), os.Getenv("SMTP_HOST"), emailConfig.Host)
 	port, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	assert.Equal(suite.T(), port, emailConfig.Port)
