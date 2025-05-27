@@ -30,7 +30,7 @@ func run(server *gin.Engine) {
 		routes.LoggerRoute(server)
 	}
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("GOLANG_PORT")
 	if port == "" {
 		port = "8888"
 	}
