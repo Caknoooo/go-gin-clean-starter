@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/Caknoooo/go-gin-clean-starter/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/controller"
 	"github.com/Caknoooo/go-gin-clean-starter/repository"
 	"github.com/Caknoooo/go-gin-clean-starter/service"
@@ -9,10 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ProvideUserDependencies(injector *do.Injector) {
-	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
-	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
-
+func ProvideUserDependencies(injector *do.Injector, db *gorm.DB, jwtService service.JWTService) {
 	// Repository
 	userRepository := repository.NewUserRepository(db)
 	refreshTokenRepository := repository.NewRefreshTokenRepository(db)

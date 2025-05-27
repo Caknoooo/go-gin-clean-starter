@@ -26,7 +26,8 @@ func SetupControllerUser() controller.UserController {
 		db             = SetUpDatabaseConnection()
 		userRepo       = repository.NewUserRepository(db)
 		jwtService     = service.NewJWTService()
-		userService    = service.NewUserService(userRepo, jwtService)
+		refreshTokenRepo = repository.NewRefreshTokenRepository(db)
+		userService    = service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
 		userController = controller.NewUserController(userService)
 	)
 
