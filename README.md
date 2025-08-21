@@ -2,7 +2,7 @@
 You can join in the development (Open Source). **Let's Go!!!**
 
 ## Introduction 👋
-> Clean Architecture is an approach to organizing code in an application that focuses on separating responsibilities and dependencies between components. In the context of Golang, Clean Architecture refers to the application of Clean Architecture principles in developing applications using the Go programming language.
+> The Controller–Service–Repository pattern is an approach to organizing application code that emphasizes clear separation of responsibilities across different layers. In the context of Golang, this pattern helps keep the codebase clean, testable, and scalable by dividing application logic into three main parts: Controller for handling requests and responses, Service for managing business logic, and Repository for accessing and managing data in storage or databases.
 
 
 ![image](https://github.com/user-attachments/assets/0b011bcc-f9c6-466e-a9da-964cce47a8bc)
