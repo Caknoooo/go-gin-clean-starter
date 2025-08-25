@@ -160,32 +160,6 @@ Replace ``example_script`` with the actual script name in **script.go** at scrip
 
 If you need the application to continue running after performing migrations, seeding, or executing a script, always append the ``--run`` option.
 
-## Clean Architecture Benefits 🏛️
-
-This project follows **Clean Architecture** principles, providing several key benefits:
-
-### 🔧 **Separation of Concerns**
-- **cmd/**: Application entry point
-- **modules/**: Business logic organized by domain (user, auth, etc.)
-- **database/**: Data persistence layer 
-- **pkg/**: Shared utilities and helpers
-- **providers/**: Dependency injection setup
-
-### 🧪 **Testability**
-- Each layer can be tested independently
-- Easy mocking of dependencies
-- Clear interfaces between layers
-
-### 🚀 **Scalability**
-- Add new modules without affecting existing code
-- Easy to extend functionality
-- Modular architecture supports team development
-
-### 🔄 **Maintainability** 
-- Clear code organization
-- Reduced coupling between components
-- Easy to locate and modify specific functionality
-
 ## What did you get?
 By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.
 
