@@ -1,9 +1,8 @@
-# Golang Gin Gorm Starter
+# Golang Gin Clean Starter
 You can join in the development (Open Source). **Let's Go!!!**
 
 ## Introduction 👋
-> The Controller–Service–Repository pattern is an approach to organizing application code that emphasizes clear separation of responsibilities across different layers. In the context of Golang, this pattern helps keep the codebase clean, testable, and scalable by dividing application logic into three main parts: Controller for handling requests and responses, Service for managing business logic, and Repository for accessing and managing data in storage or databases.
-
+> This project implements **Clean Architecture** principles with the Controller–Service–Repository pattern. This approach emphasizes clear separation of responsibilities across different layers in Golang applications. The architecture helps keep the codebase clean, testable, and scalable by dividing application logic into distinct modules with well-defined boundaries.
 
 ![image](https://github.com/user-attachments/assets/0b011bcc-f9c6-466e-a9da-964cce47a8bc)
 
@@ -45,17 +44,53 @@ http://your-domain/logs
   ```bash 
   cp .env.example .env
   ```
-There are 2 ways to do running
+
+## Available Make Commands 🚀
+The project includes a comprehensive Makefile with the following commands:
+
+### Development Commands
+```bash
+make dep          # Install and tidy dependencies
+make run          # Run the application locally
+make build        # Build the application binary
+make test         # Run tests
+```
+
+### Local Database Commands (without Docker)
+```bash
+make migrate-local      # Run migrations locally
+make seed-local        # Run seeders locally  
+make migrate-seed-local # Run migrations + seeders locally
+```
+
+### Docker Commands
+```bash
+make init-docker       # Initialize and build Docker containers
+make up               # Start Docker containers
+make down             # Stop Docker containers
+make logs             # View Docker logs
+```
+
+### Docker Database Commands
+```bash
+make migrate          # Run migrations in Docker
+make seed            # Run seeders in Docker
+make migrate-seed    # Run migrations + seeders in Docker
+make container-go    # Access Go container shell
+make container-postgres # Access PostgreSQL container
+```
+
+There are 2 ways to run the application:
 ### With Docker
-1. Build Docker
+1. Build and start Docker containers:
   ```bash
-  make up
+  make init-docker
   ```
-2. Run Initial UUID V4 for Auto Generate UUID
+2. Run Initial UUID V4 for Auto Generate UUID:
   ```bash
   make init-uuid
   ```
-3. Run Migration and Seeder
+3. Run Migration and Seeder:
   ```bash
   make migrate-seed
   ```
@@ -69,29 +104,32 @@ There are 2 ways to do running
   DB_NAME=
   DB_PORT=5432
   ```
-2. Open the terminal and follow these steps:
+2. Open the terminal and set up PostgreSQL:
   - If you haven't downloaded PostgreSQL, download it first.
   - Run:
     ```bash
     psql -U postgres
     ```
-  - Create the database according to what you put in `.env` => if using uuid-ossp or auto generate (check file **/entity/user.go**):
+  - Create the database according to what you put in `.env`:
     ```bash
     CREATE DATABASE your_database;
     \c your_database
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; // remove default:uuid_generate_v4() if you not use you can uncomment code in user_entity.go
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     \q
     ``` 
-3. Run the application:
+3. Install dependencies and run the application:
   ```bash
-  go run main.go
+  make dep              # Install dependencies
+  make migrate-local    # Run migrations
+  make seed-local       # Run seeders (optional)
+  make run              # Start the application
   ```
 
 ## Run Migrations, Seeder, and Script
 To run migrations, seed the database, and execute a script while keeping the application running, use the following command:
 
 ```bash
-go run main.go --migrate --seed --run --script:example_script
+go run cmd/main.go --migrate --seed --run --script:example_script
 ```
 
 - ``--migrate`` will apply all pending migrations.
@@ -102,25 +140,51 @@ go run main.go --migrate --seed --run --script:example_script
 #### Migrate Database 
 To migrate the database schema 
 ```bash
-go run main.go --migrate
+go run cmd/main.go --migrate
 ```
 This command will apply all pending migrations to your PostgreSQL database specified in `.env`
 
 #### Seeder Database 
 To seed the database with initial data:
 ```bash
-go run main.go --seed
+go run cmd/main.go --seed
 ```
 This command will populate the database with initial data using the seeders defined in your application.
 
 #### Script Run
 To run a specific script:
 ```bash
-go run main.go --script:example_script
+go run cmd/main.go --script:example_script
 ```
 Replace ``example_script`` with the actual script name in **script.go** at script folder
 
 If you need the application to continue running after performing migrations, seeding, or executing a script, always append the ``--run`` option.
+
+## Clean Architecture Benefits 🏛️
+
+This project follows **Clean Architecture** principles, providing several key benefits:
+
+### 🔧 **Separation of Concerns**
+- **cmd/**: Application entry point
+- **modules/**: Business logic organized by domain (user, auth, etc.)
+- **database/**: Data persistence layer 
+- **pkg/**: Shared utilities and helpers
+- **providers/**: Dependency injection setup
+
+### 🧪 **Testability**
+- Each layer can be tested independently
+- Easy mocking of dependencies
+- Clear interfaces between layers
+
+### 🚀 **Scalability**
+- Add new modules without affecting existing code
+- Easy to extend functionality
+- Modular architecture supports team development
+
+### 🔄 **Maintainability** 
+- Clear code organization
+- Reduced coupling between components
+- Easy to locate and modify specific functionality
 
 ## What did you get?
 By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.

@@ -3,7 +3,7 @@ tmp_dir = "docker/air/tmp"
 
 [build]
   bin = "docker/air/tmp/main"
-  cmd = "go build -o docker/air/tmp/main"
+  cmd = "go build -o docker/air/tmp/main cmd/main.go"
   include_ext = ["go"]
   exclude_dir = ["vendor", "tmp"]
 

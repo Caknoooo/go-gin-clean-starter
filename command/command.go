@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Caknoooo/go-gin-clean-starter/constants"
-	"github.com/Caknoooo/go-gin-clean-starter/migrations"
+	"github.com/Caknoooo/go-gin-clean-starter/database"
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/script"
 	"github.com/samber/do"
 	"gorm.io/gorm"
@@ -14,7 +14,7 @@ import (
 
 func Commands(injector *do.Injector) bool {
 	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
-	
+
 	var scriptName string
 
 	migrate := false
@@ -39,14 +39,14 @@ func Commands(injector *do.Injector) bool {
 	}
 
 	if migrate {
-		if err := migrations.Migrate(db); err != nil {
+		if err := database.Migrate(db); err != nil {
 			log.Fatalf("error migration: %v", err)
 		}
 		log.Println("migration completed successfully")
 	}
 
 	if seed {
-		if err := migrations.Seeder(db); err != nil {
+		if err := database.Seeder(db); err != nil {
 			log.Fatalf("error migration seeder: %v", err)
 		}
 		log.Println("seeder completed successfully")

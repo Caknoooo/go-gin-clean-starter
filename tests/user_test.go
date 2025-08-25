@@ -7,11 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Caknoooo/go-gin-clean-starter/controller"
-	"github.com/Caknoooo/go-gin-clean-starter/dto"
-	"github.com/Caknoooo/go-gin-clean-starter/entity"
-	"github.com/Caknoooo/go-gin-clean-starter/repository"
-	"github.com/Caknoooo/go-gin-clean-starter/service"
+	"github.com/Caknoooo/go-gin-clean-starter/database/entities"
+	authRepo "github.com/Caknoooo/go-gin-clean-starter/modules/auth/repository"
+	authService "github.com/Caknoooo/go-gin-clean-starter/modules/auth/service"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/controller"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/repository"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,20 +25,20 @@ func SetUpRoutes() *gin.Engine {
 
 func SetupControllerUser() controller.UserController {
 	var (
-		db             = SetUpDatabaseConnection()
-		userRepo       = repository.NewUserRepository(db)
-		jwtService     = service.NewJWTService()
-		refreshTokenRepo = repository.NewRefreshTokenRepository(db)
-		userService    = service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
-		userController = controller.NewUserController(userService)
+		db               = SetUpDatabaseConnection()
+		userRepo         = repository.NewUserRepository(db)
+		jwtService       = authService.NewJWTService()
+		refreshTokenRepo = authRepo.NewRefreshTokenRepository(db)
+		userService      = service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
+		userController   = controller.NewUserController(userService)
 	)
 
 	return userController
 }
 
-func InsertTestUser() ([]entity.User, error) {
+func InsertTestUser() ([]entities.User, error) {
 	db := SetUpDatabaseConnection()
-	users := []entity.User{
+	users := []entities.User{
 		{
 			Name:  "admin",
 			Email: "admin1234@gmail.com",
@@ -83,7 +85,7 @@ func Test_Register_OK(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	var out struct {
-		Data entity.User `json:"data"`
+		Data entities.User `json:"data"`
 	}
 	json.Unmarshal(w.Body.Bytes(), &out)
 	assert.Equal(t, payload.Email, out.Data.Email)
@@ -195,7 +197,7 @@ func Test_GetAllUser_OK(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	type Response struct {
-		Data []entity.User `json:"data"`
+		Data []entities.User `json:"data"`
 	}
 
 	var response Response
@@ -281,7 +283,7 @@ func Test_Me_OK(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	type Resp struct {
-		Data entity.User `json:"data"`
+		Data entities.User `json:"data"`
 	}
 	var resp Resp
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
@@ -313,7 +315,7 @@ func Test_Update_OK(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	type Resp struct {
-		Data entity.User `json:"data"`
+		Data entities.User `json:"data"`
 	}
 	var resp Resp
 	err := json.Unmarshal(w.Body.Bytes(), &resp)

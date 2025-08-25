@@ -13,16 +13,26 @@ dep:
 	go mod tidy
 
 run: 
-	go run main.go
+	go run cmd/main.go
 
 build: 
-	go build -o main main.go
+	go build -o main cmd/main.go
 
 run-build: build
 	./main
 
 test:
 	go test -v ./tests
+
+# Local commands (without docker)
+migrate-local:
+	go run cmd/main.go --migrate
+
+seed-local: 
+	go run cmd/main.go --seed
+
+migrate-seed-local: 
+	go run cmd/main.go --migrate --seed
 
 init-docker:
 	docker compose up -d --build
@@ -51,13 +61,13 @@ container-go:
 	docker exec -it ${CONTAINER_NAME} /bin/sh
 
 migrate:
-	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run main.go --migrate"
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate"
 
 seed: 
-	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run main.go --seed"
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --seed"
 
 migrate-seed: 
-	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run main.go --migrate --seed"
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate --seed"
 
 go-tidy:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
