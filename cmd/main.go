@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/Caknoooo/go-gin-clean-starter/command"
 	"github.com/Caknoooo/go-gin-clean-starter/middlewares"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/auth"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user"
@@ -17,7 +16,7 @@ import (
 
 func args(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
-		flag := command.Commands(injector)
+		flag := Commands(injector)
 		return flag
 	}
 
