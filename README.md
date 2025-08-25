@@ -4,6 +4,39 @@ You can join in the development (Open Source). **Let's Go!!!**
 ## Introduction 👋
 > This project implements **Clean Architecture** principles with the Controller–Service–Repository pattern. This approach emphasizes clear separation of responsibilities across different layers in Golang applications. The architecture helps keep the codebase clean, testable, and scalable by dividing application logic into distinct modules with well-defined boundaries.
 
+## New Project Structure
+## Project Structure 🏗️
+```
+go-gin-clean-starter/
+├── cmd/                 # Entry point (main.go)
+├── config/              # Config loader (env, logger, db, etc)
+├── database/            # Database layer
+│   ├── entities/        # Database entities
+│   ├── migrations/      # Database migrations
+│   ├── seeders/         # Database seeders
+│   ├── migration.go
+│   └── seeder.go
+├── middlewares/         # Middleware layer
+├── modules/             # Business modules
+│   ├── user/            # User module
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── repository/
+│   │   ├── dto/
+│   │   └── routes.go
+│   └── auth/            # Auth module
+├── pkg/                 # Shared utilities
+│   ├── helpers/
+│   ├── utils/
+│   ├── constants/
+│   └── dto/
+├── providers/           # Dependency injection
+├── script/              # Scripts and automation
+├── examples/            # Example implementations
+└── tests/               # Tests
+```
+
+
 ![image](https://github.com/user-attachments/assets/0b011bcc-f9c6-466e-a9da-964cce47a8bc)
 
 ## Logs Feature 📋
@@ -159,32 +192,6 @@ go run cmd/main.go --script:example_script
 Replace ``example_script`` with the actual script name in **script.go** at script folder
 
 If you need the application to continue running after performing migrations, seeding, or executing a script, always append the ``--run`` option.
-
-## Clean Architecture Benefits 🏛️
-
-This project follows **Clean Architecture** principles, providing several key benefits:
-
-### 🔧 **Separation of Concerns**
-- **cmd/**: Application entry point
-- **modules/**: Business logic organized by domain (user, auth, etc.)
-- **database/**: Data persistence layer 
-- **pkg/**: Shared utilities and helpers
-- **providers/**: Dependency injection setup
-
-### 🧪 **Testability**
-- Each layer can be tested independently
-- Easy mocking of dependencies
-- Clear interfaces between layers
-
-### 🚀 **Scalability**
-- Add new modules without affecting existing code
-- Easy to extend functionality
-- Modular architecture supports team development
-
-### 🔄 **Maintainability** 
-- Clear code organization
-- Reduced coupling between components
-- Easy to locate and modify specific functionality
 
 ## What did you get?
 By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.
