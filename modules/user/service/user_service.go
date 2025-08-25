@@ -9,6 +9,7 @@ import (
 	authService "github.com/Caknoooo/go-gin-clean-starter/modules/auth/service"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/repository"
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	commonDto "github.com/Caknoooo/go-gin-clean-starter/pkg/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/helpers"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/utils"
@@ -50,7 +51,6 @@ func NewUserService(
 }
 
 func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error) {
-	// Check if email already exists
 	_, exists, err := s.userRepository.CheckEmail(ctx, s.db, req.Email)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return dto.UserResponse{}, err
@@ -59,24 +59,16 @@ func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (
 		return dto.UserResponse{}, dto.ErrEmailAlreadyExists
 	}
 
-	// Create user entity
 	user := entities.User{
 		ID:         uuid.New(),
 		Name:       req.Name,
 		Email:      req.Email,
 		TelpNumber: req.TelpNumber,
-		Password:   req.Password, // Will be hashed in BeforeCreate hook
-		Role:       "user",
+		Password:   req.Password,
+		Role:       constants.ENUM_ROLE_USER,
 		IsVerified: false,
 	}
 
-	// Handle image upload if provided
-	if req.Image != nil {
-		// Handle image upload logic here
-		user.ImageUrl = "" // Set image URL after upload
-	}
-
-	// Save user
 	createdUser, err := s.userRepository.Register(ctx, s.db, user)
 	if err != nil {
 		return dto.UserResponse{}, err
@@ -141,17 +133,14 @@ func (s *userService) Verify(ctx context.Context, req dto.UserLoginRequest) (aut
 		return authDto.TokenResponse{}, dto.ErrEmailNotFound
 	}
 
-	// Check password
 	isValid, err := helpers.CheckPassword(user.Password, []byte(req.Password))
 	if err != nil || !isValid {
 		return authDto.TokenResponse{}, dto.ErrUserNotFound
 	}
 
-	// Generate tokens
 	accessToken := s.jwtService.GenerateAccessToken(user.ID.String(), user.Role)
 	refreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
-	// Save refresh token
 	refreshToken := entities.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    user.ID,
@@ -181,10 +170,8 @@ func (s *userService) SendVerificationEmail(ctx context.Context, req dto.SendVer
 		return dto.ErrAccountAlreadyVerified
 	}
 
-	// Generate verification token
 	verificationToken := s.jwtService.GenerateAccessToken(user.ID.String(), "verification")
 
-	// Send email (implement email sending logic)
 	subject := "Email Verification"
 	body := "Please verify your email using this token: " + verificationToken
 
@@ -192,25 +179,21 @@ func (s *userService) SendVerificationEmail(ctx context.Context, req dto.SendVer
 }
 
 func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailRequest) (dto.VerifyEmailResponse, error) {
-	// Validate token
 	token, err := s.jwtService.ValidateToken(req.Token)
 	if err != nil || !token.Valid {
 		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
 	}
 
-	// Get user ID from token
 	userId, err := s.jwtService.GetUserIDByToken(req.Token)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrTokenInvalid
 	}
 
-	// Get user
 	user, err := s.userRepository.GetUserById(ctx, s.db, userId)
 	if err != nil {
 		return dto.VerifyEmailResponse{}, dto.ErrUserNotFound
 	}
 
-	// Update verification status
 	user.IsVerified = true
 	updatedUser, err := s.userRepository.Update(ctx, s.db, user)
 	if err != nil {
@@ -224,13 +207,11 @@ func (s *userService) VerifyEmail(ctx context.Context, req dto.VerifyEmailReques
 }
 
 func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, userId string) (dto.UserUpdateResponse, error) {
-	// Get existing user
 	user, err := s.userRepository.GetUserById(ctx, s.db, userId)
 	if err != nil {
 		return dto.UserUpdateResponse{}, dto.ErrUserNotFound
 	}
 
-	// Update fields
 	if req.Name != "" {
 		user.Name = req.Name
 	}
@@ -241,7 +222,6 @@ func (s *userService) Update(ctx context.Context, req dto.UserUpdateRequest, use
 		user.TelpNumber = req.TelpNumber
 	}
 
-	// Save updates
 	updatedUser, err := s.userRepository.Update(ctx, s.db, user)
 	if err != nil {
 		return dto.UserUpdateResponse{}, err
@@ -262,23 +242,19 @@ func (s *userService) Delete(ctx context.Context, userId string) error {
 }
 
 func (s *userService) RefreshToken(ctx context.Context, req authDto.RefreshTokenRequest) (authDto.TokenResponse, error) {
-	// Find refresh token
 	refreshToken, err := s.refreshTokenRepository.FindByToken(ctx, s.db, req.RefreshToken)
 	if err != nil {
 		return authDto.TokenResponse{}, err
 	}
 
-	// Generate new tokens
 	accessToken := s.jwtService.GenerateAccessToken(refreshToken.UserID.String(), refreshToken.User.Role)
 	newRefreshTokenString, expiresAt := s.jwtService.GenerateRefreshToken()
 
-	// Delete old refresh token
 	err = s.refreshTokenRepository.DeleteByToken(ctx, s.db, req.RefreshToken)
 	if err != nil {
 		return authDto.TokenResponse{}, err
 	}
 
-	// Create new refresh token
 	newRefreshToken := entities.RefreshToken{
 		ID:        uuid.New(),
 		UserID:    refreshToken.UserID,
