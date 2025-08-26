@@ -21,7 +21,7 @@ func ProvideUserDependencies(injector *do.Injector, db *gorm.DB, jwtService auth
 	// Controller
 	do.Provide(
 		injector, func(i *do.Injector) (controller.UserController, error) {
-			return controller.NewUserController(userService), nil
+			return controller.NewUserController(i, userService), nil
 		},
 	)
 }
