@@ -1,4 +1,4 @@
-package main
+package script
 
 import (
 	"log"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/Caknoooo/go-gin-clean-starter/database"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
-	"github.com/Caknoooo/go-gin-clean-starter/script"
 	"github.com/samber/do"
 	"gorm.io/gorm"
 )
@@ -53,7 +52,7 @@ func Commands(injector *do.Injector) bool {
 	}
 
 	if scriptFlag {
-		if err := script.Script(scriptName, db); err != nil {
+		if err := Script(scriptName, db); err != nil {
 			log.Fatalf("error script: %v", err)
 		}
 		log.Println("script run successfully")

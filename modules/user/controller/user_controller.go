@@ -5,10 +5,14 @@ import (
 
 	authDto "github.com/Caknoooo/go-gin-clean-starter/modules/auth/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/query"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
-	commonDto "github.com/Caknoooo/go-gin-clean-starter/pkg/dto"
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/utils"
+	"github.com/Caknoooo/go-pagination"
 	"github.com/gin-gonic/gin"
+	"github.com/samber/do"
+	"gorm.io/gorm"
 )
 
 type (
@@ -26,12 +30,15 @@ type (
 
 	userController struct {
 		userService service.UserService
+		db          *gorm.DB
 	}
 )
 
-func NewUserController(us service.UserService) UserController {
+func NewUserController(injector *do.Injector, us service.UserService) UserController {
+	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
 	return &userController{
 		userService: us,
+		db:          db,
 	}
 }
 
@@ -55,28 +62,21 @@ func (c *userController) Register(ctx *gin.Context) {
 }
 
 func (c *userController) GetAllUser(ctx *gin.Context) {
-	var req commonDto.PaginationRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
+	var filter = &query.UserFilter{}
+	filter.BindPagination(ctx)
 
-	result, err := c.userService.GetAllUserWithPagination(ctx.Request.Context(), req)
+	ctx.ShouldBindQuery(filter)
+
+	users, total, err := pagination.PaginatedQueryWithIncludable[query.User](c.db, filter)
 	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_LIST_USER, err.Error(), nil)
+		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_USER, err.Error(), nil)
 		ctx.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	resp := utils.Response{
-		Status:  true,
-		Message: dto.MESSAGE_SUCCESS_GET_LIST_USER,
-		Data:    result.Data,
-		Meta:    result.PaginationResponse,
-	}
-
-	ctx.JSON(http.StatusOK, resp)
+	paginationResponse := pagination.CalculatePagination(filter.Pagination, total)
+	response := pagination.NewPaginatedResponse(http.StatusOK, "Users retrieved successfully", users, paginationResponse)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (c *userController) Me(ctx *gin.Context) {

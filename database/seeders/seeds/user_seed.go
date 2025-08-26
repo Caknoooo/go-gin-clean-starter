@@ -11,7 +11,7 @@ import (
 )
 
 func ListUserSeeder(db *gorm.DB) error {
-	jsonFile, err := os.Open("./migrations/json/users.json")
+	jsonFile, err := os.Open("./database/seeders/json/users.json")
 	if err != nil {
 		return err
 	}

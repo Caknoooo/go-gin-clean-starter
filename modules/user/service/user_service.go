@@ -10,7 +10,6 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/repository"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
-	commonDto "github.com/Caknoooo/go-gin-clean-starter/pkg/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/helpers"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/utils"
 	"github.com/google/uuid"
@@ -19,7 +18,6 @@ import (
 
 type UserService interface {
 	Register(ctx context.Context, req dto.UserCreateRequest) (dto.UserResponse, error)
-	GetAllUserWithPagination(ctx context.Context, req commonDto.PaginationRequest) (dto.UserPaginationResponse, error)
 	GetUserById(ctx context.Context, userId string) (dto.UserResponse, error)
 	Verify(ctx context.Context, req dto.UserLoginRequest) (authDto.TokenResponse, error)
 	SendVerificationEmail(ctx context.Context, req dto.SendVerificationEmailRequest) error
@@ -82,31 +80,6 @@ func (s *userService) Register(ctx context.Context, req dto.UserCreateRequest) (
 		Role:       createdUser.Role,
 		ImageUrl:   createdUser.ImageUrl,
 		IsVerified: createdUser.IsVerified,
-	}, nil
-}
-
-func (s *userService) GetAllUserWithPagination(ctx context.Context, req commonDto.PaginationRequest) (dto.UserPaginationResponse, error) {
-	result, err := s.userRepository.GetAllUserWithPagination(ctx, s.db, req)
-	if err != nil {
-		return dto.UserPaginationResponse{}, err
-	}
-
-	var userResponses []dto.UserResponse
-	for _, user := range result.Users {
-		userResponses = append(userResponses, dto.UserResponse{
-			ID:         user.ID.String(),
-			Name:       user.Name,
-			Email:      user.Email,
-			TelpNumber: user.TelpNumber,
-			Role:       user.Role,
-			ImageUrl:   user.ImageUrl,
-			IsVerified: user.IsVerified,
-		})
-	}
-
-	return dto.UserPaginationResponse{
-		Data:               userResponses,
-		PaginationResponse: result.PaginationResponse,
 	}, nil
 }
 

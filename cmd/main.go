@@ -8,6 +8,7 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/modules/auth"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user"
 	"github.com/Caknoooo/go-gin-clean-starter/providers"
+	"github.com/Caknoooo/go-gin-clean-starter/script"
 	"github.com/samber/do"
 
 	"github.com/common-nighthawk/go-figure"
@@ -16,7 +17,7 @@ import (
 
 func args(injector *do.Injector) bool {
 	if len(os.Args) > 1 {
-		flag := Commands(injector)
+		flag := script.Commands(injector)
 		return flag
 	}
 
