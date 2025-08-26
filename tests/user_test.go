@@ -14,7 +14,9 @@ import (
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/repository"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
+	"github.com/Caknoooo/go-gin-clean-starter/providers"
 	"github.com/gin-gonic/gin"
+	"github.com/samber/do"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,14 +25,21 @@ func SetUpRoutes() *gin.Engine {
 	return r
 }
 
+func SetUpInjector() *do.Injector {
+	injector := do.New()
+	providers.RegisterDependencies(injector)
+	return injector
+}
+
 func SetupControllerUser() controller.UserController {
 	var (
 		db               = SetUpDatabaseConnection()
+		injector         = SetUpInjector()
 		userRepo         = repository.NewUserRepository(db)
 		jwtService       = authService.NewJWTService()
 		refreshTokenRepo = authRepo.NewRefreshTokenRepository(db)
 		userService      = service.NewUserService(userRepo, refreshTokenRepo, jwtService, db)
-		userController   = controller.NewUserController(userService)
+		userController   = controller.NewUserController(injector, userService)
 	)
 
 	return userController
