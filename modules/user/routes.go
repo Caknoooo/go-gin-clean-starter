@@ -1,24 +1,28 @@
 package user
 
 import (
+	"github.com/Caknoooo/go-gin-clean-starter/middlewares"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/auth/service"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/controller"
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
 )
 
 func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
 	userController := do.MustInvoke[controller.UserController](injector)
+	jwtService := do.MustInvokeNamed[service.JWTService](injector, constants.JWTService)
 
-	userRoutes := server.Group("/api/v1")
+	userRoutes := server.Group("/api/user")
 	{
-		userRoutes.GET("/user", userController.GetAllUser)
-		userRoutes.GET("/user/:id", userController.Me)
-		userRoutes.POST("/user", userController.Register)
-		userRoutes.PUT("/user/:id", userController.Update)
-		userRoutes.DELETE("/user/:id", userController.Delete)
-		userRoutes.POST("/user/send-verification-email", userController.SendVerificationEmail)
-		userRoutes.POST("/user/verify-email", userController.VerifyEmail)
-		userRoutes.POST("/user/login", userController.Login)
-		userRoutes.POST("/user/refresh", userController.Refresh)
+		userRoutes.POST("", userController.Register)
+		userRoutes.POST("/login", userController.Login)
+		userRoutes.GET("", userController.GetAllUser)
+		userRoutes.GET("/me", middlewares.Authenticate(jwtService), userController.Me)
+		userRoutes.PUT("/:id", middlewares.Authenticate(jwtService), userController.Update)
+		userRoutes.DELETE("/:id", middlewares.Authenticate(jwtService), userController.Delete)
+		userRoutes.POST("/send-verification-email", userController.SendVerificationEmail)
+		userRoutes.POST("/verify-email", userController.VerifyEmail)
+		userRoutes.POST("/refresh", middlewares.Authenticate(jwtService), userController.Refresh)
 	}
 }
