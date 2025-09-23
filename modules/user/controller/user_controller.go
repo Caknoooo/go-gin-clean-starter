@@ -3,10 +3,10 @@ package controller
 import (
 	"net/http"
 
-	authDto "github.com/Caknoooo/go-gin-clean-starter/modules/auth/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/dto"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/query"
 	"github.com/Caknoooo/go-gin-clean-starter/modules/user/service"
+	"github.com/Caknoooo/go-gin-clean-starter/modules/user/validation"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/utils"
 	"github.com/Caknoooo/go-pagination"
@@ -17,48 +17,27 @@ import (
 
 type (
 	UserController interface {
-		Register(ctx *gin.Context)
-		Login(ctx *gin.Context)
 		Me(ctx *gin.Context)
-		Refresh(ctx *gin.Context)
 		GetAllUser(ctx *gin.Context)
-		SendVerificationEmail(ctx *gin.Context)
-		VerifyEmail(ctx *gin.Context)
 		Update(ctx *gin.Context)
 		Delete(ctx *gin.Context)
 	}
 
 	userController struct {
-		userService service.UserService
-		db          *gorm.DB
+		userService    service.UserService
+		userValidation *validation.UserValidation
+		db             *gorm.DB
 	}
 )
 
 func NewUserController(injector *do.Injector, us service.UserService) UserController {
 	db := do.MustInvokeNamed[*gorm.DB](injector, constants.DB)
+	userValidation := validation.NewUserValidation()
 	return &userController{
-		userService: us,
-		db:          db,
+		userService:    us,
+		userValidation: userValidation,
+		db:             db,
 	}
-}
-
-func (c *userController) Register(ctx *gin.Context) {
-	var user dto.UserCreateRequest
-	if err := ctx.ShouldBind(&user); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	result, err := c.userService.Register(ctx.Request.Context(), user)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_REGISTER_USER, err.Error(), nil)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_REGISTER_USER, result)
-	ctx.JSON(http.StatusOK, res)
 }
 
 func (c *userController) GetAllUser(ctx *gin.Context) {
@@ -93,67 +72,16 @@ func (c *userController) Me(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (c *userController) Login(ctx *gin.Context) {
-	var req dto.UserLoginRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		response := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}
-
-	result, err := c.userService.Verify(ctx.Request.Context(), req)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_LOGIN, err.Error(), nil)
-		ctx.JSON(http.StatusBadRequest, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, result)
-	ctx.JSON(http.StatusOK, res)
-}
-
-func (c *userController) SendVerificationEmail(ctx *gin.Context) {
-	var req dto.SendVerificationEmailRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	err := c.userService.SendVerificationEmail(ctx.Request.Context(), req)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SEND_VERIFICATION_EMAIL_SUCCESS, nil)
-	ctx.JSON(http.StatusOK, res)
-}
-
-func (c *userController) VerifyEmail(ctx *gin.Context) {
-	var req dto.VerifyEmailRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	result, err := c.userService.VerifyEmail(ctx.Request.Context(), req)
-	if err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_VERIFY_EMAIL, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_VERIFY_EMAIL, result)
-	ctx.JSON(http.StatusOK, res)
-}
-
 func (c *userController) Update(ctx *gin.Context) {
 	var req dto.UserUpdateRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+
+	if err := c.userValidation.ValidateUserUpdateRequest(req); err != nil {
+		res := utils.BuildResponseFailed("Validation failed", err.Error(), nil)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
@@ -180,24 +108,5 @@ func (c *userController) Delete(ctx *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_USER, nil)
-	ctx.JSON(http.StatusOK, res)
-}
-
-func (c *userController) Refresh(ctx *gin.Context) {
-	var req authDto.RefreshTokenRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		res := utils.BuildResponseFailed(dto.MESSAGE_FAILED_GET_DATA_FROM_BODY, err.Error(), nil)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-
-	result, err := c.userService.RefreshToken(ctx.Request.Context(), req)
-	if err != nil {
-		res := utils.BuildResponseFailed(authDto.MESSAGE_FAILED_REFRESH_TOKEN, err.Error(), nil)
-		ctx.JSON(http.StatusUnauthorized, res)
-		return
-	}
-
-	res := utils.BuildResponseSuccess(authDto.MESSAGE_SUCCESS_REFRESH_TOKEN, result)
 	ctx.JSON(http.StatusOK, res)
 }

@@ -1,15 +1,23 @@
 package auth
 
 import (
+	"github.com/Caknoooo/go-gin-clean-starter/modules/auth/controller"
 	"github.com/gin-gonic/gin"
 	"github.com/samber/do"
 )
 
 func RegisterRoutes(server *gin.Engine, injector *do.Injector) {
-	// Auth routes akan ditambahkan nanti ketika auth controller sudah dibuat
-	authRoutes := server.Group("/api/v1/auth")
+	authController := do.MustInvoke[controller.AuthController](injector)
+
+	authRoutes := server.Group("/api/auth")
 	{
-		// authRoutes.POST("/refresh-token", authController.RefreshToken)
-		_ = authRoutes // untuk menghindari unused variable
+		authRoutes.POST("/register", authController.Register)
+		authRoutes.POST("/login", authController.Login)
+		authRoutes.POST("/refresh", authController.RefreshToken)
+		authRoutes.POST("/logout", authController.Logout)
+		authRoutes.POST("/send-verification-email", authController.SendVerificationEmail)
+		authRoutes.POST("/verify-email", authController.VerifyEmail)
+		authRoutes.POST("/send-password-reset", authController.SendPasswordReset)
+		authRoutes.POST("/reset-password", authController.ResetPassword)
 	}
 }

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -15,11 +15,9 @@ func RunExtension(db *gorm.DB) {
 }
 
 func SetUpDatabaseConnection() *gorm.DB {
-	if os.Getenv("APP_ENV") != constants.ENUM_RUN_PRODUCTION {
-		err := godotenv.Load(".env")
-		if err != nil {
-			panic(err)
-		}
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic(err)
 	}
 
 	dbUser := os.Getenv("DB_USER")
@@ -43,6 +41,51 @@ func SetUpDatabaseConnection() *gorm.DB {
 	RunExtension(db)
 
 	return db
+}
+
+func SetUpTestDatabaseConnection() *gorm.DB {
+	dbUser := getEnvOrDefault("DB_USER", "postgres")
+	dbPass := getEnvOrDefault("DB_PASS", "password")
+	dbHost := getEnvOrDefault("DB_HOST", "localhost")
+	dbName := getEnvOrDefault("DB_NAME", "test_db")
+	dbPort := getEnvOrDefault("DB_PORT", "5432")
+
+	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v", dbHost, dbUser, dbPass, dbName, dbPort)
+
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	RunExtension(db)
+
+	return db
+}
+
+func SetUpInMemoryDatabase() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
+func SetUpTestSQLiteDatabase() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func CloseDatabaseConnection(db *gorm.DB) {
