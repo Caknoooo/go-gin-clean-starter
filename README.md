@@ -2,13 +2,9 @@
 
 You can join in the development (Open Source). **Let's Go!!!**
 
-<div align="left">
-  <img align="right" width="200" height="200" alt="Go Gin Clean Architecture" src="https://github.com/user-attachments/assets/b7e2f353-bb6b-4ef1-88e9-6ab9bf2b8327" style="margin-top: -50px;" />
-  
-  [![Go Report Card](https://goreportcard.com/badge/github.com/Caknoooo/go-gin-clean-starter)](https://goreportcard.com/report/github.com/Caknoooo/go-gin-clean-starter) [![Go Reference](https://pkg.go.dev/badge/github.com/Caknoooo/go-gin-clean-starter.svg)](https://pkg.go.dev/github.com/Caknoooo/go-gin-clean-starter) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Release](https://img.shields.io/badge/release-v2.1.0-green.svg)](https://github.com/Caknoooo/go-gin-clean-starter/releases)
-  
-  [![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.20-blue.svg)](https://golang.org/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%3E%3D%2015.0-blue.svg)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/) [![Gin](https://img.shields.io/badge/Gin-Web%20Framework-red.svg)](https://gin-gonic.com/) [![GORM](https://img.shields.io/badge/GORM-ORM-green.svg)](https://gorm.io/)
-</div>
+[![Go Report Card](https://goreportcard.com/badge/github.com/Caknoooo/go-gin-clean-starter)](https://goreportcard.com/report/github.com/Caknoooo/go-gin-clean-starter) [![Go Reference](https://pkg.go.dev/badge/github.com/Caknoooo/go-gin-clean-starter.svg)](https://pkg.go.dev/github.com/Caknoooo/go-gin-clean-starter) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Release](https://img.shields.io/badge/release-v2.1.0-green.svg)](https://github.com/Caknoooo/go-gin-clean-starter/releases) <img align="right" width="200" height="200" alt="Go Gin Clean Architecture" src="https://github.com/user-attachments/assets/b7e2f353-bb6b-4ef1-88e9-6ab9bf2b8327" />
+
+[![Go Version](https://img.shields.io/badge/Go-%3E%3D%201.20-blue.svg)](https://golang.org/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%3E%3D%2015.0-blue.svg)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-Supported-blue.svg)](https://www.docker.com/) [![Gin](https://img.shields.io/badge/Gin-Web%20Framework-red.svg)](https://gin-gonic.com/) [![GORM](https://img.shields.io/badge/GORM-ORM-green.svg)](https://gorm.io/)
 
 ## Introduction 👋
 > This project implements **Clean Architecture** principles with the Controller–Service–Repository pattern. This approach emphasizes clear separation of responsibilities across different layers in Golang applications. The architecture helps keep the codebase clean, testable, and scalable by dividing application logic into distinct modules with well-defined boundaries.
