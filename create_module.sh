@@ -7,10 +7,8 @@ fi
 
 MODULE_NAME=$1
 
-# ✅ Convert snake_case -> PascalCase (cross-platform)
 PASCAL_MODULE_NAME=$(echo "$MODULE_NAME" | awk -F'_' '{for(i=1;i<=NF;i++){ $i=toupper(substr($i,1,1)) substr($i,2)} }1' OFS='')
 
-# ✅ Convert PascalCase -> camelCase (untuk nama struct/variabel)
 CAMEL_MODULE_NAME="$(tr '[:upper:]' '[:lower:]' <<< ${PASCAL_MODULE_NAME:0:1})${PASCAL_MODULE_NAME:1}"
 
 echo "🚀 Creating module: $MODULE_NAME -> $PASCAL_MODULE_NAME"
@@ -24,7 +22,6 @@ mkdir -p modules/$MODULE_NAME/validation
 mkdir -p modules/$MODULE_NAME/tests
 mkdir -p modules/$MODULE_NAME/query
 
-# Controller
 cat > modules/$MODULE_NAME/controller/${MODULE_NAME}_controller.go << EOF
 package controller
 
@@ -58,7 +55,6 @@ func New${PASCAL_MODULE_NAME}Controller(injector *do.Injector, s service.${PASCA
 }
 EOF
 
-# Service
 cat > modules/$MODULE_NAME/service/${MODULE_NAME}_service.go << EOF
 package service
 
@@ -86,7 +82,6 @@ func New${PASCAL_MODULE_NAME}Service(
 }
 EOF
 
-# Repository
 cat > modules/$MODULE_NAME/repository/${MODULE_NAME}_repository.go << EOF
 package repository
 
@@ -108,7 +103,6 @@ func New${PASCAL_MODULE_NAME}Repository(db *gorm.DB) ${PASCAL_MODULE_NAME}Reposi
 }
 EOF
 
-# DTO
 cat > modules/$MODULE_NAME/dto/${MODULE_NAME}_dto.go << EOF
 package dto
 
@@ -126,7 +120,6 @@ type (
 )
 EOF
 
-# Validation
 cat > modules/$MODULE_NAME/validation/${MODULE_NAME}_validation.go << EOF
 package validation
 
@@ -146,7 +139,6 @@ func New${PASCAL_MODULE_NAME}Validation() *${PASCAL_MODULE_NAME}Validation {
 }
 EOF
 
-# Tests
 for file in controller service repository validation; do
 cat > modules/$MODULE_NAME/tests/${MODULE_NAME}_${file}_test.go << EOF
 package tests
@@ -162,7 +154,6 @@ func Test${PASCAL_MODULE_NAME}$(echo $file | sed 's/.*/\u&/') (t *testing.T) {
 EOF
 done
 
-# Routes
 cat > modules/$MODULE_NAME/routes.go << EOF
 package $MODULE_NAME
 
