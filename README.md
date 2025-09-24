@@ -23,14 +23,13 @@ To view the logs:
 http://your-domain/logs
 ```
 
+![Logs Interface](https://github.com/user-attachments/assets/adda0afb-a1e4-4e05-b44e-87225fe63309)
+
 ### Features
 - **Monthly Filtering**: Filter logs by selecting different months
 - **Real-time Refresh**: Instantly refresh logs with the refresh button
 - **Expandable Entries**: Click on any log entry to view its full content
 - **Modern UI**: Clean and responsive interface with glass-morphism design
-
-![Logs Interface](https://github.com/user-attachments/assets/adda0afb-a1e4-4e05-b44e-87225fe63309)
-
 
 ## Quick Start 🚀
 
