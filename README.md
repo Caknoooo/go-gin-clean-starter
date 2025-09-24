@@ -9,7 +9,7 @@ You can join in the development (Open Source). **Let's Go!!!**
 ## Introduction 👋
 > This project implements **Clean Architecture** principles with the Controller–Service–Repository pattern. This approach emphasizes clear separation of responsibilities across different layers in Golang applications. The architecture helps keep the codebase clean, testable, and scalable by dividing application logic into distinct modules with well-defined boundaries.
 
-![image](https://github.com/user-attachments/assets/0b011bcc-f9c6-466e-a9da-964cce47a8bc)
+<img width="1485" height="610" alt="Image" src="https://github.com/user-attachments/assets/918adf6d-9dc4-47fa-b9a6-3a10ca1e5242" />
 
 ## Logs Feature 📋
 
