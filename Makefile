@@ -24,6 +24,23 @@ run-build: build
 test:
 	go test -v ./tests
 
+test-auth:
+	go test -v ./modules/auth/tests/...
+
+test-user:
+	go test -v ./modules/user/tests/...
+
+test-all:
+	go test -v ./modules/.../tests/...
+
+test-coverage:
+	go test -v -coverprofile=coverage.out ./modules/.../tests/...
+	go tool cover -html=coverage.out
+
+module:
+	@if [ -z "$(name)" ]; then echo "Usage: make module name=<module_name>"; exit 1; fi
+	@./create_module.sh $(name)
+
 # Local commands (without docker)
 migrate-local:
 	go run cmd/main.go --migrate

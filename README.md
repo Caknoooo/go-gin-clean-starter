@@ -27,23 +27,29 @@ http://your-domain/logs
 ![Logs Interface](https://github.com/user-attachments/assets/adda0afb-a1e4-4e05-b44e-87225fe63309)
 
 
-## Prerequisite 🏆
+## Quick Start 🚀
+
+### Prerequisites
 - Go Version `>= go 1.20`
 - PostgreSQL Version `>= version 15.0`
 
-## How To Use
+### Installation
 1. Clone the repository or **Use This Template**
-  ```bash
-  git clone https://github.com/Caknoooo/go-gin-clean-starter.git
-  ```
+   ```bash
+   git clone https://github.com/Caknoooo/go-gin-clean-starter.git
+   ```
 2. Navigate to the project directory:
-  ```bash
-  cd go-gin-clean-starter
-  ```
+   ```bash
+   cd go-gin-clean-starter
+   ```
 3. Copy the example environment file and configure it:
-  ```bash 
-  cp .env.example .env
-  ```
+   ```bash 
+   cp .env.example .env
+   ```
+4. Install dependencies:
+   ```bash
+   make dep
+   ```
 
 ## Available Make Commands 🚀
 The project includes a comprehensive Makefile with the following commands:
@@ -53,7 +59,37 @@ The project includes a comprehensive Makefile with the following commands:
 make dep          # Install and tidy dependencies
 make run          # Run the application locally
 make build        # Build the application binary
-make test         # Run tests
+make run-build    # Build and run the application
+```
+
+### Module Generation Commands
+```bash
+make module name=<module_name>  # Generate a new module with all necessary files
+```
+
+**Example:**
+```bash
+make module name=product
+```
+
+This command will automatically create a complete module structure including:
+- Controller (`product_controller.go`)
+- Service (`product_service.go`) 
+- Repository (`product_repository.go`)
+- DTO (`product_dto.go`)
+- Validation (`product_validation.go`)
+- Routes (`routes.go`)
+- Test files for all components
+- Query directory (for custom queries)
+
+The generated module follows Clean Architecture principles and is ready to use with proper dependency injection setup.
+
+### Testing Commands
+```bash
+make test-auth      # Run auth module tests only
+make test-user      # Run user module tests only
+make test-all       # Run tests for all modules
+make test-coverage  # Run tests with coverage report
 ```
 
 ### Local Database Commands (without Docker)
@@ -80,95 +116,147 @@ make container-go    # Access Go container shell
 make container-postgres # Access PostgreSQL container
 ```
 
-There are 2 ways to run the application:
-### With Docker
+## Running the Application 🏃‍♂️
+
+There are two ways to run the application:
+
+### Option 1: With Docker
 1. Build and start Docker containers:
-  ```bash
-  make init-docker
-  ```
-2. Run Initial UUID V4 for Auto Generate UUID:
-  ```bash
-  make init-uuid
-  ```
-3. Run Migration and Seeder:
-  ```bash
-  make migrate-seed
-  ```
+   ```bash
+   make init-docker
+   ```
+2. Initialize UUID V4 extension for auto-generated UUIDs:
+   ```bash
+   make init-uuid
+   ```
+3. Run migrations and seeders:
+   ```bash
+   make migrate-seed
+   ```
+4. The application will be available at `http://localhost:8080`
 
-### Without Docker
+### Option 2: Without Docker
 1. Configure `.env` with your PostgreSQL credentials:
-  ```bash
-  DB_HOST=localhost
-  DB_USER=postgres
-  DB_PASS=
-  DB_NAME=
-  DB_PORT=5432
-  ```
-2. Open the terminal and set up PostgreSQL:
-  - If you haven't downloaded PostgreSQL, download it first.
-  - Run:
-    ```bash
-    psql -U postgres
-    ```
-  - Create the database according to what you put in `.env`:
-    ```bash
-    CREATE DATABASE your_database;
-    \c your_database
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-    \q
-    ``` 
-3. Install dependencies and run the application:
-  ```bash
-  make dep              # Install dependencies
-  make migrate-local    # Run migrations
-  make seed-local       # Run seeders (optional)
-  make run              # Start the application
-  ```
+   ```bash
+   DB_HOST=localhost
+   DB_USER=postgres
+   DB_PASS=your_password
+   DB_NAME=your_database
+   DB_PORT=5432
+   ```
+2. Set up PostgreSQL:
+   - Download and install PostgreSQL if you haven't already
+   - Create a database:
+     ```bash
+     psql -U postgres
+     CREATE DATABASE your_database;
+     \c your_database
+     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+     \q
+     ```
+3. Run the application:
+   ```bash
+   make migrate-local    # Run migrations
+   make seed-local       # Run seeders (optional)
+   make run              # Start the application
+   ```
 
-## Run Migrations, Seeder, and Script
-To run migrations, seed the database, and execute a script while keeping the application running, use the following command:
+## Advanced Usage 🔧
+
+### Running Migrations, Seeders, and Scripts
+You can run migrations, seed the database, and execute scripts while keeping the application running:
 
 ```bash
 go run cmd/main.go --migrate --seed --run --script:example_script
 ```
 
-- ``--migrate`` will apply all pending migrations.
-- ``--seed`` will seed the database with initial data.
-- ``--script:example_script`` will run the specified script (replace ``example_script`` with your script name).
-- ``--run`` will ensure the application continues running after executing the commands above.
+**Available flags:**
+- `--migrate`: Apply all pending migrations
+- `--seed`: Seed the database with initial data
+- `--script:example_script`: Run the specified script (replace `example_script` with your script name)
+- `--run`: Keep the application running after executing the commands above
 
-#### Migrate Database 
-To migrate the database schema 
+### Individual Commands
+
+#### Database Migration
 ```bash
 go run cmd/main.go --migrate
 ```
 This command will apply all pending migrations to your PostgreSQL database specified in `.env`
 
-#### Seeder Database 
-To seed the database with initial data:
+#### Database Seeding
 ```bash
 go run cmd/main.go --seed
 ```
 This command will populate the database with initial data using the seeders defined in your application.
 
-#### Script Run
-To run a specific script:
+#### Script Execution
 ```bash
 go run cmd/main.go --script:example_script
 ```
-Replace ``example_script`` with the actual script name in **script.go** at script folder
+Replace `example_script` with the actual script name in **script.go** at the script folder.
 
-If you need the application to continue running after performing migrations, seeding, or executing a script, always append the ``--run`` option.
+> **Note:** If you need the application to continue running after performing migrations, seeding, or executing a script, always append the `--run` option.
 
-## What did you get?
-By using this template, you get a ready-to-go architecture with pre-configured endpoints. The template provides a structured foundation for building your application using Golang with Clean Architecture principles.
+## What You Get 🎁
 
-### Postman Documentation
-You can explore the available endpoints and their usage in the [Postman Documentation](https://documenter.getpostman.com/view/29665461/2s9YJaZQCG). This documentation provides a comprehensive overview of the API endpoints, including request and response examples, making it easier to understand how to interact with the API.
+By using this template, you get a production-ready architecture with:
 
-### Issue / Pull Request Template
+### 🏗️ Clean Architecture Implementation
+- **Controller-Service-Repository pattern** with clear separation of concerns
+- **Dependency injection** using samber/do
+- **Modular structure** for easy maintenance and testing
+- **Consistent code organization** across all modules
 
-The repository includes templates for issues and pull requests to standardize contributions and improve the quality of discussions and code reviews.
+### 🚀 Pre-configured Features
+- **Authentication system** with JWT tokens
+- **User management** with email verification
+- **Password reset** functionality
+- **Database migrations** and seeders
+- **Comprehensive logging** system with web interface
+- **CORS middleware** for cross-origin requests
+- **Input validation** with go-playground/validator
 
-- **Issue Template**: Helps in reporting bugs or suggesting features by providing a structured format to capture all necessary information.
-- **Pull Request Template**: Guides contributors to provide a clear description of changes, related issues, and testing steps, ensuring smooth and efficient code reviews.
+### 📚 Documentation & Testing
+- **Postman collection** for API testing
+- **Comprehensive test suite** for all modules
+- **Code coverage** reporting
+- **Issue and PR templates** for better collaboration
+
+### 🔧 Developer Experience
+- **Hot reload** with Air for development
+- **Docker support** for easy deployment
+- **Make commands** for common tasks
+- **Module generator** for rapid development
+- **Structured logging** with query tracking
+
+## 📖 Documentation
+
+### API Documentation
+Explore the available endpoints and their usage in the [Postman Documentation](https://documenter.getpostman.com/view/29665461/2s9YJaZQCG). This documentation provides a comprehensive overview of the API endpoints, including request and response examples.
+
+### Contributing
+We welcome contributions! The repository includes templates for issues and pull requests to standardize contributions and improve the quality of discussions and code reviews.
+
+- **Issue Template**: Helps in reporting bugs or suggesting features by providing a structured format
+- **Pull Request Template**: Guides contributors to provide clear descriptions of changes and testing steps
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Gin Web Framework](https://gin-gonic.com/)
+- [GORM](https://gorm.io/)
+- [Samber/do](https://github.com/samber/do) for dependency injection
+- [Go Playground Validator](https://github.com/go-playground/validator)
+- [Testify](https://github.com/stretchr/testify) for testing
