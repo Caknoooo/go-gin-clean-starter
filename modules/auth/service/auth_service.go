@@ -66,7 +66,7 @@ func (s *authService) Register(ctx context.Context, req userDto.UserCreateReques
 		Name:       req.Name,
 		Email:      req.Email,
 		TelpNumber: req.TelpNumber,
-		Password:   string(hashedPassword),
+		Password:   hashedPassword,
 		Role:       "user",
 		IsVerified: false,
 	}
@@ -237,7 +237,7 @@ func (s *authService) ResetPassword(ctx context.Context, req dto.ResetPasswordRe
 		return err
 	}
 
-	user.Password = string(hashedPassword)
+	user.Password = hashedPassword
 	_, err = s.userRepository.Update(ctx, s.db, user)
 	if err != nil {
 		return err
