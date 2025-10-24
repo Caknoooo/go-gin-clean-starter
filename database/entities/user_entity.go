@@ -41,15 +41,3 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 
 	return nil
 }
-
-// BeforeUpdate hook to handle password updates
-func (u *User) BeforeUpdate(_ *gorm.DB) (err error) {
-	// Only hash password if it has been changed
-	if u.Password != "" {
-		u.Password, err = helpers.HashPassword(u.Password)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
