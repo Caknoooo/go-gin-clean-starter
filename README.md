@@ -55,6 +55,45 @@ http://your-domain/logs
    make dep
    ```
 
+## Running the Application 🏃‍♂️
+
+There are two ways to run the application:
+
+### Option 1: With Docker
+1. Configure `.env` with your PostgreSQL credentials:
+   ```bash
+   DB_HOST=localhost
+   DB_USER=postgres
+   DB_PASS=your_password
+   DB_NAME=your_database
+   DB_PORT=5432
+   ```
+2. Build and start Docker containers:
+   ```bash
+   make init-docker
+   ```
+3. Run migrations and seeders:
+   ```bash
+   make migrate-seed
+   ```
+4. The application will be available at `http://localhost:<port>`
+
+### Option 2: Without Docker
+1. Configure `.env` with your PostgreSQL credentials:
+   ```bash
+   DB_HOST=localhost
+   DB_USER=postgres
+   DB_PASS=your_password
+   DB_NAME=your_database
+   DB_PORT=5432
+   ```
+2. Run the application:
+   ```bash
+   make migrate-local    # Run migrations
+   make seed-local       # Run seeders (optional)
+   make run              # Start the application
+   ```
+
 ## Available Make Commands 🚀
 The project includes a comprehensive Makefile with the following commands:
 
@@ -85,85 +124,6 @@ This command will automatically create a complete module structure including:
 - Routes (`routes.go`)
 - Test files for all components
 - Query directory (for custom queries)
-
-The generated module follows Clean Architecture principles and is ready to use with proper dependency injection setup.
-
-### Testing Commands
-```bash
-make test-auth      # Run auth module tests only
-make test-user      # Run user module tests only
-make test-all       # Run tests for all modules
-make test-coverage  # Run tests with coverage report
-```
-
-### Local Database Commands (without Docker)
-```bash
-make migrate-local      # Run migrations locally
-make seed-local        # Run seeders locally  
-make migrate-seed-local # Run migrations + seeders locally
-```
-
-### Docker Commands
-```bash
-make init-docker       # Initialize and build Docker containers
-make up               # Start Docker containers
-make down             # Stop Docker containers
-make logs             # View Docker logs
-```
-
-### Docker Database Commands
-```bash
-make migrate          # Run migrations in Docker
-make seed            # Run seeders in Docker
-make migrate-seed    # Run migrations + seeders in Docker
-make container-go    # Access Go container shell
-make container-postgres # Access PostgreSQL container
-```
-
-## Running the Application 🏃‍♂️
-
-There are two ways to run the application:
-
-### Option 1: With Docker
-1. Build and start Docker containers:
-   ```bash
-   make init-docker
-   ```
-2. Initialize UUID V4 extension for auto-generated UUIDs:
-   ```bash
-   make init-uuid
-   ```
-3. Run migrations and seeders:
-   ```bash
-   make migrate-seed
-   ```
-4. The application will be available at `http://localhost:8080`
-
-### Option 2: Without Docker
-1. Configure `.env` with your PostgreSQL credentials:
-   ```bash
-   DB_HOST=localhost
-   DB_USER=postgres
-   DB_PASS=your_password
-   DB_NAME=your_database
-   DB_PORT=5432
-   ```
-2. Set up PostgreSQL:
-   - Download and install PostgreSQL if you haven't already
-   - Create a database:
-     ```bash
-     psql -U postgres
-     CREATE DATABASE your_database;
-     \c your_database
-     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-     \q
-     ```
-3. Run the application:
-   ```bash
-   make migrate-local    # Run migrations
-   make seed-local       # Run seeders (optional)
-   make run              # Start the application
-   ```
 
 ## Advanced Usage 🔧
 
@@ -201,38 +161,6 @@ go run cmd/main.go --script:example_script
 Replace `example_script` with the actual script name in **script.go** at the script folder.
 
 > **Note:** If you need the application to continue running after performing migrations, seeding, or executing a script, always append the `--run` option.
-
-## What You Get 🎁
-
-By using this template, you get a production-ready architecture with:
-
-### 🏗️ Clean Architecture Implementation
-- **Controller-Service-Repository pattern** with clear separation of concerns
-- **Dependency injection** using samber/do
-- **Modular structure** for easy maintenance and testing
-- **Consistent code organization** across all modules
-
-### 🚀 Pre-configured Features
-- **Authentication system** with JWT tokens
-- **User management** with email verification
-- **Password reset** functionality
-- **Database migrations** and seeders
-- **Comprehensive logging** system with web interface
-- **CORS middleware** for cross-origin requests
-- **Input validation** with go-playground/validator
-
-### 📚 Documentation & Testing
-- **Postman collection** for API testing
-- **Comprehensive test suite** for all modules
-- **Code coverage** reporting
-- **Issue and PR templates** for better collaboration
-
-### 🔧 Developer Experience
-- **Hot reload** with Air for development
-- **Docker support** for easy deployment
-- **Make commands** for common tasks
-- **Module generator** for rapid development
-- **Structured logging** with query tracking
 
 ## 📖 Documentation
 
