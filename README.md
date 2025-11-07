@@ -253,6 +253,10 @@ We welcome contributions! The repository includes templates for issues and pull 
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 🌟 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Caknoooo/go-gin-clean-starter&type=date&legend=top-left)](https://www.star-history.com/#Caknoooo/go-gin-clean-starter&type=date&legend=top-left)
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
