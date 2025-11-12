@@ -3,9 +3,6 @@ package dto
 import (
 	"errors"
 	"mime/multipart"
-
-	"github.com/Caknoooo/go-gin-clean-starter/database/entities"
-	"github.com/Caknoooo/go-gin-clean-starter/pkg/dto"
 )
 
 const (
@@ -66,17 +63,6 @@ type (
 		ImageUrl   string `json:"image_url"`
 		IsVerified bool   `json:"is_verified"`
 	}
-
-	UserPaginationResponse struct {
-		Data []UserResponse `json:"data"`
-		dto.PaginationResponse
-	}
-
-	GetAllUserRepositoryResponse struct {
-		Users []entities.User `json:"users"`
-		dto.PaginationResponse
-	}
-
 	UserUpdateRequest struct {
 		Name       string `json:"name" form:"name" binding:"omitempty,min=2,max=100"`
 		TelpNumber string `json:"telp_number" form:"telp_number" binding:"omitempty,min=8,max=20"`
