@@ -43,13 +43,30 @@ module:
 
 # Commands (without docker)
 migrate:
-	go run cmd/main.go --migrate
+	go run cmd/main.go --migrate:run
+
+migrate-rollback:
+	go run cmd/main.go --migrate:rollback
+
+migrate-rollback-batch:
+	@if [ -z "$(batch)" ]; then echo "Usage: make migrate-rollback-batch batch=<batch_number>"; exit 1; fi
+	go run cmd/main.go --migrate:rollback $(batch)
+
+migrate-rollback-all:
+	go run cmd/main.go --migrate:rollback:all
+
+migrate-status:
+	go run cmd/main.go --migrate:status
+
+migrate-create:
+	@if [ -z "$(name)" ]; then echo "Usage: make migrate-create name=<migration_name>"; exit 1; fi
+	go run cmd/main.go --migrate:create:$(name)
 
 seed: 
 	go run cmd/main.go --seed
 
 migrate-seed: 
-	go run cmd/main.go --migrate --seed
+	go run cmd/main.go --migrate:run --seed
 
 # Postgres commands
 container-postgres:
@@ -78,13 +95,30 @@ container-go:
 	docker exec -it ${CONTAINER_NAME} /bin/sh
 
 migrate-docker:
-	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate"
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:run"
+
+migrate-rollback-docker:
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:rollback"
+
+migrate-rollback-batch-docker:
+	@if [ -z "$(batch)" ]; then echo "Usage: make migrate-rollback-batch-docker batch=<batch_number>"; exit 1; fi
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:rollback $(batch)"
+
+migrate-rollback-all-docker:
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:rollback:all"
+
+migrate-status-docker:
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:status"
+
+migrate-create-docker:
+	@if [ -z "$(name)" ]; then echo "Usage: make migrate-create-docker name=<migration_name>"; exit 1; fi
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:create:$(name)"
 
 seed-docker: 
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --seed"
 
 migrate-seed-docker: 
-	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate --seed"
+	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate:run --seed"
 
 go-tidy-docker:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
