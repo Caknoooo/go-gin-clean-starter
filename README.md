@@ -54,7 +54,7 @@ There are two ways to run the application:
    ```
 3. Run migrations and seeders:
    ```bash
-   make migrate-seed
+   make migrate-seed-docker
    ```
 4. The application will be available at `http://localhost:<port>`
 
@@ -69,9 +69,10 @@ There are two ways to run the application:
    ```
 2. Run the application:
    ```bash
-   make migrate-local    # Run migrations
-   make seed-local       # Run seeders (optional)
-   make run              # Start the application
+   make migrate      # Run migrations
+   make seed         # Run seeders (optional)
+   make migrate-seed # Run Migrations + Seeder
+   make run          # Start the application
    ```
 
 ## Available Make Commands 🚀

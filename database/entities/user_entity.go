@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"github.com/Caknoooo/go-gin-clean-starter/pkg/constants"
 	"github.com/Caknoooo/go-gin-clean-starter/pkg/helpers"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -36,7 +37,7 @@ func (u *User) BeforeCreate(_ *gorm.DB) (err error) {
 
 	// Set default role if not specified
 	if u.Role == "" {
-		u.Role = "user"
+		u.Role = constants.ENUM_ROLE_USER
 	}
 
 	return nil

@@ -41,27 +41,15 @@ module:
 	@if [ -z "$(name)" ]; then echo "Usage: make module name=<module_name>"; exit 1; fi
 	@./create_module.sh $(name)
 
-# Local commands (without docker)
-migrate-local:
+# Commands (without docker)
+migrate:
 	go run cmd/main.go --migrate
 
-seed-local: 
+seed: 
 	go run cmd/main.go --seed
 
-migrate-seed-local: 
+migrate-seed: 
 	go run cmd/main.go --migrate --seed
-
-init-docker:
-	docker compose up -d --build
-
-up: 
-	docker-compose up -d
-
-down:
-	docker-compose down
-
-logs:
-	docker-compose logs -f
 
 # Postgres commands
 container-postgres:
@@ -74,17 +62,29 @@ init-uuid:
 	docker exec -it ${POSTGRES_CONTAINER_NAME} /bin/sh -c "psql -U ${DB_USER} -d ${DB_NAME} -c 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";'"
 
 # Docker commands
+init-docker:
+	docker compose up -d --build
+
+up: 
+	docker-compose up -d
+
+down:
+	docker-compose down
+
+logs:
+	docker-compose logs -f
+
 container-go:
 	docker exec -it ${CONTAINER_NAME} /bin/sh
 
-migrate:
+migrate-docker:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate"
 
-seed: 
+seed-docker: 
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --seed"
 
-migrate-seed: 
+migrate-seed-docker: 
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go run cmd/main.go --migrate --seed"
 
-go-tidy:
+go-tidy-docker:
 	docker exec -it ${CONTAINER_NAME} /bin/sh -c "go mod tidy"
