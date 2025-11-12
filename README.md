@@ -60,12 +60,12 @@ There are two ways to run the application:
 
 **Docker Migration Commands:**
 ```bash
-make migrate-docker                    # Run migrations in Docker
-make migrate-status-docker            # Show migration status in Docker
-make migrate-rollback-docker           # Rollback last batch in Docker
-make migrate-rollback-batch-docker batch=<number>  # Rollback batch in Docker
-make migrate-rollback-all-docker       # Rollback all in Docker
-make migrate-create-docker name=<name> # Create migration in Docker
+make migrate-docker                                 # Run migrations in Docker
+make migrate-status-docker                          # Show migration status in Docker
+make migrate-rollback-docker                        # Rollback last batch in Docker
+make migrate-rollback-batch-docker batch=<number>   # Rollback batch in Docker
+make migrate-rollback-all-docker                    # Rollback all in Docker
+make migrate-create-docker name=<name>              # Create migration in Docker
 ```
 
 ### Option 2: Without Docker
@@ -98,22 +98,22 @@ make run-build    # Build and run the application
 
 ### Migration Commands
 ```bash
-make migrate                    # Run all pending migrations
-make migrate-status            # Show migration status
-make migrate-rollback          # Rollback the last batch
+make migrate                                # Run all pending migrations
+make migrate-status                         # Show migration status
+make migrate-rollback                       # Rollback the last batch
 make migrate-rollback-batch batch=<number>  # Rollback specific batch
-make migrate-rollback-all      # Rollback all migrations
-make migrate-create name=<migration_name>  # Create new migration file
+make migrate-rollback-all                   # Rollback all migrations
+make migrate-create name=<migration_name>   # Create new migration file
 ```
 
 **Migration Examples:**
 ```bash
-make migrate                                    # Run migrations
-make migrate-status                            # Check migration status
-make migrate-rollback                           # Rollback last batch
-make migrate-rollback-batch batch=2             # Rollback batch 2
-make migrate-rollback-all                      # Rollback all migrations
-make migrate-create name=create_posts_table     # Create migration with entity
+make migrate                                 # Run migrations
+make migrate-status                          # Check migration status
+make migrate-rollback                        # Rollback last batch
+make migrate-rollback-batch batch=2          # Rollback batch 2
+make migrate-rollback-all                    # Rollback all migrations
+make migrate-create name=create_posts_table  # Create migration with entity
 ```
 
 **Note:** When creating a migration with format `create_*_table`, the system will automatically:
@@ -165,11 +165,11 @@ go run cmd/main.go --migrate:run --seed --run --script:example_script
 
 #### Database Migration
 ```bash
-go run cmd/main.go --migrate:run              # Run all pending migrations
-go run cmd/main.go --migrate:status          # Show migration status
-go run cmd/main.go --migrate:rollback         # Rollback last batch
-go run cmd/main.go --migrate:rollback 2       # Rollback batch 2
-go run cmd/main.go --migrate:rollback:all     # Rollback all migrations
+go run cmd/main.go --migrate:run                        # Run all pending migrations
+go run cmd/main.go --migrate:status                     # Show migration status
+go run cmd/main.go --migrate:rollback                   # Rollback last batch
+go run cmd/main.go --migrate:rollback 2                 # Rollback batch 2
+go run cmd/main.go --migrate:rollback:all               # Rollback all migrations
 go run cmd/main.go --migrate:create:create_posts_table  # Create migration
 ```
 
