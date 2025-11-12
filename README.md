@@ -58,6 +58,16 @@ There are two ways to run the application:
    ```
 4. The application will be available at `http://localhost:<port>`
 
+**Docker Migration Commands:**
+```bash
+make migrate-docker                    # Run migrations in Docker
+make migrate-status-docker            # Show migration status in Docker
+make migrate-rollback-docker           # Rollback last batch in Docker
+make migrate-rollback-batch-docker batch=<number>  # Rollback batch in Docker
+make migrate-rollback-all-docker       # Rollback all in Docker
+make migrate-create-docker name=<name> # Create migration in Docker
+```
+
 ### Option 2: Without Docker
 1. Configure `.env` with your PostgreSQL credentials:
    ```bash
@@ -86,6 +96,31 @@ make build        # Build the application binary
 make run-build    # Build and run the application
 ```
 
+### Migration Commands
+```bash
+make migrate                    # Run all pending migrations
+make migrate-status            # Show migration status
+make migrate-rollback          # Rollback the last batch
+make migrate-rollback-batch batch=<number>  # Rollback specific batch
+make migrate-rollback-all      # Rollback all migrations
+make migrate-create name=<migration_name>  # Create new migration file
+```
+
+**Migration Examples:**
+```bash
+make migrate                                    # Run migrations
+make migrate-status                            # Check migration status
+make migrate-rollback                           # Rollback last batch
+make migrate-rollback-batch batch=2             # Rollback batch 2
+make migrate-rollback-all                      # Rollback all migrations
+make migrate-create name=create_posts_table     # Create migration with entity
+```
+
+**Note:** When creating a migration with format `create_*_table`, the system will automatically:
+- Create the entity file in `database/entities/`
+- Add the entity to the migration file
+- Add the entity to `database/migration.go` AutoMigrate section
+
 ### Module Generation Commands
 ```bash
 make module name=<module_name>  # Generate a new module with all necessary files
@@ -112,11 +147,16 @@ This command will automatically create a complete module structure including:
 You can run migrations, seed the database, and execute scripts while keeping the application running:
 
 ```bash
-go run cmd/main.go --migrate --seed --run --script:example_script
+go run cmd/main.go --migrate:run --seed --run --script:example_script
 ```
 
 **Available flags:**
-- `--migrate`: Apply all pending migrations
+- `--migrate` or `--migrate:run`: Apply all pending migrations
+- `--migrate:status`: Show migration status
+- `--migrate:rollback`: Rollback the last batch
+- `--migrate:rollback <batch_number>`: Rollback specific batch
+- `--migrate:rollback:all`: Rollback all migrations
+- `--migrate:create:<migration_name>`: Create new migration file
 - `--seed`: Seed the database with initial data
 - `--script:example_script`: Run the specified script (replace `example_script` with your script name)
 - `--run`: Keep the application running after executing the commands above
@@ -125,9 +165,22 @@ go run cmd/main.go --migrate --seed --run --script:example_script
 
 #### Database Migration
 ```bash
-go run cmd/main.go --migrate
+go run cmd/main.go --migrate:run              # Run all pending migrations
+go run cmd/main.go --migrate:status          # Show migration status
+go run cmd/main.go --migrate:rollback         # Rollback last batch
+go run cmd/main.go --migrate:rollback 2       # Rollback batch 2
+go run cmd/main.go --migrate:rollback:all     # Rollback all migrations
+go run cmd/main.go --migrate:create:create_posts_table  # Create migration
 ```
-This command will apply all pending migrations to your PostgreSQL database specified in `.env`
+
+**Migration System Features:**
+- **Batch-based migrations**: Similar to Laravel, migrations are grouped in batches
+- **Automatic entity creation**: When creating migration with format `create_*_table`, the system will:
+  - Automatically create entity file in `database/entities/`
+  - Add entity to migration file's AutoMigrate
+  - Add entity to `database/migration.go` AutoMigrate section
+- **Rollback support**: Rollback by batch or rollback all migrations
+- **Status tracking**: View which migrations have been run and their batch numbers
 
 #### Database Seeding
 ```bash
